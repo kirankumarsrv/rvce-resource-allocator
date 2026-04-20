@@ -1,0 +1,21 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres:15
+    container_name: scas-postgres
+    environment:
+      POSTGRES_DB: scas_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: scas-redis
+    ports:
+      - "6379:6379"
