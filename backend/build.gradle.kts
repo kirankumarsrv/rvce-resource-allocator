@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.5.13"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("org.flywaydb.flyway") version "9.22.3"
 }
 
 group = "com.rvce"
@@ -36,7 +37,7 @@ dependencies {
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
-	//flyway - for database migrations
+	// flyway - runtime migration support in app
 	implementation("org.flywaydb:flyway-core")
 
 	// swagger - for API documentation
@@ -45,4 +46,14 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+flyway {
+	url = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost:5432/scas_db?stringtype=unspecified"
+	user = System.getenv("DB_USER") ?: "scas"
+	password = System.getenv("DB_PASSWORD") ?: "scas_dev_password"
+	locations = arrayOf("classpath:db/migration")
+	validateOnMigrate = false
+	outOfOrder = false
+	schemas = arrayOf("public")
 }

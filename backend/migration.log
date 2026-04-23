@@ -1,0 +1,31 @@
+
+> Task :flywayMigrate FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/kiran/Desktop/rvce-resource-allocator/backend/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.4/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+1 actionable task: 1 executed
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':flywayMigrate'.
+> Error occurred while executing flywayMigrate
+  Unable to obtain connection from database (jdbc:postgresql://localhost:5432/scas_db) for user 'scas': FATAL: invalid value for parameter "TimeZone": "Asia/Calcutta"
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  SQL State  : 22023
+  Error Code : 0
+  Message    : FATAL: invalid value for parameter "TimeZone": "Asia/Calcutta"
+  
+  FATAL: invalid value for parameter "TimeZone": "Asia/Calcutta"
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 9s

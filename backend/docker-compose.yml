@@ -8,9 +8,9 @@ services:
     image: postgres:15
     container_name: scas-postgres
     environment:
-      POSTGRES_DB: scas_dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      TZ: UTC
     ports:
       - "5432:5432"
 
