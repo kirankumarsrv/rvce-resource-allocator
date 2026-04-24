@@ -39,6 +39,7 @@ dependencies {
 
 	// flyway - runtime migration support in app
 	implementation("org.flywaydb:flyway-core")
+	implementation("org.flywaydb:flyway-database-postgresql")
 
 	// swagger - for API documentation
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")

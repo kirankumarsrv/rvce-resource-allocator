@@ -8,9 +8,16 @@ spring:
   config:
     activate:
       on-profile: dev
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/scas_db?stringtype=unspecified}
+    username: ${DB_USER:scas}
+    password: ${DB_PASSWORD:scas_dev_password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8080
@@ -27,9 +34,16 @@ spring:
   config:
     activate:
       on-profile: prod
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/scas_db?stringtype=unspecified}
+    username: ${DB_USER:scas}
+    password: ${DB_PASSWORD:scas_dev_password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8080
