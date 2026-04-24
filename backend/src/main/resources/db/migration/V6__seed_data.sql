@@ -305,7 +305,7 @@ INSERT INTO timetable_versions (
     '66666666-6666-6666-6666-666666666001',
     '2025-26', 5, 'Odd Semester 2025-26 - Initial', 'ACTIVE',
     '44444444-4444-4444-4444-444444444002'
-) ON CONFLICT DO NOTHING;
+) ON CONFLICT (version_id) DO NOTHING;
 
 -- ─── SAMPLE TIMETABLE SLOTS ───────────────────────────────────
 INSERT INTO timetable_slots (

@@ -160,9 +160,11 @@ CREATE INDEX idx_tt_versions_semester
     ON timetable_versions (academic_year, semester, status);
 
 -- Report cache lookup (same parameters = return cached URL)
+-- NOTE: partial index predicates cannot use non-IMMUTABLE functions
+-- like NOW(), so keep predicate static and filter expires_at at query time.
 CREATE INDEX idx_reports_type_params
     ON reports USING GIN (parameters)
-    WHERE file_url IS NOT NULL AND expires_at > NOW();
+    WHERE file_url IS NOT NULL;
 
 -- ── ADDITIONAL CHECK CONSTRAINTS ─────────────────────────────
 -- DECISION: Add cross-table consistency checks as DB constraints,
