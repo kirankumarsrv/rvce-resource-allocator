@@ -71,12 +71,11 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // REVIEW-RISK (critical): "/api/auth/**" also permits logout endpoints.
-                        // That allows unauthenticated access to /logout and /logout-all controller methods,
-                        // which expect a non-null principal and can lead to runtime errors if token missing.
-                        // Safer approach: permit only login/refresh explicitly and require auth for logout routes.
+                        // FIX: do not permit all `/api/auth/**` routes.
+                        // Only login/refresh are public; logout routes must stay authenticated.
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/auth/login",
+                                "/api/auth/refresh",
                                 "/actuator/health",
                                 "/actuator/info",
                                 "/v3/api-docs/**",

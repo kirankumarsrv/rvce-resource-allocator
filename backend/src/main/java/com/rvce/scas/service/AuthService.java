@@ -16,10 +16,14 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -120,12 +124,10 @@ public class AuthService {
                 .filter(User::isActive)
                 .orElseThrow(() -> new InvalidTokenException("User account is disabled."));
 
-            // REVIEW-RISK (high): this currently includes only ROLE_* authorities.
-            // Login token includes fine-grained permission authorities from ScasPrincipal.
-            // After refresh, permission authorities (e.g., TIMETABLE_WRITE) may be lost.
-            // This is a behavior mismatch versus DECISION [1] + [17] expectation of fresh complete claims.
-        List<String> freshRoles = user.getUserRoles().stream()
-                .map(ur -> "ROLE_" + ur.getRole().getName())
+            // FIX: keep refresh token authorities consistent with login.
+            // We include both ROLE_* and RESOURCE_ACTION permissions to avoid privilege mismatch.
+        List<String> freshRoles = buildAuthorities(user).stream()
+                .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
             // Rotate refresh token ID to limit replay from old stolen refresh token.
@@ -149,8 +151,8 @@ public class AuthService {
     }
 
     private void checkLockout(String email) {
-        // REVIEW-RISK (low): String#toLowerCase() should ideally use Locale.ROOT for deterministic behavior.
-        String lockKey = LOCKOUT_PREFIX + email.toLowerCase();
+        // FIX: Locale.ROOT avoids locale-dependent transformations (e.g., Turkish 'I').
+        String lockKey = LOCKOUT_PREFIX + email.toLowerCase(Locale.ROOT);
         if (Boolean.TRUE.equals(redisTemplate.hasKey(lockKey))) {
             Long ttl = redisTemplate.getExpire(lockKey, TimeUnit.MINUTES);
             throw new AccountLockedException("Account locked. Try again in " + ttl + " minute(s).");
@@ -158,7 +160,7 @@ public class AuthService {
     }
 
     private int incrementFailCount(String email) {
-        String failKey = FAIL_COUNT_PREFIX + email.toLowerCase();
+        String failKey = FAIL_COUNT_PREFIX + email.toLowerCase(Locale.ROOT);
         Long count = redisTemplate.opsForValue().increment(failKey);
         // First failure starts a sliding window TTL for brute-force tracking.
         if (count != null && count == 1L) {
@@ -168,13 +170,27 @@ public class AuthService {
     }
 
     private void lockAccount(String email) {
-        String lockKey = LOCKOUT_PREFIX + email.toLowerCase();
+        String lockKey = LOCKOUT_PREFIX + email.toLowerCase(Locale.ROOT);
         redisTemplate.opsForValue().set(lockKey, "1", LOCKOUT_MINUTES, TimeUnit.MINUTES);
-        redisTemplate.delete(FAIL_COUNT_PREFIX + email.toLowerCase());
+        redisTemplate.delete(FAIL_COUNT_PREFIX + email.toLowerCase(Locale.ROOT));
         log.warn("Account locked due to too many failed attempts: {}", email);
     }
 
     private void clearFailCount(String email) {
-        redisTemplate.delete(FAIL_COUNT_PREFIX + email.toLowerCase());
+        redisTemplate.delete(FAIL_COUNT_PREFIX + email.toLowerCase(Locale.ROOT));
+    }
+
+    private Set<GrantedAuthority> buildAuthorities(User user) {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        user.getUserRoles().forEach(userRole -> {
+            var role = userRole.getRole();
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+            role.getRolePermissions().stream()
+                    .map(rp -> rp.getPermission())
+                    .map(perm -> perm.getResource().toUpperCase(Locale.ROOT) + "_" + perm.getAction().toUpperCase(Locale.ROOT))
+                    .map(SimpleGrantedAuthority::new)
+                    .forEach(authorities::add);
+        });
+        return authorities;
     }
 }

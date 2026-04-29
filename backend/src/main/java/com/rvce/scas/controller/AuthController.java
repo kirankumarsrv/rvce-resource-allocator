@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -77,6 +78,11 @@ public class AuthController {
             @RequestHeader(value = "Authorization") String authHeader,
             @RequestParam(required = false) String refreshToken) {
 
+        // FIX: explicit guard helps return stable 401 instead of null-principal runtime failures.
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         // REVIEW-RISK (medium): refreshToken is currently sent as a URL query parameter.
         // URLs can end up in server access logs, browser history, proxies, and Referer headers.
         // A request body DTO would reduce accidental leakage, especially for a revocable token.
@@ -95,6 +101,11 @@ public class AuthController {
     public ResponseEntity<Void> logoutAll(
             @AuthenticationPrincipal JwtPrincipal principal,
             @RequestHeader("Authorization") String authHeader) {
+
+        // FIX: defensive fallback in case security config is changed later by mistake.
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         String accessToken = null;
         if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {

@@ -9,11 +9,15 @@ import io.jsonwebtoken.security.SignatureException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -92,21 +96,29 @@ public class JwtTokenProvider {
             @Value("${scas.jwt.refresh-token-expiry-seconds:604800}") long refreshTokenExpirySeconds,
             RedisTemplate<String, String> redisTemplate) throws Exception {
 
-        // REVIEW-RISK (high): if key paths are blank, a new ephemeral key-pair is generated per app startup.
-        // Consequence: all existing access tokens become invalid after restart; in multi-pod deployments,
-        // pods may sign/verify with different keys, breaking cross-pod token validation.
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(2048);
-        KeyPair pair = keyPairGenerator.generateKeyPair();
+        boolean hasPrivateKeyPath = StringUtils.hasText(privateKeyPath);
+        boolean hasPublicKeyPath = StringUtils.hasText(publicKeyPath);
 
-        // REVIEW-RISK (high): if only one path is configured (private or public), this can create mismatched
-        // sign/verify keys because one key comes from file and the other from random generated pair.
-        this.privateKey = privateKeyPath == null || privateKeyPath.isBlank()
-                ? (PrivateKey) pair.getPrivate()
-                : loadPrivateKey(privateKeyPath);
-        this.publicKey = publicKeyPath == null || publicKeyPath.isBlank()
-                ? (PublicKey) pair.getPublic()
-                : loadPublicKey(publicKeyPath);
+        // FIX: require both key paths together to avoid mismatched sign/verify key pairs.
+        if (hasPrivateKeyPath != hasPublicKeyPath) {
+            throw new IllegalStateException(
+                    "Invalid JWT key config: provide both scas.jwt.private-key-path and scas.jwt.public-key-path together"
+            );
+        }
+
+        if (hasPrivateKeyPath) {
+            this.privateKey = loadPrivateKey(privateKeyPath);
+            this.publicKey = loadPublicKey(publicKeyPath);
+        } else {
+            // FIX: explicit warning for dev-only fallback behavior.
+            // Ephemeral keys invalidate issued access tokens on app restart.
+            log.warn("JWT key paths not configured; generating ephemeral RSA key pair for this process only");
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            KeyPair pair = keyPairGenerator.generateKeyPair();
+            this.privateKey = pair.getPrivate();
+            this.publicKey = pair.getPublic();
+        }
 
         this.accessTokenExpiryMs = accessTokenExpiryMs;
         this.refreshTokenExpirySeconds = refreshTokenExpirySeconds;
@@ -194,17 +206,20 @@ public class JwtTokenProvider {
     }
 
     public void logout(String accessToken, UUID userId, String refreshTokenId) {
-        try {
-            Claims claims = parseClaims(accessToken);
-            String jti = claims.getId();
-            Date expiry = claims.getExpiration();
-            if (jti != null && expiry != null) {
-                // Blacklist entry expires exactly when token would have naturally expired.
-                long ttlSeconds = Math.max(1L, (expiry.getTime() - System.currentTimeMillis()) / 1000L);
-                redisTemplate.opsForValue().set(BLACKLIST_PREFIX + jti, "1", ttlSeconds, TimeUnit.SECONDS);
+        // FIX: skip claim parsing when caller has no/invalid access token.
+        if (StringUtils.hasText(accessToken)) {
+            try {
+                Claims claims = parseClaims(accessToken);
+                String jti = claims.getId();
+                Date expiry = claims.getExpiration();
+                if (jti != null && expiry != null) {
+                    // Blacklist entry expires exactly when token would have naturally expired.
+                    long ttlSeconds = Math.max(1L, (expiry.getTime() - System.currentTimeMillis()) / 1000L);
+                    redisTemplate.opsForValue().set(BLACKLIST_PREFIX + jti, "1", ttlSeconds, TimeUnit.SECONDS);
+                }
+            } catch (JwtException | IllegalArgumentException e) {
+                log.debug("Skipping access-token blacklist due to parse failure");
             }
-        } catch (JwtException | IllegalArgumentException e) {
-            log.debug("Skipping access-token blacklist due to parse failure");
         }
 
         if (refreshTokenId != null && !refreshTokenId.isBlank()) {
@@ -214,15 +229,25 @@ public class JwtTokenProvider {
 
     public void logoutAllDevices(UUID userId) {
         // T-005 DECISION [5]: all refresh tokens for this user should be revoked here.
-        // REVIEW-RISK (high): the current implementation uses redisTemplate.keys(pattern),
-        // which performs a blocking Redis keyspace scan on the server thread.
-        // The design comment says SCAN should be used, but the code below still uses KEYS.
-        // For large Redis databases this can pause Redis and hurt all clients, not just auth.
+        // FIX: use SCAN instead of KEYS to avoid blocking Redis on large keyspaces.
         String pattern = REFRESH_PREFIX + userId + ":*";
-        var keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
+        redisTemplate.execute(connection -> {
+            ScanOptions options = ScanOptions.scanOptions().match(pattern).count(500).build();
+            ArrayList<byte[]> keysToDelete = new ArrayList<>();
+
+            try (var cursor = connection.scan(options)) {
+                while (cursor.hasNext()) {
+                    keysToDelete.add(cursor.next());
+                }
+            } catch (java.io.IOException e) {
+                throw new UncheckedIOException("Failed to scan refresh-token keys for logout-all", e);
+            }
+
+            if (!keysToDelete.isEmpty()) {
+                connection.del(keysToDelete.toArray(new byte[0][]));
+            }
+            return null;
+        });
     }
 
     public UUID extractUserId(Claims claims) {
