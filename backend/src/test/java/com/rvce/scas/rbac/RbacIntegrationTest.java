@@ -39,6 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("T-006: RBAC Authorization Tests")
 class RbacIntegrationTest {
 
+    // REVIEW-GAP: this suite covers authorization boundaries, but it does not yet verify
+    // the account lockout flow. T-005's important security rule is: 5 failed logins should
+    // produce a lockout response (ideally 429 TOO_MANY_REQUESTS if that is the chosen API contract).
+    // Add a dedicated login-path integration test for that behavior when you are ready.
+
     @Autowired
     private MockMvc mockMvc;
 

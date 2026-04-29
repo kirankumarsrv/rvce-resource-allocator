@@ -39,13 +39,42 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        /*
+         * Beginner-level explanation of SecurityConfig choices:
+         *
+         * - CSRF disabled: CSRF protection is necessary when authentication is carried in
+         *   browser cookies (which are auto-sent by browsers). With stateless JWT bearer
+         *   tokens in `Authorization` headers, CSRF is not applicable and would cause
+         *   unnecessary failures for legitimate API clients.
+         *
+         * - SessionCreationPolicy.STATELESS: prevents Spring from creating `HttpSession`
+         *   (no JSESSIONID cookies). This ensures any pod can handle requests without
+         *   sticky sessions, enabling horizontal scaling in Kubernetes.
+         *
+         * - AuthenticationEntryPoint: returns JSON 401 responses for unauthorized requests
+         *   (instead of HTML redirect), which is important for single-page apps and API clients.
+         *
+         * - CORS configuration: explicitly lists allowed origins, methods, and headers so
+         *   browsers permit cross-origin requests from the frontend. `setAllowCredentials(true)`
+         *   is safe here because the app uses Authorization headers instead of cookies.
+         *
+         * - Note on permitAll: prefer explicit permits for login and refresh endpoints only.
+         *   Avoid permitting the entire `/api/auth/**` path because it may include logout
+         *   endpoints that expect an authenticated principal.
+         */
         http
+                // T-005 DECISION [11]: disable CSRF for stateless bearer-token API.
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session
+                        // T-005 DECISION [12]: no HttpSession/JSESSIONID in JWT architecture.
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // REVIEW-RISK (critical): "/api/auth/**" also permits logout endpoints.
+                        // That allows unauthenticated access to /logout and /logout-all controller methods,
+                        // which expect a non-null principal and can lead to runtime errors if token missing.
+                        // Safer approach: permit only login/refresh explicitly and require auth for logout routes.
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/actuator/health",
@@ -62,6 +91,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
+                        // T-005 DECISION [14]: return JSON 401 for API clients instead of HTML redirect.
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -99,6 +129,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+                // T-005 DECISION [13]: BCrypt strength 12 to balance brute-force resistance and UX latency.
         return new BCryptPasswordEncoder(12);
     }
 
@@ -121,6 +152,8 @@ public class SecurityConfig {
                 "Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Auth-Error"
         ));
         config.setExposedHeaders(List.of("X-Auth-Error"));
+        // Using Authorization header for bearer tokens; credentials flag mainly impacts cookie mode,
+        // but keeping explicit origins avoids wildcard + credentials misconfiguration.
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
