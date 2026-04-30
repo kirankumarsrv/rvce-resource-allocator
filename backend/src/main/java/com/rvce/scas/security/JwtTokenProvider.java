@@ -13,9 +13,12 @@ import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -242,17 +245,20 @@ public class JwtTokenProvider {
      * @param refreshTokenId current refresh-token id, if any
      */
     public void logout(String accessToken, UUID userId, String refreshTokenId) {
-        try {
-            Claims claims = parseClaims(accessToken);
-            String jti = claims.getId();
-            Date expiry = claims.getExpiration();
-            if (jti != null && expiry != null) {
-                // Blacklist entry expires exactly when token would have naturally expired.
-                long ttlSeconds = Math.max(1L, (expiry.getTime() - System.currentTimeMillis()) / 1000L);
-                redisTemplate.opsForValue().set(BLACKLIST_PREFIX + jti, "1", ttlSeconds, TimeUnit.SECONDS);
+        // FIX: skip claim parsing when caller has no/invalid access token.
+        if (StringUtils.hasText(accessToken)) {
+            try {
+                Claims claims = parseClaims(accessToken);
+                String jti = claims.getId();
+                Date expiry = claims.getExpiration();
+                if (jti != null && expiry != null) {
+                    // Blacklist entry expires exactly when token would have naturally expired.
+                    long ttlSeconds = Math.max(1L, (expiry.getTime() - System.currentTimeMillis()) / 1000L);
+                    redisTemplate.opsForValue().set(BLACKLIST_PREFIX + jti, "1", ttlSeconds, TimeUnit.SECONDS);
+                }
+            } catch (JwtException | IllegalArgumentException e) {
+                log.debug("Skipping access-token blacklist due to parse failure");
             }
-        } catch (JwtException | IllegalArgumentException e) {
-            log.debug("Skipping access-token blacklist due to parse failure");
         }
 
         if (refreshTokenId != null && !refreshTokenId.isBlank()) {

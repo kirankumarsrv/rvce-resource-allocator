@@ -16,6 +16,7 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -150,7 +151,7 @@ public class AuthService {
     private void lockAccount(String email) {
         String lockKey = LOCKOUT_PREFIX + email.toLowerCase(Locale.ROOT);
         redisTemplate.opsForValue().set(lockKey, "1", LOCKOUT_MINUTES, TimeUnit.MINUTES);
-        redisTemplate.delete(FAIL_COUNT_PREFIX + email.toLowerCase());
+        redisTemplate.delete(FAIL_COUNT_PREFIX + email.toLowerCase(Locale.ROOT));
         log.warn("Account locked due to too many failed attempts: {}", email);
     }
 
