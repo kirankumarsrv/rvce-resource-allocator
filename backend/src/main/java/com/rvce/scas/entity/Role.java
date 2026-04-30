@@ -15,6 +15,29 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Entity representing a system role with associated permissions.
+ *
+ * <p><strong>Table:</strong> {@code roles}</p>
+ *
+ * <p><strong>Examples of Roles:</strong></p>
+ * <ul>
+ *   <li>{@code ADMIN}: Full system access</li>
+ *   <li>{@code TEACHER}: Can view and manage exam data</li>
+ *   <li>{@code STUDENT}: Can view exam schedules and seat allocations</li>
+ *   <li>{@code TIMETABLE_OPERATOR}: Can manage timetable data</li>
+ * </ul>
+ *
+ * <p><strong>Design Pattern:</strong> Roles are the coarse-grained layer in Role-Based
+ * Access Control (RBAC). Each role contains zero or more fine-grained Permissions.
+ * Users are assigned roles via the UserRole join table.</p>
+ *
+ * @author RVCE SCAS Team
+ * @see User
+ * @see UserRole
+ * @see Permission
+ * @see RolePermission
+ */
 @Getter
 @Setter
 @Entity

@@ -11,6 +11,24 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+/**
+ * Entity representing a fine-grained permission in a resource-action model.
+ *
+ * <p><strong>Table:</strong> {@code permissions}</p>
+ *
+ * <p><strong>Purpose:</strong> Permissions are the finest granularity of authorization.
+ * Each permission is defined by a (resource, action) pair. For example,
+ * resource="EXAM", action="VIEW" creates a permission to view exam data.</p>
+ *
+ * <p><strong>Authorization in JWT:</strong> When generating tokens, permissions are
+ * converted to strings like "EXAM_VIEW" and included in JWT claims for use by
+ * Spring Security's {@code hasAuthority()} checks.</p>
+ *
+ * @author RVCE SCAS Team
+ * @see Role
+ * @see RolePermission
+ * @see UserRole
+ */
 @Getter
 @Setter
 @Entity

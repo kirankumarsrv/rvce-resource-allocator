@@ -1,6 +1,5 @@
 package com.rvce.scas.security;
 
-import com.rvce.scas.security.JwtTokenProvider.JwtValidationResult;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +21,22 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Once-per-request filter that authenticates valid JWT bearer tokens.
+ *
+ * <p>Fields:</p>
+ * <ul>
+ *   <li>{@code tokenProvider}: validates the token signature and parses trusted claims.</li>
+ * </ul>
+ *
+ * <p>Critical steps:</p>
+ * <ol>
+ *   <li>Read the Bearer token from the Authorization header only.</li>
+ *   <li>Reject expired or malformed tokens without creating an authenticated principal.</li>
+ *   <li>Convert verified JWT claims into a {@link JwtPrincipal}.</li>
+ *   <li>Store the principal in the SecurityContext for downstream authorization checks.</li>
+ * </ol>
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,47 +44,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
 
-    /*
-     * Beginner-level explanation of JwtAuthFilter responsibilities:
+    /**
+        * Authenticates the request by reading the Bearer token from the Authorization header.
      *
-     * - Purpose: Intercepts HTTP requests and attempts to authenticate them based on a
-     *   Bearer access token present in the `Authorization` header. If authentication succeeds
-     *   the filter creates an `Authentication` object and stores it in the `SecurityContext`.
-     *
-     * - OncePerRequestFilter: Ensures this filter runs once per HTTP request even when the
-     *   request is forwarded internally. This avoids duplicate authentication logic.
-     *
-     * - Why we don't hit DB here: The JWT contains signed claims (userId, email, roles).
-     *   Because the token is signed with our private key and verified with the public key,
-     *   the filter trusts the claims and avoids a DB lookup on every request, which improves
-     *   throughput and reduces DB load. Only login and refresh endpoints access DB.
-     *
-     * - Error handling: If the token is expired we set an `X-Auth-Error` header which the
-     *   security entry point later converts into a JSON 401 response. Invalid tokens are
-     *   logged but not propagated as exceptions to avoid stack traces on every bad request.
-     *
-     * - shouldNotFilter: Lists endpoints that must bypass this filter (login, refresh, health,
-     *   API docs). Note: do not over-broaden permitAll in configuration to avoid exposing
-     *   endpoints that should remain authenticated (e.g., logout).
+     * @param request current HTTP request
+     * @param response current HTTP response
+     * @param filterChain downstream filter chain
+     * @throws ServletException if filter processing fails
+     * @throws IOException if request or response I/O fails
      */
     @Override
-    // T-005 DECISION [8]: OncePerRequestFilter ensures one security pass per request dispatch.
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // T-005 DECISION [10]: extract bearer token from Authorization header only.
         String token = extractTokenFromRequest(request);
 
         if (token != null) {
-            JwtValidationResult result = tokenProvider.validateAccessToken(token);
+            JwtTokenProvider.JwtValidationResult result = tokenProvider.validateAccessToken(token);
 
             if (result.isValid()) {
-                // T-005 DECISION [9]: no DB call on each request; trust signed claims.
                 setSecurityContext(result.getClaims(), request);
             } else if (result.isExpired()) {
-                // Header is consumed later by AuthenticationEntryPoint for structured JSON error code.
                 response.setHeader("X-Auth-Error", "TOKEN_EXPIRED");
             } else {
                 log.warn("Invalid JWT from IP={} path={}", request.getRemoteAddr(), request.getRequestURI());
@@ -78,17 +76,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Extracts a Bearer token from the request header.
+     *
+     * @param request current HTTP request
+     * @return JWT string or {@code null}
+     */
     private String extractTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-        // Accept strict RFC6750 "Bearer <token>" form.
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
     }
 
+    /**
+     * Populates the SecurityContext with the authenticated principal.
+     *
+     * @param claims verified JWT claims
+     * @param request current HTTP request
+     */
     private void setSecurityContext(Claims claims, HttpServletRequest request) {
-        // Parse identity and authorities from verified claims.
         UUID userId = tokenProvider.extractUserId(claims);
         String email = tokenProvider.extractEmail(claims);
         List<String> roles = tokenProvider.extractRoles(claims);
@@ -111,10 +119,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         log.debug("Authenticated user={} roles={}", email, roles);
     }
 
+    /**
+     * Skips the filter for public infrastructure endpoints.
+     *
+     * @param request current HTTP request
+     * @return true when the filter should be bypassed
+     */
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Allow login/refresh endpoints to run without access-token authentication.
         return path.startsWith("/api/auth/login")
                 || path.startsWith("/api/auth/refresh")
                 || path.startsWith("/actuator/health")

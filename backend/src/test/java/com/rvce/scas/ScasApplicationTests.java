@@ -5,7 +5,7 @@ import com.rvce.scas.security.UserDetailsServiceImpl;
 import com.rvce.scas.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(properties = {
 		"spring.autoconfigure.exclude="
@@ -16,13 +16,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 })
 class ScasApplicationTests {
 
-	@MockBean
+	@MockitoBean
 	private UserDetailsServiceImpl userDetailsService;
 
-	@MockBean
+	@MockitoBean
 	private JwtTokenProvider jwtTokenProvider;
 
-	@MockBean
+	@MockitoBean
 	private AuthService authService;
 
 	@Test

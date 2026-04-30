@@ -17,74 +17,122 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Slf4j // Lombok annotation for logging
-@Service           // business logic implementation 
-@RequiredArgsConstructor // generates constructor for final fields, used for dependency injection
-public class UserDetailsServiceImpl implements UserDetailsService { // Spring Security interface for loading user-specific data during authentication
+/**
+ * Spring Security UserDetailsService implementation for SCAS system.
+ *
+ * <p><strong>Purpose:</strong> Loads user information from the database during
+ * authentication and converts it into Spring Security's UserDetails format.
+ * Used by the AuthenticationManager's authentication provider.</p>
+ *
+ * <p><strong>Key Flow:</strong></p>
+ * <ol>
+ *   <li>Client submits credentials to /api/auth/login</li>
+ *   <li>AuthenticationManager calls loadUserByUsername(email)</li>
+ *   <li>UserDetailsServiceImpl queries database for the user</li>
+ *   <li>User's roles and permissions are loaded from database</li>
+ *   <li>ScasPrincipal is returned with user data + authorities</li>
+ *   <li>Password encoder compares submitted password with stored hash</li>
+ *   <li>If valid, JWT tokens are generated with user identity + authorities</li>
+ * </ol>
+ *
+ * <p><strong>Authority Building:</strong> Combines two types of authorities:
+ * <ul>
+ *   <li>Coarse-grained roles: "ROLE_ADMIN", "ROLE_STUDENT", etc.</li>
+ *   <li>Fine-grained permissions: "EXAM_VIEW", "ROOM_EDIT", etc.</li>
+ * </ul>
+ * Both types are included in JWT claims and available for authorization checks.</p>
+ *
+ * @author RVCE SCAS Team
+ * @see UserDetailsService
+ * @see ScasPrincipal
+ * @see UserRepository
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class UserDetailsServiceImpl implements UserDetailsService {
+    private final UserRepository userRepository;
 
-        /*
-         * Detailed conceptual notes (for beginners):
-         *
-         * - Purpose: This class implements Spring Security's `UserDetailsService` which is the
-         *   standard extension point Spring uses to load user information during authentication.
-         *   When `AuthenticationManager` needs to authenticate credentials (email + password), it
-         *   calls `loadUserByUsername` to obtain a `UserDetails` instance that contains the stored
-         *   password hash and granted authorities.
-         *
-         * - @Service: declares this class as a Spring-managed bean. It will be discovered and
-         *   injected into other beans (for example the `DaoAuthenticationProvider`).
-         *
-         * - @RequiredArgsConstructor: Lombok annotation that creates a constructor for `final`
-         *   fields. It allows Spring to `@Autowired` the `UserRepository` through constructor injection.
-         *
-         * - @Transactional(readOnly = true): opens a read-only transactional context for the
-         *   duration of `loadUserByUsername`. This is important because JPA/Hibernate may lazily
-         *   load related collections (roles, permissions). Without an open transaction the
-         *   lazy collections would throw `LazyInitializationException` when accessed outside the
-         *   DAO method. `readOnly=true` hints the DB that no write locks are needed and can
-         *   yield small performance improvements for read-heavy paths like authentication.
-         *
-         * - Email as identity: Although the method signature says "username", the application
-         *   uses `email` as the unique login identifier. The DB uses case-insensitive columns
-         *   (CITEXT) and the repository method `findByEmailIgnoreCase` enforces that.
-         *
-         * - Authorities vs Roles: Spring treats `ROLE_*` authorities specially for `hasRole("X")`
-         *   checks. This implementation adds both `ROLE_<name>` authorities for role checks and
-         *   fine-grained `RESOURCE_ACTION` authorities (e.g., `TIMETABLE_WRITE`) to support
-         *   permission-based checks (`hasAuthority("TIMETABLE_WRITE")`). Both forms live in the
-         *   same collection of `GrantedAuthority` objects on the principal.
-         */
-    // T-005 DECISION [3]: Spring calls this "username" historically, but we treat it as email.
-    // Email is chosen as stable, user-known, and globally unique identifier.
-    private final UserRepository userRepository; // JPA repository for User entity, used to fetch user data from the database
-
-    @Override // method from UserDetailsService interface, called by Spring Security during authentication
-    // T-005 DECISION [2]: Keep transactional context open for lazy role/permission graph reads.
-    // readOnly=true reduces DB overhead on auth read path and avoids accidental writes.
-    @Transactional(readOnly = true) // ensures that the method runs within a transactional context, with read-only optimizations
+    /**
+     * Loads a user by email (username) and builds a Spring Security principal.
+     *
+     * <p><strong>Process:</strong></p>
+     * <ol>
+     *   <li>Query database for user by email (case-insensitive)</li>
+     *   <li>Load associated roles via eager fetching (OneToMany.EAGER in User entity)</li>
+     *   <li>Build authorities from roles and permissions</li>
+     *   <li>Return ScasPrincipal for authentication</li>
+     * </ol>
+     *
+     * <p><strong>Transaction Context:</strong> Method is @Transactional(readOnly=true)
+     * to ensure lazy-loaded relationships (role permissions) can be accessed without
+     * causing LazyInitializationException.</p>
+     *
+     * <p><strong>Error Handling:</strong> Logs authentication attempts for users that
+     * don't exist to aid security monitoring and debugging.</p>
+     *
+     * @param email user's login identifier (email address)
+     * @return Spring Security UserDetails backed by User entity
+     * @throws UsernameNotFoundException if no user with that email exists
+     */
+    @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // Lookup is case-insensitive to align with email semantics and DB constraints.
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> {
-                    // REVIEW-NOTE: this is only a server log; API response still uses generic invalid-credentials message.
                     log.warn("Auth attempt for unknown email: {}", email);
                     return new UsernameNotFoundException("No user found with email: " + email);
                 });
 
-        // Build principal with both coarse role and fine-grained permission authorities.
         return new ScasPrincipal(user, buildAuthorities(user));
     }
 
+    /**
+     * Builds granted authorities from user's roles and their permissions.
+     *
+     * <p><strong>Authority Types Generated:</strong></p>
+     * <ul>
+     *   <li>Role authority: "ROLE_" + role name (e.g., "ROLE_ADMIN")</li>
+     *   <li>Permission authority: "RESOURCE_ACTION" (e.g., "EXAM_VIEW")</li>
+     * </ul>
+     *
+     * <p><strong>Process:</strong></p>
+     * <ol>
+     *   <li>Iterate through user's assigned roles</li>
+     *   <li>For each role, create a "ROLE_*" authority</li>
+     *   <li>For each permission in the role, create a "RESOURCE_ACTION" authority</li>
+     *   <li>Deduplicate authorities across multiple roles (Set used)</li>
+     *   <li>Return complete authority collection</li>
+     * </ol>
+     *
+     * <p><strong>Example Output:</strong>
+     * For a user with role "ADMIN" having permissions "EXAM_VIEW", "ROOM_EDIT":
+     * <pre>
+     *   [
+     *     SimpleGrantedAuthority("ROLE_ADMIN"),
+     *     SimpleGrantedAuthority("EXAM_VIEW"),
+     *     SimpleGrantedAuthority("ROOM_EDIT")
+     *   ]
+     * </pre>
+     *
+     * <p><strong>Usage in Authorization:</strong> These authorities are used by:
+     * <ul>
+     *   <li>Spring Security's {@code hasRole()}, {@code hasAuthority()}, etc.</li>
+     *   <li>Method-level @Secured/@PreAuthorize annotations</li>
+     *   <li>JWT token claims for stateless request authorization</li>
+     * </ul>
+     *
+     * @param user the authenticated user entity from database
+     * @return collection of GrantedAuthority for the user
+     */
     private Collection<GrantedAuthority> buildAuthorities(User user) {
-        // T-005 DECISION [1]: include ROLE_* and RESOURCE_ACTION authorities in one set.
-        // Example: ROLE_TEACHER + TIMETABLE_WRITE.
         Set<GrantedAuthority> authorities = user.getUserRoles().stream()
                 .map(userRole -> userRole.getRole())
                 .flatMap(role -> {
                     Set<GrantedAuthority> roleAuthorities = new HashSet<>();
-                    // Coarse-grained role authority for hasRole("...") checks.
+                    // Coarse-grained role authority
                     roleAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
-                    // Fine-grained permissions for hasAuthority("RESOURCE_ACTION") checks.
+                    // Fine-grained permission authorities
                     role.getRolePermissions().stream()
                             .map(rp -> rp.getPermission())
                             .map(perm -> perm.getResource().toUpperCase() + "_" + perm.getAction().toUpperCase())
@@ -92,7 +140,6 @@ public class UserDetailsServiceImpl implements UserDetailsService { // Spring Se
                             .forEach(roleAuthorities::add);
                     return roleAuthorities.stream();
                 })
-                // Set removes duplicates across multi-role overlap.
                 .collect(Collectors.toSet());
 
         log.debug("Loaded {} authorities for user {}", authorities.size(), user.getEmail());

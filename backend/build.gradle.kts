@@ -1,8 +1,9 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.5.13"
-	id("io.spring.dependency-management") version "1.1.7"
-	id("org.flywaydb.flyway") version "9.22.3"
+	jacoco
+	alias(libs.plugins.spring.boot)
+	alias(libs.plugins.spring.dependency.management)
+	alias(libs.plugins.flyway)
 }
 
 group = "com.rvce"
@@ -19,38 +20,50 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-data-redis")
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
-	runtimeOnly("org.postgresql:postgresql")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.security:spring-security-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation(libs.spring.boot.starter.actuator)
+	implementation(libs.spring.boot.starter.data.jpa)
+	implementation(libs.spring.boot.starter.data.redis)
+	implementation(libs.spring.boot.starter.security)
+	implementation(libs.spring.boot.starter.validation)
+	implementation(libs.spring.boot.starter.web)
+	implementation(libs.jjwt.api)
+	runtimeOnly(libs.jjwt.impl)
+	runtimeOnly(libs.jjwt.jackson)
+	runtimeOnly(libs.postgresql)
+	testImplementation(libs.spring.boot.starter.test)
+	testImplementation(libs.spring.security.test)
+	testRuntimeOnly(libs.junit.platform.launcher)
 
 	// lombok - removes boilerplate code like getters, setters, constructors, etc.
-	compileOnly("org.projectlombok:lombok")
-	annotationProcessor("org.projectlombok:lombok")
+	compileOnly(libs.lombok)
+	annotationProcessor(libs.lombok)
 
 	// mapstruct - for mapping between DTOs and entities
-	implementation("org.mapstruct:mapstruct:1.5.5.Final")
-	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+	implementation(libs.mapstruct)
+	annotationProcessor(libs.mapstruct.processor)
 
 	// flyway - runtime migration support in app
-	implementation("org.flywaydb:flyway-core")
-	implementation("org.flywaydb:flyway-database-postgresql")
+	implementation(libs.flyway.core)
+	implementation(libs.flyway.database.postgresql)
 
 	// swagger - for API documentation
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
+	implementation(libs.springdoc.openapi.starter.webmvc.ui)
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+	}
+}
+
+tasks.test {
+	finalizedBy(tasks.jacocoTestReport)
 }
 
 flyway {

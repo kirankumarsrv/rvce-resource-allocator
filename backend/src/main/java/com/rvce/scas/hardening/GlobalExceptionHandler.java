@@ -62,8 +62,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccountLockedException.class)
     public ResponseEntity<ErrorResponseDto> handleLocked(
             AccountLockedException ex, HttpServletRequest request) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(base(request, 401, "Unauthorized", "ACCOUNT_LOCKED", ex.getMessage()));
+        // FIX: return 429 (TOO_MANY_REQUESTS) instead of 401 for rate-limit/brute-force protection.
+        // Clients can distinguish between invalid credentials (401) and rate-limit (429).
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(base(request, 429, "Too Many Requests", "ACCOUNT_LOCKED", ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidTokenException.class)

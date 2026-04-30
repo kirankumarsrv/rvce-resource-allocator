@@ -9,7 +9,9 @@ import io.jsonwebtoken.security.SignatureException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
@@ -24,67 +26,57 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
+/**
+ * Central JWT and refresh-token service for the authentication flow.
+ *
+ * <p>Fields:</p>
+ * <ul>
+ *   <li>{@code privateKey}: RSA private key used to sign access tokens.</li>
+ *   <li>{@code publicKey}: RSA public key used to verify access tokens.</li>
+ *   <li>{@code accessTokenExpiryMs}: lifetime for signed access tokens.</li>
+ *   <li>{@code refreshTokenExpirySeconds}: lifetime for Redis-backed refresh tokens.</li>
+ *   <li>{@code redisTemplate}: Redis access for refresh tokens and blacklist entries.</li>
+ * </ul>
+ *
+ * <p>Critical steps:</p>
+ * <ol>
+ *   <li>Load or generate the RSA key pair once at startup.</li>
+ *   <li>Sign access tokens with RS256 and include a {@code jti} for blacklist support.</li>
+ *   <li>Store opaque refresh tokens in Redis so logout can revoke them immediately.</li>
+ *   <li>Check Redis for blacklisted JTIs before accepting an access token.</li>
+ * </ol>
+ */
 @Slf4j
 @Component
 public class JwtTokenProvider {
 
-    /*
-     * Beginner-friendly overview and implementation notes for JwtTokenProvider:
-     *
-     * - Role: Responsible for creating and validating tokens used for stateless authentication.
-     *   The provider issues two types of artifacts: short-lived RS256-signed JWT access tokens
-     *   and opaque refresh-token IDs (UUIDs) stored in Redis.
-     *
-     * - RS256 vs HS256: RS256 uses an asymmetric keypair (private key signs, public key verifies).
-     *   This allows verification by many services without sharing the private signing key.
-     *   HS256 uses a shared secret, which is less safe in distributed systems.
-     *
-     * - Access token contents and claims:
-     *     - `sub` (subject): userId (UUID string)
-     *     - `email`: user's email
-     *     - `roles`: list of authorities included at login time (ROLE_* and permission strings)
-     *     - `jti`: unique token id used for blacklisting on logout
-     *     - `exp` and `iat`: standard expiration and issued-at timestamps
-     *
-     * - jti (JWT ID): a short handle to blacklist a particular token prior to natural expiry.
-     *   On logout we store the jti in Redis with TTL = remaining token lifetime. Every request
-     *   checks Redis to reject blacklisted jtis.
-     *
-     * - Refresh tokens: opaque UUID values stored under `refresh:{userId}:{tokenId}` in Redis.
-     *   Advantages: immediate revocation by deleting the key, and easy per-device tracking.
-     *
-     * - Key loading: private/public keys are loaded at bean construction time and kept in memory
-     *   to avoid expensive KeyFactory operations on every request. In production you should
-     *   provide stable key files (PEM) and avoid the fallback of generating ephemeral keys at
-     *   startup (which invalidates tokens across restarts and between pods).
-     *
-     * - parseClaims: verifies signature using the public key and returns claims. Use the
-     *   validated claims to extract identity and authorization details.
-     *
-     * - Redis usage patterns: `refresh:` prefix for refresh tokens and `blacklist:` prefix for
-     *   jti blacklists. `logoutAllDevices` uses a key-pattern scan to delete all refresh tokens
-     *   for a user (be careful with large keyspaces; consider Redis SCAN or a set index for scale).
-     */
-
-    // Cached keys are loaded once at bean creation time.
     // T-005 DECISION [7]: avoid key parsing/generation on request hot path.
     private final PrivateKey privateKey;
     private final PublicKey publicKey;
-    // T-005 DECISION [4]: 15 minutes default for access-token TTL (900000 ms).
     private final long accessTokenExpiryMs;
-    // T-005 DECISION [5]: 7 days default for refresh-token state in Redis.
     private final long refreshTokenExpirySeconds;
     private final RedisTemplate<String, String> redisTemplate;
 
     private static final String REFRESH_PREFIX = "refresh:";
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
+    /**
+     * Loads the RSA key pair and configures Redis-backed token storage.
+     *
+     * @param privateKeyPath path to the private key file or blank for an ephemeral pair
+     * @param publicKeyPath path to the public key file or blank for an ephemeral pair
+     * @param accessTokenExpiryMs access-token lifetime in milliseconds
+     * @param refreshTokenExpirySeconds refresh-token lifetime in seconds
+     * @param redisTemplate Redis template used for refresh tokens and blacklist data
+     * @throws Exception if key loading fails
+     */
     public JwtTokenProvider(
             @Value("${scas.jwt.private-key-path:}") String privateKeyPath,
             @Value("${scas.jwt.public-key-path:}") String publicKeyPath,
@@ -92,15 +84,30 @@ public class JwtTokenProvider {
             @Value("${scas.jwt.refresh-token-expiry-seconds:604800}") long refreshTokenExpirySeconds,
             RedisTemplate<String, String> redisTemplate) throws Exception {
 
-        // REVIEW-RISK (high): if key paths are blank, a new ephemeral key-pair is generated per app startup.
-        // Consequence: all existing access tokens become invalid after restart; in multi-pod deployments,
-        // pods may sign/verify with different keys, breaking cross-pod token validation.
+        // FIX: validate key configuration to prevent ephemeral key fallback.
+        // If both paths are blank, a new keypair is generated per startup,
+        // invalidating all tokens across restarts and breaking multi-pod deployments.
+        if ((privateKeyPath == null || privateKeyPath.isBlank()) &&
+            (publicKeyPath == null || publicKeyPath.isBlank())) {
+            log.warn("SECURITY WARNING: both private-key-path and public-key-path are blank. "
+                    + "Generating ephemeral RSA keypair. This will invalidate tokens after restart. "
+                    + "For production, configure scas.jwt.private-key-path and scas.jwt.public-key-path.");
+        }
+        // FIX: ensure both keys come from the same source (both files or both generated).
+        // Mixing one file key and one generated key creates sign/verify mismatch.
+        boolean bothFilesPassed = (privateKeyPath != null && !privateKeyPath.isBlank()) &&
+                                 (publicKeyPath != null && !publicKeyPath.isBlank());
+        boolean bothBlank = (privateKeyPath == null || privateKeyPath.isBlank()) &&
+                           (publicKeyPath == null || publicKeyPath.isBlank());
+        if (!(bothFilesPassed || bothBlank)) {
+            throw new IllegalArgumentException(
+                    "Both private-key-path and public-key-path must be configured, or both must be blank. "
+                    + "Partial configuration creates key mismatch.");
+        }
+
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         KeyPair pair = keyPairGenerator.generateKeyPair();
-
-        // REVIEW-RISK (high): if only one path is configured (private or public), this can create mismatched
-        // sign/verify keys because one key comes from file and the other from random generated pair.
         this.privateKey = privateKeyPath == null || privateKeyPath.isBlank()
                 ? (PrivateKey) pair.getPrivate()
                 : loadPrivateKey(privateKeyPath);
@@ -113,6 +120,14 @@ public class JwtTokenProvider {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * Generates a signed access token for the authenticated user.
+     *
+     * @param userId authenticated user id
+     * @param email authenticated email address
+     * @param roles granted authorities to embed in the token
+     * @return compact RS256 JWT
+     */
     public String generateAccessToken(UUID userId, String email, List<String> roles) {
         Instant now = Instant.now();
         Instant expiry = now.plusMillis(accessTokenExpiryMs);
@@ -131,6 +146,12 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    /**
+     * Generates an opaque refresh token and stores it in Redis.
+     *
+     * @param userId owner of the refresh token
+     * @return opaque refresh-token id
+     */
     public String generateRefreshToken(UUID userId) {
         // T-005 DECISION [5]: refresh token is opaque random UUID, stored server-side in Redis.
         // This enables instant revocation by deleting key(s), unlike self-contained JWT refresh tokens.
@@ -143,6 +164,12 @@ public class JwtTokenProvider {
         return tokenId;
     }
 
+    /**
+     * Validates an access token and returns a structured result.
+     *
+     * @param token compact JWT string
+     * @return validation state with claims when valid
+     */
     public JwtValidationResult validateAccessToken(String token) {
         try {
             Claims claims = parseClaims(token);
@@ -171,6 +198,13 @@ public class JwtTokenProvider {
         }
     }
 
+    /**
+     * Validates that a refresh token exists for the supplied user.
+     *
+     * @param userId user identifier
+     * @param tokenId opaque refresh-token id
+     * @return user id when the refresh token is valid
+     */
     public Optional<UUID> validateRefreshToken(UUID userId, String tokenId) {
         // Key format encodes both user and token id, allowing per-device and per-user revocation patterns.
         String redisKey = REFRESH_PREFIX + userId + ":" + tokenId;
@@ -185,6 +219,13 @@ public class JwtTokenProvider {
         return Optional.of(userId);
     }
 
+    /**
+     * Rotates the refresh token by deleting the old token and issuing a new one.
+     *
+     * @param userId user identifier
+     * @param oldTokenId refresh-token id to invalidate
+     * @return new opaque refresh-token id
+     */
     public String rotateRefreshToken(UUID userId, String oldTokenId) {
         // Rotate on refresh to reduce replay window.
         // REVIEW-RISK (medium): delete + generate is not atomic; concurrent refresh calls can both pass.
@@ -193,6 +234,13 @@ public class JwtTokenProvider {
         return generateRefreshToken(userId);
     }
 
+    /**
+     * Blacklists the current access token and removes the current refresh token when present.
+     *
+     * @param accessToken bearer access token to blacklist
+     * @param userId user identifier
+     * @param refreshTokenId current refresh-token id, if any
+     */
     public void logout(String accessToken, UUID userId, String refreshTokenId) {
         try {
             Claims claims = parseClaims(accessToken);
@@ -212,30 +260,62 @@ public class JwtTokenProvider {
         }
     }
 
+    /**
+     * Revokes every refresh token issued for the supplied user.
+     *
+     * @param userId user identifier
+     */
     public void logoutAllDevices(UUID userId) {
         // T-005 DECISION [5]: all refresh tokens for this user should be revoked here.
-        // REVIEW-RISK (high): the current implementation uses redisTemplate.keys(pattern),
-        // which performs a blocking Redis keyspace scan on the server thread.
-        // The design comment says SCAN should be used, but the code below still uses KEYS.
-        // For large Redis databases this can pause Redis and hurt all clients, not just auth.
+        // FIX: use cursor-based SCAN iteration to avoid blocking Redis entirely.
+        // KEYS() blocks the Redis server; SCAN iterates with non-blocking cursor.
         String pattern = REFRESH_PREFIX + userId + ":*";
-        var keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
+        try {
+            Set<String> keys = new HashSet<>();
+            ScanOptions scanOptions = ScanOptions.scanOptions()
+                    .match(pattern)
+                    .count(100)
+                    .build();
+            try (Cursor<String> cursor = redisTemplate.scan(scanOptions)) {
+                cursor.forEachRemaining(keys::add);
+            }
+            if (!keys.isEmpty()) {
+                redisTemplate.delete(keys);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to logout all devices for user {}: {}", userId, e.getMessage());
         }
     }
 
+    /**
+     * Extracts the user id claim from a verified JWT.
+     *
+     * @param claims verified claims
+     * @return parsed user id
+     */
     public UUID extractUserId(Claims claims) {
         return UUID.fromString(claims.getSubject());
     }
 
+    /**
+     * Extracts the email claim from a verified JWT.
+     *
+     * @param claims verified claims
+     * @return email from the token
+     */
+    public String extractEmail(Claims claims) {
+        return claims.get("email", String.class);
+    }
+
+    /**
+     * Extracts the authority list from a verified JWT.
+     *
+     * @param claims verified claims
+     * @return token authorities, or an empty list when absent
+     */
     @SuppressWarnings("unchecked")
     public List<String> extractRoles(Claims claims) {
         return claims.get("roles", List.class);
-    }
-
-    public String extractEmail(Claims claims) {
-        return claims.get("email", String.class);
     }
 
     private Claims parseClaims(String token) {

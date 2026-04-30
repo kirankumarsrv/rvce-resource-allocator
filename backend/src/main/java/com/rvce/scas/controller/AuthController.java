@@ -2,6 +2,7 @@ package com.rvce.scas.controller;
 
 import com.rvce.scas.dto.LoginRequest;
 import com.rvce.scas.dto.LoginResponse;
+import com.rvce.scas.dto.LogoutRequest;
 import com.rvce.scas.dto.RefreshRequest;
 import com.rvce.scas.dto.TokenPair;
 import com.rvce.scas.security.JwtPrincipal;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -75,18 +76,15 @@ public class AuthController {
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal JwtPrincipal principal,
             @RequestHeader(value = "Authorization") String authHeader,
-            @RequestParam(required = false) String refreshToken) {
+            @Valid @RequestBody LogoutRequest request) {
 
-        // REVIEW-RISK (medium): refreshToken is currently sent as a URL query parameter.
-        // URLs can end up in server access logs, browser history, proxies, and Referer headers.
-        // A request body DTO would reduce accidental leakage, especially for a revocable token.
-        // Robust parsing: check for presence and prefix to avoid runtime exceptions.
+        // FIX: refreshToken now comes from request body, not URL query parameter.
+        // This prevents token leakage via logs, browser history, Referer headers.
         String accessToken = null;
         if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
             accessToken = authHeader.substring(7);
         }
-        // If accessToken is null we still attempt logout of refresh token (best-effort).
-        authService.logout(accessToken, principal.getUserId(), refreshToken);
+        authService.logout(accessToken, principal.getUserId(), request.getRefreshToken());
         return ResponseEntity.ok().build();
     }
 
@@ -96,6 +94,7 @@ public class AuthController {
             @AuthenticationPrincipal JwtPrincipal principal,
             @RequestHeader("Authorization") String authHeader) {
 
+        // Note: logout-all does not need a refresh token since all devices are revoked server-side.
         String accessToken = null;
         if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
             accessToken = authHeader.substring(7);
