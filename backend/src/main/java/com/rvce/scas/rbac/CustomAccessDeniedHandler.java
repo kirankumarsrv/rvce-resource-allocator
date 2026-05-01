@@ -17,6 +17,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.Instant;
 
+/**
+ * Serializes authorization failures into the API's JSON error shape.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,6 +27,14 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
 
+        /**
+         * Handles a forbidden request by logging the attempt and returning JSON.
+         *
+         * @param request the current HTTP request
+         * @param response the HTTP response to populate
+         * @param accessDeniedException the Spring Security access denied exception
+         * @throws IOException if the response body cannot be written
+         */
     @Override
     public void handle(
             HttpServletRequest request,

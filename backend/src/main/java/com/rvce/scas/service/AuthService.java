@@ -16,7 +16,6 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +23,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Coordinates authentication, token lifecycle, and login lockout state.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,6 +42,13 @@ public class AuthService {
     private static final String FAIL_COUNT_PREFIX = "login:fail:";
     private static final String LOCKOUT_PREFIX = "login:locked:";
 
+    /**
+     * Authenticates the user, issues tokens, and records login audit data.
+     *
+     * @param email the user's login email
+     * @param rawPassword the submitted password
+     * @return a fresh access and refresh token pair
+     */
     @Transactional
     public TokenPair login(String email, String rawPassword) {
         checkLockout(email);
@@ -84,12 +93,19 @@ public class AuthService {
         }
     }
 
+    /**
+     * Validates and rotates the refresh token to issue a new access token.
+     *
+     * @param userId the authenticated user id
+     * @param refreshTokenId the opaque refresh token id
+     * @return a rotated token pair
+     */
     @Transactional(readOnly = true)
     public TokenPair refresh(UUID userId, String refreshTokenId) {
         tokenProvider.validateRefreshToken(userId, refreshTokenId)
                 .orElseThrow(() -> new InvalidTokenException("Refresh token is invalid or expired."));
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(Objects.requireNonNull(userId, "userId"))
                 .filter(User::isActive)
                 .orElseThrow(() -> new InvalidTokenException("User account is disabled."));
 
@@ -101,6 +117,12 @@ public class AuthService {
         return new TokenPair(newAccessToken, newRefreshToken);
     }
 
+    /**
+     * Rebuilds the user's authorities for refresh-token renewal.
+     *
+     * @param user the active user entity loaded from the database
+     * @return the full set of role and permission authorities
+     */
     private List<String> buildAuthoritiesForRefresh(User user) {
         Set<String> authorities = user.getUserRoles().stream()
                 .map(userRole -> userRole.getRole())
@@ -118,17 +140,35 @@ public class AuthService {
         return new ArrayList<>(authorities);
     }
 
+    /**
+     * Revokes the current session and logs the logout event.
+     *
+     * @param accessToken the bearer token presented by the client
+     * @param userId the authenticated user id
+     * @param refreshTokenId the refresh token id to revoke
+     */
     public void logout(String accessToken, UUID userId, String refreshTokenId) {
         tokenProvider.logout(accessToken, userId, refreshTokenId);
         auditService.logLogout(userId);
     }
 
+    /**
+     * Revokes all active sessions for the user and logs the logout event.
+     *
+     * @param accessToken the bearer token presented by the client
+     * @param userId the authenticated user id
+     */
     public void logoutAllDevices(String accessToken, UUID userId) {
         tokenProvider.logout(accessToken, userId, null);
         tokenProvider.logoutAllDevices(userId);
         auditService.logLogout(userId);
     }
 
+    /**
+     * Fails fast if the account is currently locked in Redis.
+     *
+     * @param email the login email to check
+     */
     private void checkLockout(String email) {
         String lockKey = LOCKOUT_PREFIX + email.toLowerCase(Locale.ROOT);
         if (Boolean.TRUE.equals(redisTemplate.hasKey(lockKey))) {
@@ -137,6 +177,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Increments the failed-login counter for the given email address.
+     *
+     * @param email the login email to track
+     * @return the updated failure count
+     */
     private int incrementFailCount(String email) {
         String failKey = FAIL_COUNT_PREFIX + email.toLowerCase(Locale.ROOT);
         Long count = redisTemplate.opsForValue().increment(failKey);
@@ -148,6 +194,11 @@ public class AuthService {
         return count != null ? count.intValue() : 1;
     }
 
+    /**
+     * Marks the account as locked and clears the active failure counter.
+     *
+     * @param email the login email to lock
+     */
     private void lockAccount(String email) {
         String lockKey = LOCKOUT_PREFIX + email.toLowerCase(Locale.ROOT);
         redisTemplate.opsForValue().set(lockKey, "1", LOCKOUT_MINUTES, TimeUnit.MINUTES);
@@ -155,6 +206,11 @@ public class AuthService {
         log.warn("Account locked due to too many failed attempts: {}", email);
     }
 
+    /**
+     * Removes the failure counter after a successful login.
+     *
+     * @param email the login email to clear
+     */
     private void clearFailCount(String email) {
         redisTemplate.delete(FAIL_COUNT_PREFIX + email.toLowerCase(Locale.ROOT));
     }

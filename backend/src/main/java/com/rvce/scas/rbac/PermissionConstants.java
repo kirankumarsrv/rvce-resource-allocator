@@ -1,6 +1,12 @@
 package com.rvce.scas.rbac;
 
+/**
+ * Central list of application permission names used by RBAC checks.
+ */
 public final class PermissionConstants {
+    /**
+     * Prevents instantiation of this constants holder.
+     */
     private PermissionConstants() {
     }
 

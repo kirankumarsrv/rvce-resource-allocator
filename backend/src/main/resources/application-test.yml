@@ -1,0 +1,43 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  
+  # Use H2 in-memory database for tests
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        show_sql: false
+        format_sql: false
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # Configure Redis for tests (will be mocked)
+  redis:
+    host: localhost
+    port: 6370
+    timeout: 1s
+
+# Disable Flyway for tests (migrations are PostgreSQL-specific)
+spring.flyway.enabled: false
+
+# Disable Redis auto-configuration - we use mocked Redis for testing
+spring.autoconfigure.exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+server:
+  port: 8080
+
+

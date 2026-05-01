@@ -32,6 +32,7 @@ dependencies {
 	runtimeOnly(libs.postgresql)
 	testImplementation(libs.spring.boot.starter.test)
 	testImplementation(libs.spring.security.test)
+	testImplementation("com.h2database:h2")
 	testRuntimeOnly(libs.junit.platform.launcher)
 
 	// lombok - removes boilerplate code like getters, setters, constructors, etc.

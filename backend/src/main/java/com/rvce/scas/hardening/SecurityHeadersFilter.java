@@ -11,6 +11,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Applies security-related HTTP headers to every API response.
+ */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SecurityHeadersFilter extends OncePerRequestFilter {
@@ -32,6 +35,15 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
     private static final String PERMISSIONS_POLICY =
             "camera=(self), geolocation=(self), microphone=(), payment=(), usb=()";
 
+    /**
+     * Adds hardened response headers before the request continues through the chain.
+     *
+     * @param request the incoming HTTP request
+     * @param response the HTTP response to mutate
+     * @param chain the downstream filter chain
+     * @throws ServletException if the container cannot continue processing
+     * @throws IOException if the response cannot be written
+     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,

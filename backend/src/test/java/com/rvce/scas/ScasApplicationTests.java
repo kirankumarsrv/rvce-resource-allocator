@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+/**
+ * Smoke test that verifies the Spring context starts successfully.
+ */
 @SpringBootTest(properties = {
 		"spring.autoconfigure.exclude="
 				+ "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
@@ -25,6 +28,9 @@ class ScasApplicationTests {
 	@MockitoBean
 	private AuthService authService;
 
+	/**
+	 * Verifies that the application context can load without startup errors.
+	 */
 	@Test
 	void contextLoads() {
 	}

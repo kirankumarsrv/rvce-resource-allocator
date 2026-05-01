@@ -6,10 +6,6 @@ import com.rvce.scas.security.UserDetailsServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -27,12 +23,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Verifies the application's role-based access control boundaries.
+ */
+@SuppressWarnings("null")
 @SpringBootTest(properties = {
-        "spring.autoconfigure.exclude="
-                + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"
+    "spring.autoconfigure.exclude="
+        + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
+        + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,"
+        + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration,"
+        + "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -56,6 +56,11 @@ class RbacIntegrationTest {
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * Confirms that a TTO user can upload timetable data.
+     *
+     * @throws Exception if MockMvc cannot perform the request
+     */
     @Test
     @DisplayName("TTO can upload timetable -> 200")
     @WithMockUser(username = "tto@rvce.edu.in", authorities = {"ROLE_TTO", "TIMETABLE_WRITE", "TIMETABLE_READ"})
@@ -67,7 +72,12 @@ class RbacIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
+            /**
+             * Confirms that a student is denied timetable upload access.
+             *
+             * @throws Exception if MockMvc cannot perform the request
+             */
+            @Test
     @DisplayName("STUDENT cannot upload timetable -> 403 JSON")
     @WithMockUser(username = "student@rvce.edu.in", authorities = {"ROLE_STUDENT", "TIMETABLE_READ", "EXAM_READ"})
     void student_cannotUploadTimetable() throws Exception {
@@ -80,6 +90,11 @@ class RbacIntegrationTest {
                 .andExpect(jsonPath("$.path").value("/api/timetable/upload"));
     }
 
+    /**
+     * Confirms that an exam controller user can publish an exam endpoint.
+     *
+     * @throws Exception if MockMvc cannot perform the request
+     */
     @Test
     @DisplayName("EXAM_CONTROLLER can publish seating plan -> 200")
     @WithMockUser(authorities = {"ROLE_EXAM_CONTROLLER", "EXAM_PUBLISH", "EXAM_WRITE"})
@@ -88,6 +103,11 @@ class RbacIntegrationTest {
                 .andExpect(status().isOk());
     }
 
+    /**
+     * Confirms that TTO users cannot access admin audit logs.
+     *
+     * @throws Exception if MockMvc cannot perform the request
+     */
     @Test
     @DisplayName("TTO cannot access audit logs -> 403")
     @WithMockUser(authorities = {"ROLE_TTO", "TIMETABLE_WRITE", "TIMETABLE_GENERATE"})
@@ -96,6 +116,11 @@ class RbacIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
+    /**
+     * Confirms that unauthenticated callers receive a JSON 401 response.
+     *
+     * @throws Exception if MockMvc cannot perform the request
+     */
     @Test
     @DisplayName("Unauthenticated request to protected endpoint -> 401")
     void unauthenticated_gets401() throws Exception {
@@ -106,6 +131,11 @@ class RbacIntegrationTest {
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
+    /**
+     * Confirms that the login endpoint remains publicly reachable.
+     *
+     * @throws Exception if MockMvc cannot perform the request
+     */
     @Test
     @DisplayName("Unauthenticated request to /api/auth/login -> 401 from auth service")
     void login_endpoint_is_public() throws Exception {
