@@ -1,146 +1,146 @@
-name: Deploy to Kubernetes
+# name: Deploy to Kubernetes
 
-on:
-  workflow_run:
-    # workflows: ["Backend CI", "Frontend CI"]
-    # types: [completed]
-    # branches: [main]
+# on:
+#   workflow_run:
+#     workflows: ["Backend CI", "Frontend CI"]
+#     types: [completed]
+#     branches: [main]
 
-jobs:
-  check-all-passed:
-    name: Verify All CI Workflows Passed
-    runs-on: ubuntu-22.04
-    if: github.event.workflow_run.conclusion == 'success'
-    outputs:
-      should-deploy: ${{ steps.check.outputs.result }}
-    steps:
-      - name: Check all workflows passed
-        id: check
-        run: |
-          echo "Deploying commit: ${{ github.sha }}"
-          echo "result=true" >> $GITHUB_OUTPUT
+# jobs:
+#   check-all-passed:
+#     name: Verify All CI Workflows Passed
+#     runs-on: ubuntu-22.04
+#     if: github.event.workflow_run.conclusion == 'success'
+#     outputs:
+#       should-deploy: ${{ steps.check.outputs.result }}
+#     steps:
+#       - name: Check all workflows passed
+#         id: check
+#         run: |
+#           echo "Deploying commit: ${{ github.sha }}"
+#           echo "result=true" >> $GITHUB_OUTPUT
 
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-22.04
-    needs: check-all-passed
-    environment:
-      name: staging
-      url: https://staging.scas.rvce.edu.in
+#   deploy-staging:
+#     name: Deploy to Staging
+#     runs-on: ubuntu-22.04
+#     needs: check-all-passed
+#     environment:
+#       name: staging
+#       url: https://staging.scas.rvce.edu.in
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Update kubeconfig for EKS
-        run: |
-          aws eks update-kubeconfig \
-            --region ${{ secrets.AWS_REGION }} \
-            --name scas-cluster
+#       - name: Update kubeconfig for EKS
+#         run: |
+#           aws eks update-kubeconfig \
+#             --region ${{ secrets.AWS_REGION }} \
+#             --name scas-cluster
 
-      - name: Deploy to staging namespace
-        env:
-          IMAGE_TAG: ${{ github.sha }}
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          NAMESPACE: scas-staging
-        run: |
-          kubectl set image deployment/scas-backend \
-            backend="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}" \
-            -n ${NAMESPACE}
+#       - name: Deploy to staging namespace
+#         env:
+#           IMAGE_TAG: ${{ github.sha }}
+#           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+#           NAMESPACE: scas-staging
+#         run: |
+#           kubectl set image deployment/scas-backend \
+#             backend="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}" \
+#             -n ${NAMESPACE}
 
-          kubectl set image deployment/scas-frontend \
-            frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
-            -n ${NAMESPACE}
+#           kubectl set image deployment/scas-frontend \
+#             frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
+#             -n ${NAMESPACE}
 
-      - name: Wait for rollout to complete
-        run: |
-          kubectl rollout status deployment/scas-backend \
-            -n scas-staging --timeout=5m
-          kubectl rollout status deployment/scas-frontend \
-            -n scas-staging --timeout=5m
+#       - name: Wait for rollout to complete
+#         run: |
+#           kubectl rollout status deployment/scas-backend \
+#             -n scas-staging --timeout=5m
+#           kubectl rollout status deployment/scas-frontend \
+#             -n scas-staging --timeout=5m
 
-      - name: Run smoke tests against staging
-        run: |
-          STAGING_URL="https://staging.scas.rvce.edu.in"
-          sleep 30
+#       - name: Run smoke tests against staging
+#         run: |
+#           STAGING_URL="https://staging.scas.rvce.edu.in"
+#           sleep 30
           
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${STAGING_URL}/actuator/health")
+#           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+#             "${STAGING_URL}/actuator/health")
 
-          if [ "$HTTP_STATUS" != "200" ]; then
-            echo "Smoke test FAILED: health check returned ${HTTP_STATUS}"
-            exit 1
-          fi
+#           if [ "$HTTP_STATUS" != "200" ]; then
+#             echo "Smoke test FAILED: health check returned ${HTTP_STATUS}"
+#             exit 1
+#           fi
 
-          echo "Smoke test PASSED: health check returned 200"
+#           echo "Smoke test PASSED: health check returned 200"
 
-      - name: Notify on success
-        if: success()
-        run: |
-          echo "Deployment to staging succeeded: ${{ github.sha }}"
+#       - name: Notify on success
+#         if: success()
+#         run: |
+#           echo "Deployment to staging succeeded: ${{ github.sha }}"
 
-      - name: Rollback on failure
-        if: failure()
-        run: |
-          echo "Deployment FAILED. Rolling back..."
-          kubectl rollout undo deployment/scas-backend -n scas-staging
-          kubectl rollout undo deployment/scas-frontend -n scas-staging
-          echo "Rollback complete"
+#       - name: Rollback on failure
+#         if: failure()
+#         run: |
+#           echo "Deployment FAILED. Rolling back..."
+#           kubectl rollout undo deployment/scas-backend -n scas-staging
+#           kubectl rollout undo deployment/scas-frontend -n scas-staging
+#           echo "Rollback complete"
 
-  deploy-production:
-    name: Deploy to Production (Manual Approval)
-    runs-on: ubuntu-22.04
-    needs: deploy-staging
-    environment:
-      name: production
-      url: https://scas.rvce.edu.in
+#   deploy-production:
+#     name: Deploy to Production (Manual Approval)
+#     runs-on: ubuntu-22.04
+#     needs: deploy-staging
+#     environment:
+#       name: production
+#       url: https://scas.rvce.edu.in
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name scas-cluster
+#       - name: Update kubeconfig
+#         run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name scas-cluster
 
-      - name: Blue-Green deploy to production
-        env:
-          IMAGE_TAG: ${{ github.sha }}
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          NAMESPACE: scas-prod
-        run: |
-          kubectl set image deployment/scas-backend \
-            backend="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}" \
-            -n ${NAMESPACE}
+#       - name: Blue-Green deploy to production
+#         env:
+#           IMAGE_TAG: ${{ github.sha }}
+#           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+#           NAMESPACE: scas-prod
+#         run: |
+#           kubectl set image deployment/scas-backend \
+#             backend="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}" \
+#             -n ${NAMESPACE}
 
-          kubectl set image deployment/scas-frontend \
-            frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
-            -n ${NAMESPACE}
+#           kubectl set image deployment/scas-frontend \
+#             frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
+#             -n ${NAMESPACE}
 
-      - name: Wait for production rollout
-        run: |
-          kubectl rollout status deployment/scas-backend -n scas-prod --timeout=5m
-          kubectl rollout status deployment/scas-frontend -n scas-prod --timeout=5m
+#       - name: Wait for production rollout
+#         run: |
+#           kubectl rollout status deployment/scas-backend -n scas-prod --timeout=5m
+#           kubectl rollout status deployment/scas-frontend -n scas-prod --timeout=5m
 
-      - name: Production smoke test
-        run: |
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "https://scas.rvce.edu.in/actuator/health")
-          [ "$HTTP_STATUS" = "200" ] || exit 1
+#       - name: Production smoke test
+#         run: |
+#           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+#             "https://scas.rvce.edu.in/actuator/health")
+#           [ "$HTTP_STATUS" = "200" ] || exit 1
 
-      - name: Rollback production on failure
-        if: failure()
-        run: |
-          kubectl rollout undo deployment/scas-backend -n scas-prod
-          kubectl rollout undo deployment/scas-frontend -n scas-prod
+#       - name: Rollback production on failure
+#         if: failure()
+#         run: |
+#           kubectl rollout undo deployment/scas-backend -n scas-prod
+#           kubectl rollout undo deployment/scas-frontend -n scas-prod

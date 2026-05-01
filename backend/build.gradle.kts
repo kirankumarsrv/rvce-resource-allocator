@@ -4,6 +4,7 @@ plugins {
 	alias(libs.plugins.spring.boot)
 	alias(libs.plugins.spring.dependency.management)
 	alias(libs.plugins.flyway)
+	alias(libs.plugins.owasp.dependency.check)
 }
 
 group = "com.rvce"

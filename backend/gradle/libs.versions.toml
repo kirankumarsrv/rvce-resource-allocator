@@ -5,11 +5,13 @@ flyway = "9.22.3"
 jjwt = "0.12.6"
 mapstruct = "1.5.5.Final"
 springdoc = "2.5.0"
+owasp-dependency-check = "9.2.0"
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
+owasp-dependency-check = { id = "org.owasp.dependencycheck", version.ref = "owasp-dependency-check" }
 
 [libraries]
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
