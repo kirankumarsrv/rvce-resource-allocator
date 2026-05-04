@@ -45,11 +45,11 @@ CREATE TABLE rooms (
     name            VARCHAR(20)  NOT NULL,   -- A201, SH-01, LAB-CS-3
     display_name    VARCHAR(100) NULL,       -- "Seminar Hall Block A"
     room_type       VARCHAR(20)  NOT NULL,
-    capacity        SMALLINT    NOT NULL,
+    capacity        INTEGER     NOT NULL,
     -- bench grid (NULL for non-exam rooms - DECISION [D7])
-    bench_rows      SMALLINT    NULL,
-    bench_cols      SMALLINT    NULL,
-    floor_number    SMALLINT    NOT NULL DEFAULT 0,
+    bench_rows      INTEGER     NULL,
+    bench_cols      INTEGER     NULL,
+    floor_number    INTEGER     NOT NULL DEFAULT 0,
     block           VARCHAR(10)  NOT NULL,   -- A, B, C, D, Admin, Library
     building        VARCHAR(50)  NULL,       -- Main Block, PG Block
     -- GPS for campus map (NUMERIC not FLOAT - DECISION [D12])
@@ -87,7 +87,7 @@ CREATE TRIGGER trg_rooms_updated_at
 CREATE TABLE timetable_versions (
     version_id      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     academic_year   VARCHAR(10)  NOT NULL,   -- 2025-26
-    semester        SMALLINT    NOT NULL,    -- 1-8
+    semester        INTEGER     NOT NULL,    -- 1-8
     label           VARCHAR(100) NULL,       -- "Post-mid revision"
     status          VARCHAR(10)  NOT NULL DEFAULT 'DRAFT',
     created_by      UUID        NOT NULL REFERENCES users(user_id),
@@ -109,17 +109,17 @@ CREATE TABLE timetable_versions (
 -- not specific dates. day_overrides handles specific-date exceptions.
 -- This avoids inserting 180 rows (one per semester day) per slot.
 CREATE TABLE timetable_slots (
-    slot_id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    slot_id         BIGSERIAL   PRIMARY KEY,
     version_id      UUID        NOT NULL REFERENCES timetable_versions(version_id),
     room_id         UUID        NOT NULL REFERENCES rooms(room_id),
     teacher_id      UUID        NOT NULL REFERENCES users(user_id),
-    department_id   UUID        NOT NULL REFERENCES departments(department_id),
+    department      VARCHAR(100) NOT NULL,   -- Computer Science, Information Science
     subject_code    VARCHAR(20)  NOT NULL,   -- 21CS51
     subject_name    VARCHAR(100) NOT NULL,   -- Design & Analysis of Algorithms
     section         VARCHAR(5)   NOT NULL,   -- A, B, C, 1, 2
-    semester        SMALLINT    NOT NULL,
-    day_of_week     SMALLINT    NOT NULL,    -- 1=Monday, 5=Friday
-    period_number   SMALLINT    NOT NULL,    -- 1=8:00am, 8=5:00pm
+    semester        INTEGER     NOT NULL,
+    day_of_week     INTEGER     NOT NULL,    -- 1=Monday, 5=Friday
+    period_number   INTEGER     NOT NULL,    -- 1=8:00am, 8=5:00pm
     start_time      TIME        NOT NULL,
     end_time        TIME        NOT NULL,
     -- DECISION [D9]: optimistic locking column
@@ -143,9 +143,10 @@ COMMENT ON COLUMN timetable_slots.day_of_week IS '1=Monday, 2=Tuesday, 3=Wednesd
 -- ─── DAY_OVERRIDES ───────────────────────────────────────────
 -- DECISION [D10]: separate from timetable_slots
 -- Records: class cancelled today / room claimed by another teacher
+-- DECISION: override_id uses BIGSERIAL for auto-increment IDs (aligns with JPA entity)
 CREATE TABLE day_overrides (
-    override_id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    slot_id             UUID        NOT NULL REFERENCES timetable_slots(slot_id)
+    override_id         BIGSERIAL   PRIMARY KEY,
+    slot_id             BIGINT      NOT NULL REFERENCES timetable_slots(slot_id)
                                         ON DELETE CASCADE,
     override_date       DATE        NOT NULL,
     status              VARCHAR(15)  NOT NULL,
@@ -194,15 +195,15 @@ CREATE TABLE occupancy_records (
     record_id       UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     room_id         UUID        NOT NULL REFERENCES rooms(room_id),
     -- NULL slot_id = ad-hoc check outside scheduled slot
-    slot_id         UUID        NULL REFERENCES timetable_slots(slot_id)
+    slot_id         BIGINT      NULL REFERENCES timetable_slots(slot_id)
                                     ON DELETE SET NULL,
-    override_id     UUID        NULL REFERENCES day_overrides(override_id)
+    override_id     BIGINT      NULL REFERENCES day_overrides(override_id)
                                     ON DELETE SET NULL,
     check_date      DATE        NOT NULL,
     check_time      TIME        NOT NULL,
     method          VARCHAR(15)  NOT NULL,
     is_occupied     BOOLEAN     NOT NULL,
-    person_count    SMALLINT    NULL,        -- from YOLO detection; NULL if MANUAL
+    person_count    INTEGER     NULL,        -- from YOLO detection; NULL if MANUAL
     ai_confidence   NUMERIC(5,4) NULL,      -- 0.0000 to 1.0000
     image_url       TEXT        NULL,        -- MinIO object path
     verified_by     UUID        NULL REFERENCES users(user_id),

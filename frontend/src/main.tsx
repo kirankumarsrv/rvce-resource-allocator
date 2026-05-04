@@ -8,10 +8,11 @@ import './index.css'
 const queryClient = new QueryClient()
 
 const bootstrap = async () => {
-  if (import.meta.env.DEV) {
-    const { worker } = await import('./mocks/browser')
-    await worker.start()
-  }
+  // Temporarily disable MSW mocks to test real backend
+  // if (import.meta.env.DEV) {
+  //   const { worker } = await import('./mocks/browser')
+  //   await worker.start()
+  // }
 
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>

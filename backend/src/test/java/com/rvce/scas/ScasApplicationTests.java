@@ -5,18 +5,14 @@ import com.rvce.scas.security.UserDetailsServiceImpl;
 import com.rvce.scas.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Smoke test that verifies the Spring context starts successfully.
  */
-@SpringBootTest(properties = {
-		"spring.autoconfigure.exclude="
-				+ "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-				+ "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,"
-				+ "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration,"
-				+ "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"
-})
+@SpringBootTest
+@ActiveProfiles("test")
 class ScasApplicationTests {
 
 	@MockitoBean

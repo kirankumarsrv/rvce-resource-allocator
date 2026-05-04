@@ -69,7 +69,7 @@ COMMENT ON COLUMN departments.hod_user_id IS 'FK added as DEFERRABLE after users
 CREATE TABLE users (
     user_id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     name            VARCHAR(150) NOT NULL,
-    email           CITEXT      NOT NULL,
+    email           VARCHAR(255) NOT NULL,
     password_hash   VARCHAR(72) NOT NULL,    -- BCrypt output always ~60 chars
     usn             VARCHAR(20)  NULL,       -- 1RV21CS001 format; NULL for staff
     department_id   UUID        NULL REFERENCES departments(department_id)

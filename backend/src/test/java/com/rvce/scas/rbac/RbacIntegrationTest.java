@@ -1,23 +1,28 @@
 package com.rvce.scas.rbac;
 
-import com.rvce.scas.service.AuthService;
+import com.rvce.scas.dto.response.UploadResultDto;
 import com.rvce.scas.security.JwtTokenProvider;
 import com.rvce.scas.security.UserDetailsServiceImpl;
+import com.rvce.scas.service.AuthService;
+import com.rvce.scas.service.TimetableUploadService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,13 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Verifies the application's role-based access control boundaries.
  */
 @SuppressWarnings("null")
-@SpringBootTest(properties = {
-    "spring.autoconfigure.exclude="
-        + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-        + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,"
-        + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration,"
-        + "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"
-})
+@SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DisplayName("T-006: RBAC Authorization Tests")
@@ -51,6 +50,9 @@ class RbacIntegrationTest {
     private AuthService authService;
 
     @MockitoBean
+    private TimetableUploadService uploadService;
+
+    @MockitoBean
     private UserDetailsServiceImpl userDetailsService;
 
     @MockitoBean
@@ -65,10 +67,17 @@ class RbacIntegrationTest {
     @DisplayName("TTO can upload timetable -> 200")
     @WithMockUser(username = "tto@rvce.edu.in", authorities = {"ROLE_TTO", "TIMETABLE_WRITE", "TIMETABLE_READ"})
     void tto_canUploadTimetable() throws Exception {
-        mockMvc.perform(post("/api/timetable/upload")
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .param("academicYear", "2025-26")
-                        .param("semester", "5"))
+        when(uploadService.upload(any())).thenReturn(new UploadResultDto());
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "timetable.csv",
+                "text/csv",
+                "room_id,teacher_id,day_of_week,start_time,end_time,subject,department\n".getBytes());
+
+        mockMvc.perform(multipart("/api/timetable/upload")
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk());
     }
 
