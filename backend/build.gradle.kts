@@ -27,6 +27,7 @@ dependencies {
 	implementation(libs.spring.boot.starter.security)
 	implementation(libs.spring.boot.starter.validation)
 	implementation(libs.spring.boot.starter.web)
+	implementation("org.apache.commons:commons-csv:1.11.0")
 	implementation(libs.jjwt.api)
 	runtimeOnly(libs.jjwt.impl)
 	runtimeOnly(libs.jjwt.jackson)

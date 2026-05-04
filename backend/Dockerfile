@@ -4,7 +4,10 @@ FROM gradle:8-jdk17 AS builder
 WORKDIR /app
 COPY . .
 
-RUN gradle build -x test
+# Update certificates to avoid TLS handshake issues
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+RUN gradle clean build -x test --no-daemon
 
 # -------- RUNTIME STAGE --------
 FROM eclipse-temurin:17-jre-alpine
