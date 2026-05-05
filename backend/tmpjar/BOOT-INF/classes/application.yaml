@@ -20,12 +20,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   # Redis configuration for token storage and caching
-  data:
-    redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      timeout: 2000ms
-      database: 0
+  redis:
+    host: ${REDIS_HOST:redis}
+    port: ${REDIS_PORT:6379}
+    timeout: 2000ms
+    database: 0
 
 # JWT configuration for token signing and validation
 scas:
@@ -62,12 +61,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   # Redis configuration for token storage and caching
-  data:
-    redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      timeout: 2000ms
-      database: 0
+  redis:
+    host: ${REDIS_HOST:redis}
+    port: ${REDIS_PORT:6379}
+    timeout: 2000ms
+    database: 0
 
 # JWT configuration for token signing and validation
 scas:

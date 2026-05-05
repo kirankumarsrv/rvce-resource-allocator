@@ -9,6 +9,12 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/scas_db?stringtype=unspecified
       DB_USER: scas
       DB_PASSWORD: scas_dev_password
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: "6379"
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
     depends_on:
       postgres:
         condition: service_healthy
