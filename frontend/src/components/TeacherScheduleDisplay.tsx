@@ -1,5 +1,9 @@
 /**
- * Component to display teacher's weekly schedule
+ * TeacherScheduleDisplay Component - T-105: Teacher Schedule Visualization
+ *
+ * Displays a teacher's complete weekly schedule in a tabular format.
+ * Shows all scheduled slots across 7 days with room and subject information.
+ * Used in both Teacher and TTO portals for schedule viewing.
  */
 
 import { useEffect, useState } from 'react';
@@ -7,11 +11,16 @@ import { TeacherWeeklySchedule } from '../types/timetable';
 import { getTeacherWeeklySchedule } from '../services/timetableService';
 
 interface ScheduleDisplayProps {
+  /** UUID of the teacher whose schedule to display */
   teacherId: string;
 }
 
 const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+/**
+ * Component that fetches and displays a teacher's weekly schedule
+ * Handles loading states, errors, and empty schedules gracefully
+ */
 export const TeacherScheduleDisplay = ({ teacherId }: ScheduleDisplayProps) => {
   const [schedule, setSchedule] = useState<TeacherWeeklySchedule | null>(null);
   const [loading, setLoading] = useState(true);
