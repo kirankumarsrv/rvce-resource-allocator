@@ -1,8 +1,18 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 import { TeacherScheduleDisplay } from '../components/TeacherScheduleDisplay';
 import { RoomScheduleDisplay } from '../components/RoomScheduleDisplay';
 
+/**
+ * Time Table Officer Portal Page
+ *
+ * Main dashboard for TTO users providing access to:
+ * - Timetable analytics and utilization metrics
+ * - Teacher and room schedule viewing
+ * - Room availability management
+ * - Timetable upload and management features
+ */
 const TTOPage = () => {
   const [activeTab, setActiveTab] = useState<'analytics' | 'teacher' | 'room'>('analytics');
   const [teacherId, setTeacherId] = useState<string>('');
@@ -25,6 +35,24 @@ const TTOPage = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Time Table Officer Portal</h1>
+
+      {/* Quick Actions Navigation */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Link
+          to="/tto/rooms"
+          className="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
+        >
+          <div className="flex items-center">
+            <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <div>
+              <h3 className="font-semibold">Manage Room Availability</h3>
+              <p className="text-sm opacity-90">View and manage room bookings</p>
+            </div>
+          </div>
+        </Link>
+      </div>
 
       {/* Tab Navigation */}
       <div className="flex gap-2 mb-6 border-b border-gray-200">

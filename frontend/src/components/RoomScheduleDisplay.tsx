@@ -1,5 +1,9 @@
 /**
- * Component to display room's weekly schedule
+ * RoomScheduleDisplay Component - T-105: Room Schedule Visualization
+ *
+ * Displays a room's complete weekly schedule in a tabular format.
+ * Shows all scheduled slots across 7 days with teacher and subject information.
+ * Used in TTO portal for room utilization monitoring and scheduling.
  */
 
 import { useEffect, useState } from 'react';
@@ -7,11 +11,17 @@ import { RoomWeeklySchedule } from '../types/timetable';
 import { getRoomWeeklySchedule } from '../services/timetableService';
 
 interface RoomScheduleProps {
+  /** Numeric ID of the room whose schedule to display */
   roomId: number;
 }
 
 const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+/**
+ * Component that fetches and displays a room's weekly schedule
+ * Handles loading states, errors, and empty schedules gracefully
+ * Shows teacher assignments and subjects for each time slot
+ */
 export const RoomScheduleDisplay = ({ roomId }: RoomScheduleProps) => {
   const [schedule, setSchedule] = useState<RoomWeeklySchedule | null>(null);
   const [loading, setLoading] = useState(true);
