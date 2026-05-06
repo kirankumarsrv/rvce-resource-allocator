@@ -34,8 +34,8 @@ This package contains complete production fixes for the T-005 JWT authentication
 
 ```
 ✅ CREATED
-   docs/FIXES_SUMMARY.md                                    (This summary document)
-   docs/T005_INTERVIEW_PREP.md                             (Interview guide with topics to study)
+   docs/fixes-summary.md                                    (This summary document)
+   docs/t005-interview-prep.md                             (Interview guide with topics to study)
    backend/src/main/java/com/rvce/scas/dto/LogoutRequest.java
    backend/src/test/java/com/rvce/scas/rbac/AccountLockoutIntegrationTest.java
 
@@ -52,10 +52,10 @@ This package contains complete production fixes for the T-005 JWT authentication
 ## 🎓 Interview Preparation: 3-Step Path
 
 ### Step 1: Understand the Problems (30 mins)
-Read `docs/FIXES_SUMMARY.md` - clear explanation of each issue and its fix.
+Read `docs/fixes-summary.md` - clear explanation of each issue and its fix.
 
 ### Step 2: Study Key Topics (2-3 hours)
-Use `docs/T005_INTERVIEW_PREP.md` section "2. Key Topics to Study":
+Use `docs/t005-interview-prep.md` section "2. Key Topics to Study":
 - JWT & RS256 asymmetric cryptography
 - Spring Security architecture
 - Redis performance (SCAN vs KEYS)
@@ -128,8 +128,8 @@ cd backend
 
 ## 📚 Key Resources
 
-- **Interview Guide**: `docs/T005_INTERVIEW_PREP.md`
-- **Detailed Fixes**: `docs/FIXES_SUMMARY.md`
+- **Interview Guide**: `docs/t005-interview-prep.md`
+- **Detailed Fixes**: `docs/fixes-summary.md`
 - **Code Changes**: Review modified files in `backend/src/main/java/com/rvce/scas/`
 - **New Tests**: `backend/src/test/java/com/rvce/scas/rbac/AccountLockoutIntegrationTest.java`
 

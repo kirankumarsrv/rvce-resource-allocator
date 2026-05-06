@@ -235,7 +235,7 @@ String lockKey = LOCKOUT_PREFIX + email.toLowerCase(java.util.Locale.ROOT);
 | `GlobalExceptionHandler.java` | Return 429 for AccountLockedException (Fix #8) | ✅ |
 | `LogoutRequest.java` | **NEW** DTO for logout endpoint (Fix #4) | ✅ |
 | `AccountLockoutIntegrationTest.java` | **NEW** Integration test (Fix #10) | ✅ |
-| `T005_INTERVIEW_PREP.md` | **NEW** Interview preparation guide | ✅ |
+| `t005-interview-prep.md` | **NEW** Interview preparation guide | ✅ |
 
 ---
 
@@ -250,7 +250,7 @@ String lockKey = LOCKOUT_PREFIX + email.toLowerCase(java.util.Locale.ROOT);
 
 ## Next Steps for Interview Preparation
 
-1. **Study the Interview Prep Guide**: `docs/T005_INTERVIEW_PREP.md`
+1. **Study the Interview Prep Guide**: `docs/t005-interview-prep.md`
 2. **Review Each Fix**: Understand why each issue was a problem and how it was solved
 3. **Practice Narratives**: Prepare 1-2 minute explanations for each critical issue
 4. **Test Knowledge**: Can you explain RS256 vs HS256, why SCAN beats KEYS, how to prevent user enumeration?

@@ -1,0 +1,1949 @@
+File,Package,Type,Name,Parameters,ReturnType,Annotations,JavaDoc
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\cache\RoomAvailabilityCache.java,com.rvce.scas.cache,Class,RoomAvailabilityCache,,,Slf4j;Component;RequiredArgsConstructor,"<h3>Purpose</h3>
+Redis-based cache abstraction for room availability queries (T-102).
+Implements the caching strategy with TTL and pattern-based invalidation.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Cache room availability results with 60-second TTL</li>
+  <li>Handle cache misses gracefully with DB fallback</li>
+  <li>Support pattern-based cache invalidation</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on RedisTemplate for Redis operations.
+
+<h3>Transaction Behaviour</h3>
+Cache operations are independent of DB transactions.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\cache\RoomAvailabilityCache.java,com.rvce.scas.cache,Method,get,String key,Optional<List<RoomAvailabilityDto>>,,"Retrieves cached room availability data for the given key.
+Returns empty Optional on cache miss or deserialization failure.
+
+@param key the cache key
+@return optional list of room availability DTOs
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\cache\RoomAvailabilityCache.java,com.rvce.scas.cache,Method,put,"String key, List<RoomAvailabilityDto> data",void,,"Stores room availability data in cache with TTL.
+Serializes the DTO list to JSON before storing.
+
+@param key the cache key
+@param data the room availability data to cache
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\cache\RoomAvailabilityCache.java,com.rvce.scas.cache,Method,invalidateByDate,LocalDate date,void,,"Invalidates all cache entries for a specific date.
+Uses Redis SCAN for non-blocking pattern matching.
+
+@param date the date to invalidate cache for
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\cache\RoomAvailabilityCache.java,com.rvce.scas.cache,Method,invalidateAll,,void,,"Invalidates all room availability cache entries.
+Called when timetable data changes globally.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\cache\RoomAvailabilityCache.java,com.rvce.scas.cache,Method,invalidatePattern,String pattern,void,,"Helper method to invalidate keys matching a pattern.
+Uses SCAN to avoid blocking Redis with KEYS command.
+
+@param pattern the Redis key pattern to match
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\config\DevDataInitializer.java,com.rvce.scas.config,Class,DevDataInitializer,,,Configuration;Profile,"DevDataInitializer
+
+Initializes test user passwords in development environments.
+Only active when spring.profiles.active=dev
+
+This replaces the hardcoded password hash migration (V10) with
+a runtime initialization that doesn't expose secrets in git.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\config\DevDataInitializer.java,com.rvce.scas.config,Method,initDevUsers,"UserRepository userRepository, BCryptPasswordEncoder encoder",CommandLineRunner,Bean,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\AdminController.java,com.rvce.scas.controller,Class,AdminController,,,RestController;RequestMapping,"Handles admin-facing endpoints for operational and audit visibility.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\AdminController.java,com.rvce.scas.controller,Method,auditLogs,,"ResponseEntity<Map<String, String>>",GetMapping,"Returns a lightweight success payload for the audit log endpoint.
+
+@return HTTP 200 response with a simple status marker
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\AuthController.java,com.rvce.scas.controller,Class,AuthController,,,RestController;RequestMapping;RequiredArgsConstructor;Tag,"Exposes the authentication API for issuing, renewing, and revoking tokens.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\AuthController.java,com.rvce.scas.controller,Method,login,LoginRequest request,ResponseEntity<LoginResponse>,PostMapping;Operation,"Authenticates a user and returns the access and refresh token pair.
+
+@param request login credentials submitted by the client
+@return a login response containing bearer token metadata
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\AuthController.java,com.rvce.scas.controller,Method,refresh,RefreshRequest request,ResponseEntity<LoginResponse>,PostMapping;Operation,"Rotates the refresh token and returns a new access token.
+
+@param request the refresh token request containing the user id and opaque token id
+@return a new token pair for continued access
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\AuthController.java,com.rvce.scas.controller,Method,logout,"JwtPrincipal principal, String authHeader, LogoutRequest request",ResponseEntity<Void>,PostMapping;Operation,"Revokes the current device session and blacklists the presented tokens.
+
+@param principal the authenticated user making the request
+@param authHeader the bearer token supplied in the Authorization header
+@param request the logout payload containing the refresh token id
+@return an empty successful response
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\AuthController.java,com.rvce.scas.controller,Method,logoutAll,"JwtPrincipal principal, String authHeader",ResponseEntity<Void>,PostMapping;Operation,"Revokes every active session for the authenticated user.
+
+@param principal the authenticated user making the request
+@param authHeader the bearer token supplied in the Authorization header
+@return an empty successful response
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\ExamController.java,com.rvce.scas.controller,Class,ExamController,,,RestController;RequestMapping,"Provides exam-related endpoints used by controllers and reviewers.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\ExamController.java,com.rvce.scas.controller,Method,publish,UUID examId,"ResponseEntity<Map<String, String>>",PostMapping,"Marks the requested exam as published.
+
+@param examId the exam identifier to publish
+@return a simple confirmation payload with the exam id and status
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\RoomsController.java,com.rvce.scas.controller,Class,RoomsController,,,RestController;RequestMapping,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\RoomsController.java,com.rvce.scas.controller,Method,availability,,"ResponseEntity<Map<String, String>>",GetMapping,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\RoomsController.java,com.rvce.scas.controller,Method,verifyOccupancy,UUID roomId,"ResponseEntity<Map<String, String>>",PostMapping,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TestController.java,com.rvce.scas.controller,Class,TestController,,,RestController;RequestMapping,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TestController.java,com.rvce.scas.controller,Method,hello,,TestResponseDto,GetMapping,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Class,TimetableController,,,Tag;RestController;RequestMapping;RequiredArgsConstructor,"<h3>Purpose</h3>
+REST controller for all Epic 1 timetable operations (T-101 to T-105).
+Provides endpoints for upload, queries, substitutions, and overrides.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Handle HTTP requests and responses</li>
+  <li>Enforce RBAC via @PreAuthorize</li>
+  <li>Validate request parameters</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on all Epic 1 services.
+
+<h3>Transaction Behaviour</h3>
+Controllers are not transactional — services handle transactions.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,uploadTimetable,MultipartFile file,ResponseEntity<UploadResultDto>,PostMapping;PreAuthorize;Operation,"Uploads a CSV timetable file (T-101).
+Requires TTO role. Parses, validates, and persists schedule data transactionally.
+
+@param file the CSV file to upload
+@return upload result with success/error counts
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,getAvailableRooms,"LocalDate date, LocalTime startTime, LocalTime endTime, Integer minCapacity, String building",ResponseEntity<List<RoomAvailabilityDto>>,GetMapping;Operation,"Queries available rooms for booking (T-102).
+Returns cached results when available, otherwise queries database.
+
+@param date date to check (optional, defaults to today)
+@param startTime start of time window
+@param endTime end of time window
+@param minCapacity minimum capacity filter
+@param building building filter
+@return list of available rooms
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,substituteTeacher,SubstituteRequest request,ResponseEntity<SubstitutionResultDto>,PostMapping;PreAuthorize;Operation,"Substitutes one teacher with another for a date range (T-103).
+Requires TTO or ADMIN role. Performs clash detection and atomic reassignment.
+
+@param request substitution details
+@return substitution result with reassignment count and clashes
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,createOverride,"OverrideRequest request, JwtPrincipal principal",ResponseEntity<OverrideDto>,PostMapping;PreAuthorize;Operation,"Creates a day override for cancelling or booking (T-104).
+Teachers can cancel their own slots, admins can override any.
+
+@param request override details
+@param principal authenticated user
+@return created override details
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,getOverrides,"LocalDate date, java.util.UUID roomId",ResponseEntity<List<OverrideDto>>,GetMapping;Operation,"Retrieves overrides for a specific date (T-104).
+
+@param date date to query
+@param roomId optional room filter
+@return list of overrides
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,deleteOverride,"java.util.UUID id, JwtPrincipal principal",ResponseEntity<Void>,DeleteMapping;PreAuthorize;Operation,"Deletes a day override, restoring canonical schedule (T-104).
+
+@param id override ID to delete
+@param principal authenticated user
+@return no content on success
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,getTeacherSchedule,"UUID teacherId, Integer dayOfWeek",ResponseEntity<List<TeacherScheduleDto>>,GetMapping;Operation,"Gets the schedule for a teacher on a specific day of week (T-105).
+
+@param teacherId the teacher UUID
+@param dayOfWeek day of week (1=Monday, 7=Sunday)
+@return list of scheduled slots for that teacher on that day
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,getTeacherWeeklySchedule,UUID teacherId,"ResponseEntity<Map<Integer, List<TeacherScheduleDto>>>",GetMapping;Operation,"Gets the full weekly schedule for a teacher (T-105).
+
+@param teacherId the teacher UUID
+@return map of day-of-week to scheduled slots
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,getRoomSchedule,"Long roomId, Integer dayOfWeek",ResponseEntity<List<RoomScheduleDto>>,GetMapping;Operation,"Gets the schedule for a room on a specific day of week (T-105).
+
+@param roomId the room ID
+@param dayOfWeek day of week (1=Monday, 7=Sunday)
+@return list of scheduled slots in that room on that day
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,getRoomWeeklySchedule,Long roomId,"ResponseEntity<Map<Integer, List<RoomScheduleDto>>>",GetMapping;Operation,"Gets the full weekly schedule for a room (T-105).
+
+@param roomId the room ID
+@return map of day-of-week to scheduled slots
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\controller\TimetableController.java,com.rvce.scas.controller,Method,getTimetableAnalytics,,ResponseEntity<TimetableAnalyticsDto>,GetMapping;Operation,"Gets timetable analytics and utilization metrics (T-105).
+
+@return analytics DTO with summary statistics
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\ErrorResponseDto.java,com.rvce.scas.dto,Class,ErrorResponseDto,,,Data;Builder;NoArgsConstructor;AllArgsConstructor,"Standardized error response DTO used by GlobalExceptionHandler for all exceptions.
+
+<p><strong>Purpose:</strong> Provides consistent error response format across all
+API endpoints. Used when any exception occurs during request processing.</p>
+
+<p><strong>Field Descriptions:</strong></p>
+<ul>
+  <li>{@code timestamp}: ISO 8601 timestamp when error occurred</li>
+  <li>{@code status}: HTTP status code (e.g., 401, 403, 404, 500)</li>
+  <li>{@code error}: HTTP error name (e.g., ""Unauthorized"", ""Forbidden"")</li>
+  <li>{@code code}: Application-specific error code for client-side error handling</li>
+  <li>{@code message}: Human-readable error description</li>
+  <li>{@code path}: Request URI path that caused the error</li>
+  <li>{@code fieldErrors}: Map of validation error messages (field name -> error message)</li>
+</ul>
+
+<p><strong>Example Responses:</strong></p>
+<pre>
+  HTTP 401 Unauthorized
+  {
+    ""timestamp"": ""2024-04-30T12:34:56Z"",
+    ""status"": 401,
+    ""error"": ""Unauthorized"",
+    ""code"": ""INVALID_CREDENTIALS"",
+    ""message"": ""Invalid email or password."",
+    ""path"": ""/api/auth/login"",
+    ""fieldErrors"": null
+  }
+
+  HTTP 400 Bad Request (Validation Error)
+  {
+    ""timestamp"": ""2024-04-30T12:34:56Z"",
+    ""status"": 400,
+    ""error"": ""Bad Request"",
+    ""code"": ""VALIDATION_ERROR"",
+    ""message"": ""Request validation failed"",
+    ""path"": ""/api/auth/login"",
+    ""fieldErrors"": {
+      ""email"": ""must be a valid email address"",
+      ""password"": ""must not be blank""
+    }
+  }
+</pre>
+
+@author RVCE SCAS Team
+@see GlobalExceptionHandler
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\LoginRequest.java,com.rvce.scas.dto,Class,LoginRequest,,,Data,"Request body for user login endpoint.
+
+<p><strong>Endpoint:</strong> POST /api/auth/login</p>
+
+<p><strong>Purpose:</strong> Captures user credentials for authentication.
+Credentials are sent in request body (not URL query) to avoid logging and
+exposure in browser history or Referer headers.</p>
+
+<p><strong>Validation:</strong></p>
+<ul>
+  <li>{@code email}: Must be a valid email format and not blank</li>
+  <li>{@code password}: Must not be blank (length validation can be added server-side)</li>
+</ul>
+
+<p><strong>Security Notes:</strong></p>
+<ul>
+  <li>Request should always be sent over HTTPS</li>
+  <li>Server should never log the password field</li>
+  <li>Client should send credentials only over HTTPS, never HTTP</li>
+  <li>Email is normalized to lowercase on server side</li>
+</ul>
+
+<p><strong>Example Request:</strong></p>
+<pre>
+  POST /api/auth/login
+  Content-Type: application/json
+
+  {
+    ""email"": ""student@example.com"",
+    ""password"": ""securePassword123""
+  }
+</pre>
+
+<p><strong>Response:</strong> HTTP 200 with {@link LoginResponse} containing
+access token and refresh token.</p>
+
+@author RVCE SCAS Team
+@see LoginResponse
+@see AuthService#login(String, String)
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\LoginResponse.java,com.rvce.scas.dto,Class,LoginResponse,,,Data;Builder;NoArgsConstructor;AllArgsConstructor,"Response body returned from successful login endpoint.
+
+<p><strong>Endpoint:</strong> POST /api/auth/login</p>
+
+<p><strong>Purpose:</strong> Returns authentication tokens and metadata to the client
+after successful credential validation.</p>
+
+<p><strong>Field Descriptions:</strong></p>
+<ul>
+  <li>{@code accessToken}: RS256-signed JWT for API authorization (15-minute expiry)</li>
+  <li>{@code refreshToken}: Opaque identifier for token refresh (7-day expiry)</li>
+  <li>{@code tokenType}: Always ""Bearer"" - indicates HTTP Authorization header format</li>
+  <li>{@code expiresIn}: Access token lifetime in seconds (900 = 15 minutes)</li>
+</ul>
+
+<p><strong>Client Usage:</strong></p>
+<ol>
+  <li>Extract accessToken and store securely (memory or secure cookie)</li>
+  <li>Extract refreshToken and store in secure storage</li>
+  <li>Use token format: {@code Authorization: Bearer <accessToken>}</li>
+  <li>When expiresIn time has elapsed, call /api/auth/refresh to get new tokens</li>
+</ol>
+
+<p><strong>Example Response:</strong></p>
+<pre>
+  HTTP 200 OK
+  Content-Type: application/json
+
+  {
+    ""accessToken"": ""eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."",
+    ""refreshToken"": ""550e8400-e29b-41d4-a716-446655440000"",
+    ""tokenType"": ""Bearer"",
+    ""expiresIn"": 900
+  }
+</pre>
+
+@author RVCE SCAS Team
+@see LoginRequest
+@see TokenPair
+@see AuthService#login(String, String)
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\LogoutRequest.java,com.rvce.scas.dto,Class,LogoutRequest,,,Data;NoArgsConstructor;AllArgsConstructor,"Request body for logout endpoints.
+Keeps sensitive refresh token out of URL query parameters (avoid logs, browser history, Referer headers).
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\RefreshRequest.java,com.rvce.scas.dto,Class,RefreshRequest,,,Data,"Request body for token refresh endpoint.
+
+<p><strong>Endpoint:</strong> POST /api/auth/refresh</p>
+
+<p><strong>Purpose:</strong> Obtains new access token without re-entering password.
+Uses an opaque refresh token stored in Redis to validate the refresh request.
+Supports rotating refresh tokens to limit replay attack surface.</p>
+
+<p><strong>Validation:</strong></p>
+<ul>
+  <li>{@code userId}: Must be a valid UUID (non-null)</li>
+  <li>{@code refreshToken}: Must not be blank (typically a UUID string)</li>
+</ul>
+
+<p><strong>Security Notes:</strong></p>
+<ul>
+  <li>Refresh token is sent in request body (not query parameter) to avoid logging</li>
+  <li>Server validates that the refresh token exists in Redis and matches the user ID</li>
+  <li>Old refresh token is deleted after new one is minted (token rotation)</li>
+  <li>If validation fails, returns 401 Unauthorized</li>
+</ul>
+
+<p><strong>Example Request:</strong></p>
+<pre>
+  POST /api/auth/refresh
+  Content-Type: application/json
+
+  {
+    ""userId"": ""550e8400-e29b-41d4-a716-446655440000"",
+    ""refreshToken"": ""550e8400-e29b-41d4-a716-446655440001""
+  }
+</pre>
+
+<p><strong>Response:</strong> HTTP 200 with {@link LoginResponse} containing
+new access token and rotated refresh token.</p>
+
+@author RVCE SCAS Team
+@see LoginResponse
+@see AuthService#refresh(UUID, String)
+@see TokenPair
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\OverrideRequest.java,com.rvce.scas.dto.request,Class,OverrideRequest,,,Data,"Request DTO for creating day overrides (T-104).
+Used for cancelling classes or booking rooms.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\SubstituteRequest.java,com.rvce.scas.dto.request,Class,SubstituteRequest,,,Data,"Request DTO for teacher substitution operations (T-103).
+Contains the parameters needed to reassign slots from one teacher to another.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\SubstituteRequest.java,com.rvce.scas.dto.request,Enum,SubstitutionScope,,,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\ClashDetail.java,com.rvce.scas.dto.response,Class,ClashDetail,,,Data,"DTO representing a scheduling clash detected during substitution (T-103).
+Provides details about why a slot cannot be reassigned.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\OverrideDto.java,com.rvce.scas.dto.response,Class,OverrideDto,,,Data,"Response DTO for day override operations (T-104).
+Represents an existing override.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\RoomAvailabilityDto.java,com.rvce.scas.dto.response,Class,RoomAvailabilityDto,,,Data,"Response DTO for room availability queries (T-102).
+Represents a room that is available for booking.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\RoomScheduleDto.java,com.rvce.scas.dto.response,Class,RoomScheduleDto,,,Data;NoArgsConstructor;AllArgsConstructor,"DTO for room schedule information.
+Represents a single time slot scheduled in a room.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\SubstitutionResultDto.java,com.rvce.scas.dto.response,Class,SubstitutionResultDto,,,Data,"Response DTO for teacher substitution operations (T-103).
+Contains the outcome of the substitution attempt.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\TeacherScheduleDto.java,com.rvce.scas.dto.response,Class,TeacherScheduleDto,,,Data;NoArgsConstructor;AllArgsConstructor,"DTO for teacher schedule information.
+Represents a single time slot in a teacher's schedule.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\TimetableAnalyticsDto.java,com.rvce.scas.dto.response,Class,TimetableAnalyticsDto,,,Data;NoArgsConstructor;AllArgsConstructor,"DTO for timetable analytics and overview metrics.
+Provides summary statistics about the current timetable state.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\UploadResultDto.java,com.rvce.scas.dto.response,Class,UploadResultDto,,,Data,"Response DTO for timetable upload operations (T-101).
+Contains the results of parsing and persisting CSV data.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\TestResponseDto.java,com.rvce.scas.dto,Class,TestResponseDto,,,Data;AllArgsConstructor,"Simple response DTO for backend health/connectivity checks.
+
+<p><strong>Endpoint:</strong> GET /api/test</p>
+
+<p><strong>Purpose:</strong> Verifies that the Spring Boot backend is running
+and responding to requests. Used for health checks, load balancer status, and
+development validation.</p>
+
+<p><strong>Field Descriptions:</strong></p>
+<ul>
+  <li>{@code message}: Human-readable status message (e.g., ""Backend is working 🚀"")</li>
+  <li>{@code status}: Status indicator (typically ""SUCCESS"" for healthy response)</li>
+</ul>
+
+<p><strong>Example Response:</strong></p>
+<pre>
+  HTTP 200 OK
+  Content-Type: application/json
+
+  {
+    ""message"": ""Backend is working 🚀"",
+    ""status"": ""SUCCESS""
+  }
+</pre>
+
+<p><strong>Typical Use Cases:</strong></p>
+<ul>
+  <li>Frontend initial load check</li>
+  <li>Load balancer health probe</li>
+  <li>Docker container startup check</li>
+  <li>Development validation that server is up</li>
+</ul>
+
+@author RVCE SCAS Team
+@see TestService
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\TokenPair.java,com.rvce.scas.dto,Class,TokenPair,,,Data;AllArgsConstructor,"Data transfer object containing a pair of JWT tokens returned from authentication endpoints.
+
+<p><strong>Contents:</strong></p>
+<ul>
+  <li>{@code accessToken}: Short-lived JWT (15 minutes) containing user identity and permissions.</li>
+  <li>{@code refreshToken}: Opaque identifier (UUID string) for obtaining new access tokens.</li>
+</ul>
+
+<p><strong>Usage Flow:</strong></p>
+<ol>
+  <li>Client calls /api/auth/login with email/password</li>
+  <li>Server returns TokenPair with accessToken + refreshToken</li>
+  <li>Client stores both tokens securely (accessToken in memory/secure cookie, refreshToken
+      in secure storage)</li>
+  <li>Client includes accessToken in Authorization header for API requests</li>
+  <li>When accessToken expires, client calls /api/auth/refresh with userId + refreshToken</li>
+  <li>Server returns new TokenPair with rotated refreshToken</li>
+</ol>
+
+<p><strong>Security Notes:</strong></p>
+<ul>
+  <li>Access token is a signed JWT visible to the client (contains claims but is signature-protected)</li>
+  <li>Refresh token is opaque - only the server knows its meaning (stored in Redis)</li>
+  <li>Refresh tokens should be stored in secure storage (secure cookies, encrypted local storage)</li>
+  <li>Never store refresh tokens in localStorage if XSS risk exists</li>
+</ul>
+
+@author RVCE SCAS Team
+@see AuthService#login(String, String)
+@see AuthService#refresh(java.util.UUID, String)
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\DayOverride.java,com.rvce.scas.entity,Class,DayOverride,,,Entity;Table;Data,"<h3>Purpose</h3>
+Represents date-specific overrides to the canonical timetable schedule.
+Allows cancellations, occupations, or other exceptions without modifying the weekly slots.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Store temporary schedule changes for specific dates</li>
+  <li>Support room booking and class cancellations</li>
+  <li>Maintain referential integrity with timetable_slots</li>
+</ul>
+
+<h3>Dependencies</h3>
+References TimetableSlot entity.
+
+<h3>Transaction Behaviour</h3>
+Created/deleted in T-104 operations; read in T-102 queries.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\DayOverride.java,com.rvce.scas.entity,Enum,OverrideStatus,,,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\Permission.java,com.rvce.scas.entity,Class,Permission,,,Getter;Setter;Entity;Table,"Entity representing a fine-grained permission in a resource-action model.
+
+<p><strong>Table:</strong> {@code permissions}</p>
+
+<p><strong>Purpose:</strong> Permissions are the finest granularity of authorization.
+Each permission is defined by a (resource, action) pair. For example,
+resource=""EXAM"", action=""VIEW"" creates a permission to view exam data.</p>
+
+<p><strong>Authorization in JWT:</strong> When generating tokens, permissions are
+converted to strings like ""EXAM_VIEW"" and included in JWT claims for use by
+Spring Security's {@code hasAuthority()} checks.</p>
+
+@author RVCE SCAS Team
+@see Role
+@see RolePermission
+@see UserRole
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\Role.java,com.rvce.scas.entity,Class,Role,,,Getter;Setter;Entity;Table,"Entity representing a system role with associated permissions.
+
+<p><strong>Table:</strong> {@code roles}</p>
+
+<p><strong>Examples of Roles:</strong></p>
+<ul>
+  <li>{@code ADMIN}: Full system access</li>
+  <li>{@code TEACHER}: Can view and manage exam data</li>
+  <li>{@code STUDENT}: Can view exam schedules and seat allocations</li>
+  <li>{@code TIMETABLE_OPERATOR}: Can manage timetable data</li>
+</ul>
+
+<p><strong>Design Pattern:</strong> Roles are the coarse-grained layer in Role-Based
+Access Control (RBAC). Each role contains zero or more fine-grained Permissions.
+Users are assigned roles via the UserRole join table.</p>
+
+@author RVCE SCAS Team
+@see User
+@see UserRole
+@see Permission
+@see RolePermission
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermission.java,com.rvce.scas.entity,Class,RolePermission,,,Getter;Setter;Entity;Table,"Join entity representing the many-to-many relationship between Role and Permission.
+
+<p><strong>Table:</strong> {@code role_permissions}</p>
+
+<p><strong>Purpose:</strong> Models M:N relationship where a role can have multiple
+fine-grained permissions and a permission can be assigned to multiple roles.
+This is the second dimension of the RBAC authorization hierarchy.</p>
+
+<p><strong>Primary Key:</strong> Composite key using RolePermissionId (roleId + permissionId)
+ensures no duplicate permission assignments for the same role.</p>
+
+@author RVCE SCAS Team
+@see Role
+@see Permission
+@see RolePermissionId
+@see UserRole
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermissionId.java,com.rvce.scas.entity,Class,RolePermissionId,,,Embeddable,"Composite primary key (embedded) for the RolePermission join entity.
+
+<p><strong>Purpose:</strong> Uniquely identifies a role-permission assignment
+by combining roleId and permissionId.
+
+<p><strong>JPA Pattern:</strong> Marked with @Embeddable to be embedded in RolePermission.
+Implements Serializable and properly overrides equals() and hashCode().
+
+@author RVCE SCAS Team
+@see RolePermission
+@see Role
+@see Permission
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermissionId.java,com.rvce.scas.entity,Method,getRoleId,,UUID,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermissionId.java,com.rvce.scas.entity,Method,setRoleId,UUID roleId,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermissionId.java,com.rvce.scas.entity,Method,getPermissionId,,UUID,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermissionId.java,com.rvce.scas.entity,Method,setPermissionId,UUID permissionId,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermissionId.java,com.rvce.scas.entity,Method,equals,Object o,boolean,Override,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermissionId.java,com.rvce.scas.entity,Method,hashCode,,int,Override,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\Room.java,com.rvce.scas.entity,Class,Room,,,Entity;Table;Data,"<h3>Purpose</h3>
+Represents a physical room in the campus that can be booked for classes or events.
+This entity is used in availability queries to filter and display rooms.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Store room metadata: name, capacity, building, floor, GPS coordinates</li>
+  <li>Track room type, department ownership, and availability status</li>
+  <li>Provide unique identification for timetable slots and exams</li>
+</ul>
+
+<h3>Dependencies</h3>
+References Department entity (optional, can be null).
+
+<h3>Transaction Behaviour</h3>
+Read-only in Epic 1 context; created via T-003 migrations.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\Room.java,com.rvce.scas.entity,Method,onCreate,,void,PrePersist,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\Room.java,com.rvce.scas.entity,Method,onUpdate,,void,PreUpdate,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\TimetableSlot.java,com.rvce.scas.entity,Class,TimetableSlot,,,Entity;Table;Data,"<h3>Purpose</h3>
+Represents a scheduled class slot in the weekly timetable.
+This is the canonical schedule that repeats every week, overlaid by day_overrides for exceptions.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Store recurring weekly schedule data</li>
+  <li>Support teacher substitutions and availability queries</li>
+  <li>Provide audit trail for scheduling changes</li>
+</ul>
+
+<h3>Dependencies</h3>
+References Room and User entities.
+
+<h3>Transaction Behaviour</h3>
+Updated in T-101 uploads and T-103 substitutions; read in T-102 queries.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\User.java,com.rvce.scas.entity,Class,User,,,Getter;Setter;Entity;Table,"Entity representing a system user with authentication and authorization information.
+
+<p><strong>Table:</strong> {@code users}</p>
+
+<p><strong>Responsibilities:</strong></p>
+<ul>
+  <li>Store user authentication credentials (email, password hash)</li>
+  <li>Track account status (active/inactive)</li>
+  <li>Maintain associations with assigned roles</li>
+  <li>Support distributed account lockout via Redis (see {@code lockedUntil})</li>
+</ul>
+
+<p><strong>Key Fields:</strong></p>
+<ul>
+  <li>{@code userId}: Primary key, UUID generated automatically</li>
+  <li>{@code email}: Unique identifier for login, must be lowercase-normalized</li>
+  <li>{@code passwordHash}: Bcrypt or similar strong hash (never plaintext)</li>
+  <li>{@code active}: Flag to disable user without deletion (soft deactivation)</li>
+  <li>{@code lockedUntil}: Future timestamp for account lockout (currently unused in favor of Redis)</li>
+  <li>{@code userRoles}: Bidirectional many-to-many relationship with roles</li>
+</ul>
+
+<p><strong>Relationships:</strong></p>
+<ul>
+  <li>One-to-Many with {@link UserRole}: User can have multiple roles (ADMIN, STUDENT, TEACHER)</li>
+  <li>Through {@code UserRole}, indirectly relates to {@link Role} and {@link Permission}</li>
+</ul>
+
+@author RVCE SCAS Team
+@see UserRole
+@see Role
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRole.java,com.rvce.scas.entity,Class,UserRole,,,Getter;Setter;Entity;Table,"Join entity representing the many-to-many relationship between User and Role.
+
+<p><strong>Table:</strong> {@code user_roles}</p>
+
+<p><strong>Purpose:</strong> Models M:N relationship where a user can have multiple
+roles and a role can be assigned to multiple users. This is the core of the RBAC system.</p>
+
+<p><strong>Primary Key:</strong> Composite key using UserRoleId (userId + roleId)
+ensures no duplicate role assignments for the same user.</p>
+
+@author RVCE SCAS Team
+@see User
+@see Role
+@see UserRoleId
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRoleId.java,com.rvce.scas.entity,Class,UserRoleId,,,Embeddable,"Composite primary key (embedded) for the UserRole join entity.
+
+<p><strong>Purpose:</strong> Uniquely identifies a user-role assignment
+by combining userId and roleId.
+
+<p><strong>JPA Pattern:</strong> Marked with @Embeddable to be embedded in UserRole.
+Implements Serializable and properly overrides equals() and hashCode().
+
+@author RVCE SCAS Team
+@see UserRole
+@see User
+@see Role
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRoleId.java,com.rvce.scas.entity,Method,getUserId,,UUID,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRoleId.java,com.rvce.scas.entity,Method,setUserId,UUID userId,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRoleId.java,com.rvce.scas.entity,Method,getRoleId,,UUID,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRoleId.java,com.rvce.scas.entity,Method,setRoleId,UUID roleId,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRoleId.java,com.rvce.scas.entity,Method,equals,Object o,boolean,Override,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRoleId.java,com.rvce.scas.entity,Method,hashCode,,int,Override,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\ClassCancelledEvent.java,com.rvce.scas.event,Class,ClassCancelledEvent,,,Getter,"<h3>Purpose</h3>
+Event published when a class is cancelled via day override (T-104).
+Triggers notifications to affected students and faculty.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Notify notification subsystem of class cancellations</li>
+  <li>Carry details about the cancelled slot</li>
+</ul>
+
+<h3>Dependencies</h3>
+Published by DayOverrideService; consumed by notification listeners.
+
+<h3>Transaction Behaviour</h3>
+Published synchronously after DB commit in T-104.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableEventListener.java,com.rvce.scas.event,Class,TimetableEventListener,,,Slf4j;Component;RequiredArgsConstructor,"<h3>Purpose</h3>
+Event listener for timetable-related events.
+Handles cache invalidation and notifications asynchronously.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Invalidate room availability cache on timetable changes</li>
+  <li>Process events asynchronously to avoid blocking HTTP responses</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on RoomAvailabilityCache for invalidation operations.
+
+<h3>Transaction Behaviour</h3>
+Listens to events published after transaction commits.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableEventListener.java,com.rvce.scas.event,Method,handleTimetableUploaded,TimetableUploadedEvent event,void,EventListener;Async,"Handles timetable upload events by invalidating all cached availability data.
+This ensures that new schedule data is immediately reflected in queries.
+
+@param event the timetable uploaded event
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableEventListener.java,com.rvce.scas.event,Method,handleClassCancelled,ClassCancelledEvent event,void,EventListener;Async,"Handles class cancellation events for notification processing.
+Currently logs the event; future epics will add notification logic.
+
+@param event the class cancelled event
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableUploadedEvent.java,com.rvce.scas.event,Class,TimetableUploadedEvent,,,Getter,"<h3>Purpose</h3>
+Event published after successful timetable upload (T-101).
+Triggers cache invalidation for room availability queries.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Notify listeners that timetable data has changed</li>
+  <li>Carry metadata about the upload operation</li>
+</ul>
+
+<h3>Dependencies</h3>
+Published by TimetableUploadService; consumed by TimetableEventListener.
+
+<h3>Transaction Behaviour</h3>
+Published synchronously after DB commit in T-101.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\AccountLockedException.java,com.rvce.scas.exception,Class,AccountLockedException,,,,"Exception thrown when a user account is locked due to too many failed login attempts.
+
+<p><strong>When it occurs:</strong> After 5 consecutive failed login attempts within a
+15-minute window, the account is locked and this exception is thrown on subsequent
+login attempts for that email.</p>
+
+<p><strong>Purpose:</strong> Prevents brute-force password guessing attacks by temporarily
+disabling the account. The lockout is time-based and automatically expires after 15 minutes.</p>
+
+<p><strong>Lockout Mechanism:</strong> Distributed across all instances via Redis.
+Redis key: {@code login:locked:email@example.com} with TTL of 15 minutes.</p>
+
+<p><strong>Client Response:</strong> Returns HTTP 401 (Unauthorized) with this exception's
+message, instructing the user to retry after the lockout period expires.</p>
+
+<p><strong>Example:</strong></p>
+<pre>
+  throw new AccountLockedException(""Account locked. Try again in 15 minute(s)."");
+</pre>
+
+@author RVCE SCAS Team
+@see AuthService#login(String, String)
+@see AuthService#checkLockout(String)
+@see AuthService#lockAccount(String)
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\CsvValidationException.java,com.rvce.scas.exception,Class,CsvValidationException,,,,"Exception thrown when CSV validation fails during upload (T-101).
+Contains details about which rows failed and why.
+Maps to HTTP 422 Unprocessable Entity.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\InvalidTokenException.java,com.rvce.scas.exception,Class,InvalidTokenException,,,,"Exception thrown when a JWT token or refresh token is invalid, expired, or missing.
+
+<p><strong>Causes:</strong></p>
+<ul>
+  <li>Refresh token does not exist in Redis (already revoked or expired)</li>
+  <li>Refresh token belongs to a different user than the one requesting refresh</li>
+  <li>User account is disabled (soft-deleted)</li>
+  <li>User ID doesn't match the token claims</li>
+  <li>Signature verification fails (token tampered with)</li>
+  <li>Token has expired (beyond JWT expiry time)</li>
+  <li>Token format is malformed</li>
+</ul>
+
+<p><strong>Purpose:</strong> Signals that a token-based operation (refresh, validate) failed
+and the client must re-authenticate to obtain new tokens.</p>
+
+<p><strong>Client Response:</strong> Returns HTTP 401 (Unauthorized). Client should clear
+stored tokens and redirect user to login page.</p>
+
+<p><strong>Examples:</strong></p>
+<pre>
+  throw new InvalidTokenException(""Refresh token is invalid or expired."");
+  throw new InvalidTokenException(""User account is disabled."");
+</pre>
+
+@author RVCE SCAS Team
+@see AuthService#refresh(UUID, String)
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\OverrideNotFoundException.java,com.rvce.scas.exception,Class,OverrideNotFoundException,,,,"Exception thrown when trying to delete a non-existent override.
+Maps to HTTP 404 Not Found.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\RoomNotFoundException.java,com.rvce.scas.exception,Class,RoomNotFoundException,,,,"Exception thrown when a referenced room does not exist in the database.
+Maps to HTTP 404 Not Found.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\SlotAlreadyClaimedException.java,com.rvce.scas.exception,Class,SlotAlreadyClaimedException,,,,"Exception thrown when a user attempts to claim or book an exam seat/slot that is
+already allocated to another user.
+
+<p><strong>When it occurs:</strong> During exam seating allocation, if a student
+attempts to claim a seat that another student has already reserved or a concurrent
+request claims the same seat.</p>
+
+<p><strong>Purpose:</strong> Prevents double-booking of exam seats and ensures
+each slot is assigned to at most one student.</p>
+
+<p><strong>Concurrency:</strong> May occur due to race conditions if two users
+submit allocation requests simultaneously. The application should handle this gracefully
+and suggest the user choose a different available slot.</p>
+
+<p><strong>Client Response:</strong> Returns HTTP 409 (Conflict) with a message
+suggesting the user select a different available slot.</p>
+
+<p><strong>Example:</strong></p>
+<pre>
+  throw new SlotAlreadyClaimedException(""This exam seat is already allocated to another student."");
+</pre>
+
+@author RVCE SCAS Team
+@see ExamController
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\SlotConflictException.java,com.rvce.scas.exception,Class,SlotConflictException,,,,"Exception thrown when a slot conflict is detected (e.g., duplicate slot or override).
+Maps to HTTP 409 Conflict.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\TeacherNotFoundException.java,com.rvce.scas.exception,Class,TeacherNotFoundException,,,,"Exception thrown when a referenced teacher does not exist in the database.
+Maps to HTTP 404 Not Found.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Class,GlobalExceptionHandler,,,Slf4j;RestControllerAdvice,"Converts application exceptions into structured JSON error responses.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleValidation,"MethodArgumentNotValidException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles bean validation failures on request bodies.
+
+@param ex the validation exception raised by Spring MVC
+@param request the current HTTP request
+@return a 400 response containing per-field validation messages
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleConstraintViolation,"ConstraintViolationException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles constraint violations raised from method or parameter validation.
+
+@param ex the constraint violation exception
+@param request the current HTTP request
+@return a 400 response with the validation message
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleMissingRequestParameter,"MissingServletRequestParameterException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleTypeMismatch,"MethodArgumentTypeMismatchException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleBadCredentials,"BadCredentialsException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles invalid login credentials.
+
+@param ex the authentication failure exception
+@param request the current HTTP request
+@return a 401 response with a generic authentication error
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleLocked,"AccountLockedException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles account lockout responses after repeated failures.
+
+@param ex the account lockout exception
+@param request the current HTTP request
+@return a 429 response indicating that the account is temporarily locked
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleInvalidToken,"InvalidTokenException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles expired or malformed refresh tokens.
+
+@param ex the invalid token exception
+@param request the current HTTP request
+@return a 401 response with the token failure details
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleSlotClaimed,"SlotAlreadyClaimedException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles conflicts when a slot has already been claimed.
+
+@param ex the slot collision exception
+@param request the current HTTP request
+@return a 409 response describing the conflict
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleDbConstraint,"DataIntegrityViolationException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles database-level uniqueness and foreign-key violations.
+
+@param ex the persistence exception
+@param request the current HTTP request
+@return a 409 response describing the data conflict
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleAccessDenied,"AccessDeniedException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles authorization failures after authentication succeeds.
+
+@param ex the access denied exception
+@param request the current HTTP request
+@return a 403 response describing the missing permissions
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleIllegalArgument,"IllegalArgumentException ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles business logic validation errors (e.g., missing required parameters, invalid time ranges).
+
+@param ex the illegal argument exception
+@param request the current HTTP request
+@return a 400 response with the validation error message
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,handleUnexpected,"Exception ex, HttpServletRequest request",ResponseEntity<ErrorResponseDto>,ExceptionHandler,"Handles unexpected failures and returns a supportable incident id.
+
+@param ex the unexpected exception
+@param request the current HTTP request
+@return a 500 response with an incident reference
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\GlobalExceptionHandler.java,com.rvce.scas.hardening,Method,base,"HttpServletRequest request, int status, String error, String code, String message",ErrorResponseDto,,"Builds a standard error payload shared by all handlers.
+
+@param request the current HTTP request
+@param status the HTTP status code to report
+@param error the short error label
+@param code the machine-readable application error code
+@param message the human-readable error message
+@return a populated error response DTO
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\SecurityHeadersFilter.java,com.rvce.scas.hardening,Class,SecurityHeadersFilter,,,Component;Order,"Applies security-related HTTP headers to every API response.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\SecurityHeadersFilter.java,com.rvce.scas.hardening,Method,doFilterInternal,"HttpServletRequest request, HttpServletResponse response, FilterChain chain",void,Override,"Adds hardened response headers before the request continues through the chain.
+
+@param request the incoming HTTP request
+@param response the HTTP response to mutate
+@param chain the downstream filter chain
+@throws ServletException if the container cannot continue processing
+@throws IOException if the response cannot be written
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\RoomMapper.java,com.rvce.scas.mapper,Interface,RoomMapper,,,Mapper,"<h3>Purpose</h3>
+MapStruct mapper for converting Room entities to RoomAvailabilityDto responses.
+Ensures clean separation between DB entities and API contracts.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Convert Room entities to DTOs for availability responses</li>
+  <li>Handle field mapping and type conversions</li>
+</ul>
+
+<h3>Dependencies</h3>
+Uses MapStruct for compile-time mapping generation.
+
+<h3>Transaction Behaviour</h3>
+Called during read operations in service layer.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\RoomMapper.java,com.rvce.scas.mapper,Method,toDto,Room room,RoomAvailabilityDto,Mapping,"Converts a Room entity to RoomAvailabilityDto.
+
+@param room the room entity
+@return the corresponding DTO
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\RoomMapper.java,com.rvce.scas.mapper,Method,toDtoList,List<Room> rooms,List<RoomAvailabilityDto>,,"Converts a list of Room entities to RoomAvailabilityDto list.
+
+@param rooms the list of room entities
+@return the list of corresponding DTOs
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\TimetableMapper.java,com.rvce.scas.mapper,Interface,TimetableMapper,,,Mapper,"<h3>Purpose</h3>
+MapStruct mapper for timetable-related entity-DTO conversions.
+Handles conversions for override operations and CSV parsing.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Convert DayOverride entities to OverrideDto responses</li>
+  <li>Support CSV row to entity mapping</li>
+</ul>
+
+<h3>Dependencies</h3>
+Uses MapStruct for compile-time mapping generation.
+
+<h3>Transaction Behaviour</h3>
+Called during CRUD operations in service layer.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\TimetableMapper.java,com.rvce.scas.mapper,Method,toDto,DayOverride override,OverrideDto,Mapping;Mapping,"Converts a DayOverride entity to OverrideDto.
+
+@param override the day override entity
+@return the corresponding DTO
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\TimetableMapper.java,com.rvce.scas.mapper,Method,toDtoList,List<DayOverride> overrides,List<OverrideDto>,,"Converts a list of DayOverride entities to OverrideDto list.
+
+@param overrides the list of day override entities
+@return the list of corresponding DTOs
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\rbac\CustomAccessDeniedHandler.java,com.rvce.scas.rbac,Class,CustomAccessDeniedHandler,,,Slf4j;Component;RequiredArgsConstructor,"Serializes authorization failures into the API's JSON error shape.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\rbac\CustomAccessDeniedHandler.java,com.rvce.scas.rbac,Method,handle,"HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException",void,Override,"Handles a forbidden request by logging the attempt and returning JSON.
+
+@param request the current HTTP request
+@param response the HTTP response to populate
+@param accessDeniedException the Spring Security access denied exception
+@throws IOException if the response body cannot be written
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\rbac\PermissionConstants.java,com.rvce.scas.rbac,Class,PermissionConstants,,,,"Central list of application permission names used by RBAC checks.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\DayOverrideRepository.java,com.rvce.scas.repository,Interface,DayOverrideRepository,,,Repository,"<h3>Purpose</h3>
+Repository for day override operations, supporting T-104 cancellation and booking features.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Query overrides by date and room</li>
+  <li>Check for existing overrides to prevent duplicates</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on DayOverride entity.
+
+<h3>Transaction Behaviour</h3>
+CRUD operations for override management.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\DayOverrideRepository.java,com.rvce.scas.repository,Method,findOverridesByDate,"LocalDate date, java.util.UUID roomId",List<DayOverride>,Query,"Finds all overrides for a specific date, optionally filtered by room.
+
+@param date the date to query
+@param roomId optional room filter
+@return list of overrides for the date
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\DayOverrideRepository.java,com.rvce.scas.repository,Method,existsBySlotIdAndDate,"Long slotId, LocalDate date",boolean,,"Checks if an override already exists for the given slot and date.
+Used to enforce idempotency in T-104.
+
+@param slotId the slot ID
+@param date the date
+@return true if override exists
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\RoomRepository.java,com.rvce.scas.repository,Interface,RoomRepository,,,Repository,"<h3>Purpose</h3>
+Repository for querying available rooms based on timetable and override exclusions.
+Implements the double-exclusion JPQL query for T-102 availability engine.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Execute complex availability queries with filters</li>
+  <li>Support pagination for large result sets</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on Room, TimetableSlot, DayOverride entities.
+
+<h3>Transaction Behaviour</h3>
+Read-only queries for availability checks.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\RoomRepository.java,com.rvce.scas.repository,Method,findAvailableRooms,"LocalDate date, int dayOfWeek, LocalTime startTime, LocalTime endTime, Integer minCapacity",List<Room>,Query,"Finds rooms that are NOT occupied by timetable slots or day overrides on the given date/time.
+This is the core double-exclusion query for T-102.
+
+<p>The query excludes rooms that have:
+1. A timetable slot on the same day_of_week and overlapping time
+2. A day override with OCCUPIED status on the exact date
+(CANCELLED overrides make the room available, so they are not excluded)</p>
+
+@param date the date to check availability for
+@param startTime start of the time window
+@param endTime end of the time window
+@param minCapacity minimum room capacity (optional filter)
+@return list of available rooms matching criteria
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\RoomRepository.java,com.rvce.scas.repository,Method,findAvailableRoomsByBuilding,"LocalDate date, int dayOfWeek, LocalTime startTime, LocalTime endTime, Integer minCapacity, String building",List<Room>,Query,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Interface,TimetableSlotRepository,,,Repository,"<h3>Purpose</h3>
+Repository for timetable slot operations, including clash detection and substitution queries.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Fetch slots for teacher substitution operations</li>
+  <li>Check for scheduling conflicts</li>
+  <li>Support bulk updates for substitutions</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on TimetableSlot entity.
+
+<h3>Transaction Behaviour</h3>
+Read operations for clash checks; write operations for substitutions.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,findSlotsForTeacherInRange,"UUID teacherId, int startDayOfWeek, int endDayOfWeek",List<TimetableSlot>,Query,"Finds all active slots for a teacher within a date range.
+Used by T-103 substitution engine to identify slots to reassign.
+
+@param teacherId the teacher whose slots to find
+@param startDate start of the date range (inclusive)
+@param endDate end of the date range (inclusive)
+@return list of active slots for the teacher in the range
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,findSlotsForTeacherOnDays,"UUID teacherId, List<Integer> dayOfWeeks",List<TimetableSlot>,Query,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,existsConflictingSlot,"UUID teacherId, int dayOfWeek, LocalTime startTime, LocalTime endTime",boolean,Query,"Checks if a teacher has any slot that would conflict with the given time on the given day.
+Used for clash detection in T-103 substitution.
+
+@param teacherId the teacher to check
+@param dayOfWeek the day of the week
+@param startTime start time to check
+@param endTime end time to check
+@return true if there is a conflicting slot
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,existsRoomTimeConflict,"java.util.UUID roomId, int dayOfWeek, LocalTime startTime, LocalTime endTime",boolean,Query,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,findActiveRoomConflicts,"Long roomId, int dayOfWeek, LocalTime startTime, LocalTime endTime, Pageable pageable",List<TimetableSlot>,Query,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,findByTeacherIdAndDayOfWeek,"UUID teacherId, Integer dayOfWeek",List<TimetableSlot>,Query,"Finds all slots for a teacher on a specific day of week (T-105 queries).
+
+@param teacherId the teacher ID
+@param dayOfWeek the day of week (1=Monday, 7=Sunday)
+@return list of slots for that teacher on that day
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,findByRoomIdAndDayOfWeek,"Long roomId, Integer dayOfWeek",List<TimetableSlot>,Query,"Finds all slots for a room on a specific day of week (T-105 queries).
+
+@param roomId the room ID
+@param dayOfWeek the day of week
+@return list of slots in that room on that day
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,countByIsActive,boolean isActive,long,Query,"Counts active slots for analytics (T-105).
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,countDistinctTeachers,,long,Query,"Counts distinct teachers for analytics (T-105).
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,countDistinctRooms,,long,Query,"Counts distinct rooms for analytics (T-105).
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,countByDayOfWeek,int dayOfWeek,long,Query,"Counts slots for a specific day of week (T-105).
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,com.rvce.scas.repository,Method,countSlotsInTimeRange,"LocalTime startTime, LocalTime endTime",long,Query,"Counts slots within a time range (T-105 analytics).
+Used for morning/afternoon/evening utilization metrics.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\UserRepository.java,com.rvce.scas.repository,Interface,UserRepository,,,,"Spring Data JPA repository for User entity persistence and querying.
+
+<p><strong>Purpose:</strong> Provides database access for User entities.
+Extends JpaRepository for standard CRUD operations plus custom queries.</p>
+
+<p><strong>Key Responsibilities:</strong></p>
+<ul>
+  <li>Load users by UUID (primary key)</li>
+  <li>Find users by email (case-insensitive for login)</li>
+  <li>Save and update user records</li>
+  <li>Delete users (soft deletes via active flag recommended)</li>
+</ul>
+
+<p><strong>Usage Examples:</strong></p>
+<pre>
+  // Find by primary key
+  Optional&lt;User&gt; user = userRepository.findById(userId);
+
+  // Find by email (case-insensitive)
+  Optional&lt;User&gt; user = userRepository.findByEmailIgnoreCase(""student@example.com"");
+
+  // Eager loading of roles happens via OneToMany(fetch=EAGER) in User entity
+  User user = userRepository.findByEmailIgnoreCase(email).orElseThrow();
+  Set&lt;UserRole&gt; roles = user.getUserRoles(); // Already loaded
+</pre>
+
+<p><strong>Transaction Context:</strong></p>
+<ul>
+  <li>Lazy-loaded relationships (e.g., User.userRoles) are eagerly fetched
+      due to FetchType.EAGER in the entity definition</li>
+  <li>Callers should be in a @Transactional context to access loaded relationships</li>
+</ul>
+
+@author RVCE SCAS Team
+@see User
+@see UserRole
+@see UserDetailsServiceImpl
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\UserRepository.java,com.rvce.scas.repository,Method,findByEmailIgnoreCase,String email,Optional<User>,,"Finds a user by email address (case-insensitive).
+
+<p><strong>Purpose:</strong> Supports case-insensitive email lookup for login,
+allowing users to login with any case variation of their email address.
+For example, ""User@Example.COM"" and ""user@example.com"" will find the same account.</p>
+
+<p><strong>Usage:</strong> Called by UserDetailsServiceImpl during login to
+resolve credentials. Also used during user registration to check email uniqueness.</p>
+
+<p><strong>Database Note:</strong> Relies on database's case-insensitive string
+comparison (available in most modern databases). Ensure database collation
+supports case-insensitive comparison for this method to work correctly.</p>
+
+@param email the user's email address (any case variation accepted)
+@return Optional containing the User if found, empty Optional otherwise
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\ScasApplication.java,com.rvce.scas,Class,ScasApplication,,,SpringBootApplication,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\ScasApplication.java,com.rvce.scas,Method,main,String[] args,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\ScasApplication.java,com.rvce.scas,Method,logRedisConfiguration,"Environment environment, RedisProperties redisProperties, RedisConnectionFactory redisConnectionFactory",ApplicationRunner,Bean,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtAuthFilter.java,com.rvce.scas.security,Class,JwtAuthFilter,,,Slf4j;Component;RequiredArgsConstructor,"Once-per-request filter that authenticates valid JWT bearer tokens.
+
+<p>Fields:</p>
+<ul>
+  <li>{@code tokenProvider}: validates the token signature and parses trusted claims.</li>
+</ul>
+
+<p>Critical steps:</p>
+<ol>
+  <li>Read the Bearer token from the Authorization header only.</li>
+  <li>Reject expired or malformed tokens without creating an authenticated principal.</li>
+  <li>Convert verified JWT claims into a {@link JwtPrincipal}.</li>
+  <li>Store the principal in the SecurityContext for downstream authorization checks.</li>
+</ol>
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtAuthFilter.java,com.rvce.scas.security,Method,doFilterInternal,"HttpServletRequest request, HttpServletResponse response, FilterChain filterChain",void,Override,"Authenticates the request by reading the Bearer token from the Authorization header.
+
+@param request current HTTP request
+@param response current HTTP response
+@param filterChain downstream filter chain
+@throws ServletException if filter processing fails
+@throws IOException if request or response I/O fails
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtAuthFilter.java,com.rvce.scas.security,Method,extractTokenFromRequest,HttpServletRequest request,String,,"Extracts a Bearer token from the request header.
+
+@param request current HTTP request
+@return JWT string or {@code null}
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtAuthFilter.java,com.rvce.scas.security,Method,setSecurityContext,"Claims claims, HttpServletRequest request",void,,"Populates the SecurityContext with the authenticated principal.
+
+@param claims verified JWT claims
+@param request current HTTP request
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtAuthFilter.java,com.rvce.scas.security,Method,shouldNotFilter,HttpServletRequest request,boolean,Override,"Skips the filter for public infrastructure endpoints.
+
+@param request current HTTP request
+@return true when the filter should be bypassed
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtPrincipal.java,com.rvce.scas.security,Class,JwtPrincipal,,,Getter;AllArgsConstructor,"Authenticated principal exposed to Spring Security and controller methods.
+
+<p><strong>Purpose:</strong> Lightweight representation of an authenticated user
+extracted from a validated JWT token. Used in controller methods via
+{@code @AuthenticationPrincipal JwtPrincipal principal} annotation.</p>
+
+<p><strong>Data Source:</strong> Populated from JWT claims after successful token
+validation by JwtAuthFilter. Does NOT perform database lookups.</p>
+
+<p><strong>Usage in Controllers:</strong></p>
+<pre>
+
+@PostMapping(""/logout"") public ResponseEntity&lt;Void&gt; logout(
+@AuthenticationPrincipal JwtPrincipal principal) {
+      UUID userId = principal.getUserId();
+      String email = principal.getEmail();
+      // Use principal data without DB lookup
+  }
+</pre>
+
+<p><strong>Compared to ScasPrincipal:</strong></p>
+<ul>
+  <li>JwtPrincipal: Used during JWT-based requests (stateless, from token claims)</li>
+  <li>ScasPrincipal: Used during form-based login (stateful, from DB lookup)</li>
+</ul>
+@author RVCE SCAS Team
+@see ScasPrincipal
+@see JwtAuthFilter
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Class,JwtTokenProvider,,,Slf4j;Component,"Central JWT and refresh-token service for the authentication flow.
+
+<p>Fields:</p>
+<ul>
+  <li>{@code privateKey}: RSA private key used to sign access tokens.</li>
+  <li>{@code publicKey}: RSA public key used to verify access tokens.</li>
+  <li>{@code accessTokenExpiryMs}: lifetime for signed access tokens.</li>
+  <li>{@code refreshTokenExpirySeconds}: lifetime for Redis-backed refresh tokens.</li>
+  <li>{@code redisTemplate}: Redis access for refresh tokens and blacklist entries.</li>
+</ul>
+
+<p>Critical steps:</p>
+<ol>
+  <li>Load or generate the RSA key pair once at startup.</li>
+  <li>Sign access tokens with RS256 and include a {@code jti} for blacklist support.</li>
+  <li>Store opaque refresh tokens in Redis so logout can revoke them immediately.</li>
+  <li>Check Redis for blacklisted JTIs before accepting an access token.</li>
+</ol>
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,generateAccessToken,"UUID userId, String email, List<String> roles",String,,"Generates a signed access token for the authenticated user.
+
+@param userId authenticated user id
+@param email authenticated email address
+@param roles granted authorities to embed in the token
+@return compact RS256 JWT
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,generateRefreshToken,UUID userId,String,,"Generates an opaque refresh token and stores it in Redis.
+
+@param userId owner of the refresh token
+@return opaque refresh-token id
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,validateAccessToken,String token,JwtValidationResult,,"Validates an access token and returns a structured result.
+
+@param token compact JWT string
+@return validation state with claims when valid
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,validateRefreshToken,"UUID userId, String tokenId",Optional<UUID>,,"Validates that a refresh token exists for the supplied user.
+
+@param userId user identifier
+@param tokenId opaque refresh-token id
+@return user id when the refresh token is valid
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,rotateRefreshToken,"UUID userId, String oldTokenId",String,,"Rotates the refresh token by deleting the old token and issuing a new one.
+
+@param userId user identifier
+@param oldTokenId refresh-token id to invalidate
+@return new opaque refresh-token id
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,logout,"String accessToken, UUID userId, String refreshTokenId",void,,"Blacklists the current access token and removes the current refresh token when present.
+
+@param accessToken bearer access token to blacklist
+@param userId user identifier
+@param refreshTokenId current refresh-token id, if any
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,logoutAllDevices,UUID userId,void,,"Revokes every refresh token issued for the supplied user.
+
+@param userId user identifier
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,extractUserId,Claims claims,UUID,,"Extracts the user id claim from a verified JWT.
+
+@param claims verified claims
+@return parsed user id
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,extractEmail,Claims claims,String,,"Extracts the email claim from a verified JWT.
+
+@param claims verified claims
+@return email from the token
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,extractRoles,Claims claims,List<String>,SuppressWarnings,"Extracts the authority list from a verified JWT.
+
+@param claims verified claims
+@return token authorities, or an empty list when absent
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,parseClaims,String token,Claims,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,isBlacklisted,String jti,boolean,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,loadPrivateKey,String path,PrivateKey,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,loadPublicKey,String path,PublicKey,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Class,JwtValidationResult,,,Getter,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,valid,Claims claims,JwtValidationResult,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,expired,,JwtValidationResult,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtTokenProvider.java,com.rvce.scas.security,Method,invalid,,JwtValidationResult,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\ScasPrincipal.java,com.rvce.scas.security,Class,ScasPrincipal,,,Getter,"UserDetails implementation representing an authenticated user from the database.
+
+<p><strong>Purpose:</strong> Implements Spring Security's UserDetails interface
+to provide user credentials and authorities for authentication and authorization.
+Used during form-based login flow, not JWT-based requests.</p>
+
+<p><strong>Data Source:</strong> Populated from User entity and associated
+roles/permissions loaded from database. Lazy-loaded relationships are accessed
+within transactional context to avoid LazyInitializationException.</p>
+
+<p><strong>Key Responsibilities:</strong></p>
+<ul>
+  <li>Provide username (email) and password hash to AuthenticationManager</li>
+  <li>Indicate if account is enabled/locked/active</li>
+  <li>Supply authorities for authorization checks</li>
+  <li>Support JWT token generation with user identity and permissions</li>
+</ul>
+
+<p><strong>Usage Flow:</strong></p>
+<ol>
+  <li>UserDetailsServiceImpl loads User from database</li>
+  <li>User's roles and permissions are converted to GrantedAuthority list</li>
+  <li>ScasPrincipal wraps both user data and authorities</li>
+  <li>AuthenticationManager uses passwordHash for password comparison</li>
+  <li>JWT is generated with userId, email, and authorities</li>
+</ol>
+
+<p><strong>Compared to JwtPrincipal:</strong></p>
+<ul>
+  <li>ScasPrincipal: Database-backed, used during login (stateful)</li>
+  <li>JwtPrincipal: Token-backed, used for API requests (stateless)</li>
+</ul>
+
+@author RVCE SCAS Team
+@see JwtPrincipal
+@see UserDetailsServiceImpl
+@see User
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\ScasPrincipal.java,com.rvce.scas.security,Method,getUsername,,String,Override,"Returns the username (email) for Spring Security.
+
+@return user's email address
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\ScasPrincipal.java,com.rvce.scas.security,Method,getPassword,,String,Override,"Returns the password hash for Spring Security password comparison.
+
+@return bcrypt password hash
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\ScasPrincipal.java,com.rvce.scas.security,Method,isEnabled,,boolean,Override,"Indicates if the user account is enabled.
+
+@return {@code true} if active, {@code false} if disabled
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\ScasPrincipal.java,com.rvce.scas.security,Method,isAccountNonLocked,,boolean,Override,"Indicates if the account is not locked.
+
+@return {@code true} if not locked, {@code false} if locked
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\ScasPrincipal.java,com.rvce.scas.security,Method,isAccountNonExpired,,boolean,Override,"Indicates if the account is not expired.
+Currently always returns true (accounts don't expire).
+
+@return {@code true}
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\ScasPrincipal.java,com.rvce.scas.security,Method,isCredentialsNonExpired,,boolean,Override,"Indicates if the credentials are not expired.
+Currently always returns true (credentials don't expire).
+
+@return {@code true}
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\ScasPrincipal.java,com.rvce.scas.security,Method,getAuthorities,,Collection<? extends GrantedAuthority>,Override,"Returns the authorities (roles + permissions) for the user.
+
+@return collection of GrantedAuthority
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\SecurityConfig.java,com.rvce.scas.security,Class,SecurityConfig,,,Configuration;EnableWebSecurity;EnableMethodSecurity;RequiredArgsConstructor,"Central Spring Security configuration for the stateless SCAS JWT API.
+
+<p>Fields:</p>
+<ul>
+  <li>{@code userDetailsService}: user lookup service used by DaoAuthenticationProvider.</li>
+  <li>{@code jwtAuthFilter}: Bearer-token filter that authenticates each request.</li>
+  <li>{@code objectMapper}: serializes JSON error responses for API clients.</li>
+  <li>{@code customAccessDeniedHandler}: turns authorization failures into structured responses.</li>
+</ul>
+
+<p>Critical steps in this configuration:</p>
+<ol>
+  <li>Disable CSRF because authentication uses headers instead of session cookies.</li>
+  <li>Force stateless session handling so any pod can serve any request.</li>
+  <li>Permit only login/refresh and infrastructure endpoints anonymously.</li>
+  <li>Require authentication for logout routes and protected business endpoints.</li>
+  <li>Return JSON errors instead of HTML redirects.</li>
+  <li>Register the JWT filter before username/password authentication.</li>
+</ol>
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\SecurityConfig.java,com.rvce.scas.security,Method,filterChain,HttpSecurity http,SecurityFilterChain,Bean,"Builds the security filter chain.
+
+@param http the security builder
+@return the configured security filter chain
+@throws Exception if Spring Security cannot build the chain
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\SecurityConfig.java,com.rvce.scas.security,Method,authenticationProvider,,DaoAuthenticationProvider,Bean,"Creates the authentication provider backed by the custom user details service.
+
+@return DAO authentication provider
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\SecurityConfig.java,com.rvce.scas.security,Method,passwordEncoder,,PasswordEncoder,Bean,"Uses BCrypt for password hashing.
+
+@return BCrypt password encoder with strength 12
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\SecurityConfig.java,com.rvce.scas.security,Method,authenticationManager,AuthenticationConfiguration config,AuthenticationManager,Bean,"Exposes the application authentication manager.
+
+@param config authentication configuration
+@return authentication manager
+@throws Exception if the manager cannot be obtained
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\SecurityConfig.java,com.rvce.scas.security,Method,corsConfigurationSource,,CorsConfigurationSource,Bean,"Defines CORS rules for the frontend origins.
+
+@return CORS configuration source
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\UserDetailsServiceImpl.java,com.rvce.scas.security,Class,UserDetailsServiceImpl,,,Slf4j;Service;RequiredArgsConstructor,"Spring Security UserDetailsService implementation for SCAS system.
+
+<p><strong>Purpose:</strong> Loads user information from the database during
+authentication and converts it into Spring Security's UserDetails format.
+Used by the AuthenticationManager's authentication provider.</p>
+
+<p><strong>Key Flow:</strong></p>
+<ol>
+  <li>Client submits credentials to /api/auth/login</li>
+  <li>AuthenticationManager calls loadUserByUsername(email)</li>
+  <li>UserDetailsServiceImpl queries database for the user</li>
+  <li>User's roles and permissions are loaded from database</li>
+  <li>ScasPrincipal is returned with user data + authorities</li>
+  <li>Password encoder compares submitted password with stored hash</li>
+  <li>If valid, JWT tokens are generated with user identity + authorities</li>
+</ol>
+
+<p><strong>Authority Building:</strong> Combines two types of authorities:
+<ul>
+  <li>Coarse-grained roles: ""ROLE_ADMIN"", ""ROLE_STUDENT"", etc.</li>
+  <li>Fine-grained permissions: ""EXAM_VIEW"", ""ROOM_EDIT"", etc.</li>
+</ul>
+Both types are included in JWT claims and available for authorization checks.</p>
+
+@author RVCE SCAS Team
+@see UserDetailsService
+@see ScasPrincipal
+@see UserRepository
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\UserDetailsServiceImpl.java,com.rvce.scas.security,Method,loadUserByUsername,String email,UserDetails,Override;Transactional,"Loads a user by email (username) and builds a Spring Security principal.
+
+<p><strong>Process:</strong></p>
+<ol>
+  <li>Query database for user by email (case-insensitive)</li>
+  <li>Load associated roles via eager fetching (OneToMany.EAGER in User entity)</li>
+  <li>Build authorities from roles and permissions</li>
+  <li>Return ScasPrincipal for authentication</li>
+</ol>
+
+<p><strong>Transaction Context:</strong> Method is @Transactional(readOnly=true)
+to ensure lazy-loaded relationships (role permissions) can be accessed without
+causing LazyInitializationException.</p>
+
+<p><strong>Error Handling:</strong> Logs authentication attempts for users that
+don't exist to aid security monitoring and debugging.</p>
+
+@param email user's login identifier (email address)
+@return Spring Security UserDetails backed by User entity
+@throws UsernameNotFoundException if no user with that email exists
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\UserDetailsServiceImpl.java,com.rvce.scas.security,Method,buildAuthorities,User user,Collection<GrantedAuthority>,,"Builds granted authorities from user's roles and their permissions.
+
+<p><strong>Authority Types Generated:</strong></p>
+<ul>
+  <li>Role authority: ""ROLE_"" + role name (e.g., ""ROLE_ADMIN"")</li>
+  <li>Permission authority: ""RESOURCE_ACTION"" (e.g., ""EXAM_VIEW"")</li>
+</ul>
+
+<p><strong>Process:</strong></p>
+<ol>
+  <li>Iterate through user's assigned roles</li>
+  <li>For each role, create a ""ROLE_*"" authority</li>
+  <li>For each permission in the role, create a ""RESOURCE_ACTION"" authority</li>
+  <li>Deduplicate authorities across multiple roles (Set used)</li>
+  <li>Return complete authority collection</li>
+</ol>
+
+<p><strong>Example Output:</strong>
+For a user with role ""ADMIN"" having permissions ""EXAM_VIEW"", ""ROOM_EDIT"":
+<pre>
+  [
+    SimpleGrantedAuthority(""ROLE_ADMIN""),
+    SimpleGrantedAuthority(""EXAM_VIEW""),
+    SimpleGrantedAuthority(""ROOM_EDIT"")
+  ]
+</pre>
+
+<p><strong>Usage in Authorization:</strong> These authorities are used by:
+<ul>
+  <li>Spring Security's {@code hasRole()}, {@code hasAuthority()}, etc.</li>
+  <li>Method-level @Secured/@PreAuthorize annotations</li>
+  <li>JWT token claims for stateless request authorization</li>
+</ul>
+
+@param user the authenticated user entity from database
+@return collection of GrantedAuthority for the user
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuditService.java,com.rvce.scas.service,Class,AuditService,,,Slf4j;Service,"Service for auditing and logging authentication and authorization events.
+
+<p>This service provides centralized logging of security-related events including:
+<ul>
+  <li>User login attempts (successful and failed)</li>
+  <li>User logout events</li>
+</ul>
+
+<p>All audit logs are written to the application logger with the prefix ""AUDIT"" for
+easy filtering and monitoring. This enables security teams to track user access patterns,
+detect anomalies, and maintain compliance audit trails.
+
+<p>Example usage:
+<pre>
+  auditService.logLogin(userId, email, true, null);
+  auditService.logLogout(userId);
+</pre>
+
+@author RVCE SCAS Team
+@see AuthService for authentication logic
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuditService.java,com.rvce.scas.service,Method,logLogin,"UUID userId, String email, boolean success, String reason",void,,"Logs a login attempt with success/failure status and optional failure reason.
+
+<p>This method records both successful and failed login attempts for security auditing.
+The user ID may be null for failed login attempts where the user could not be identified.
+
+@param userId the UUID of the user attempting to login, or {@code null} if login failed before user identification
+@param email the email address of the user attempting to login
+@param success {@code true} if the login was successful, {@code false} otherwise
+@param reason optional reason for failure (e.g., ""INVALID_CREDENTIALS"", ""ACCOUNT_LOCKED"", ""USER_NOT_FOUND"")
+              should be {@code null} for successful logins
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuditService.java,com.rvce.scas.service,Method,logLogout,UUID userId,void,,"Logs a user logout event.
+
+<p>This method records when a user explicitly logs out from the system.
+It is used in conjunction with token blacklisting to ensure audit compliance.
+
+@param userId the UUID of the user performing the logout
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Class,AuthService,,,Slf4j;Service;RequiredArgsConstructor,"Coordinates authentication, token lifecycle, and login lockout state.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,login,"String email, String rawPassword",TokenPair,Transactional,"Authenticates the user, issues tokens, and records login audit data.
+
+@param email the user's login email
+@param rawPassword the submitted password
+@return a fresh access and refresh token pair
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,refresh,"UUID userId, String refreshTokenId",TokenPair,Transactional,"Validates and rotates the refresh token to issue a new access token.
+
+@param userId the authenticated user id
+@param refreshTokenId the opaque refresh token id
+@return a rotated token pair
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,buildAuthoritiesForRefresh,User user,List<String>,,"Rebuilds the user's authorities for refresh-token renewal.
+
+@param user the active user entity loaded from the database
+@return the full set of role and permission authorities
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,logout,"String accessToken, UUID userId, String refreshTokenId",void,,"Revokes the current session and logs the logout event.
+
+@param accessToken the bearer token presented by the client
+@param userId the authenticated user id
+@param refreshTokenId the refresh token id to revoke
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,logoutAllDevices,"String accessToken, UUID userId",void,,"Revokes all active sessions for the user and logs the logout event.
+
+@param accessToken the bearer token presented by the client
+@param userId the authenticated user id
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,checkLockout,String email,void,,"Fails fast if the account is currently locked in Redis.
+
+@param email the login email to check
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,incrementFailCount,String email,int,,"Increments the failed-login counter for the given email address.
+
+@param email the login email to track
+@return the updated failure count
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,lockAccount,String email,void,,"Marks the account as locked and clears the active failure counter.
+
+@param email the login email to lock
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,com.rvce.scas.service,Method,clearFailCount,String email,void,,"Removes the failure counter after a successful login.
+
+@param email the login email to clear
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\DayOverrideService.java,com.rvce.scas.service,Class,DayOverrideService,,,Slf4j;Service;RequiredArgsConstructor,"<h3>Purpose</h3>
+Service for day override operations (T-104).
+Manages cancellations and bookings that override the canonical schedule.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Create and validate day overrides</li>
+  <li>Enforce ownership and role-based permissions</li>
+  <li>Publish events for cache invalidation and notifications</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on DayOverrideRepository, TimetableSlotRepository, RoomAvailabilityCache.
+
+<h3>Transaction Behaviour</h3>
+createOverride() and deleteOverride() are @Transactional.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\DayOverrideService.java,com.rvce.scas.service,Method,createOverride,"OverrideRequest req, JwtPrincipal actor",OverrideDto,Transactional,"Creates a day override for cancelling or booking a slot.
+Validates permissions, checks for conflicts, and invalidates cache.
+
+<p>Decision DD-13: Role-based access control for override operations.</p>
+
+@param req the override request
+@param actor the authenticated user making the request
+@return OverrideDto for the created override
+@throws SlotConflictException if override already exists
+@throws AccessDeniedException if actor lacks permission
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\DayOverrideService.java,com.rvce.scas.service,Method,getOverrides,"LocalDate date, java.util.UUID roomId",List<OverrideDto>,Transactional,"Retrieves overrides for a specific date, optionally filtered by room.
+
+@param date the date to query
+@param roomId optional room filter
+@return list of overrides
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\DayOverrideService.java,com.rvce.scas.service,Method,deleteOverride,"java.util.UUID overrideId, JwtPrincipal actor",void,Transactional,"Deletes an override, restoring the canonical schedule.
+Validates ownership and invalidates cache.
+
+@param overrideId the override to delete
+@param actor the authenticated user
+@throws OverrideNotFoundException if override doesn't exist
+@throws AccessDeniedException if actor lacks permission
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\DayOverrideService.java,com.rvce.scas.service,Method,validateOwnership,"TimetableSlot slot, JwtPrincipal actor",void,,"Validates that the actor has permission to modify the slot.
+Teachers can modify their own slots, admins can modify any.
+
+@param slot the slot being modified
+@param actor the user attempting the action
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\RoomAvailabilityService.java,com.rvce.scas.service,Class,RoomAvailabilityService,,,Slf4j;Service;RequiredArgsConstructor,"<h3>Purpose</h3>
+Service for room availability queries (T-102).
+Implements the availability query engine with Redis caching.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Execute availability queries with caching</li>
+  <li>Build cache keys deterministically</li>
+  <li>Handle cache misses with DB fallback</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on RoomRepository, RoomAvailabilityCache, RoomMapper.
+
+<h3>Transaction Behaviour</h3>
+getAvailable() is @Transactional(readOnly=true) for performance.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\RoomAvailabilityService.java,com.rvce.scas.service,Method,getAvailable,"LocalDate date, LocalTime startTime, LocalTime endTime, Integer minCapacity, String building",List<RoomAvailabilityDto>,Transactional,"Retrieves available rooms for the given query parameters.
+Implements Redis caching with 60-second TTL for performance.
+
+<p>Decision DD-06: Redis caching reduces DB load for repeated queries.</p>
+
+@param date the date to check (nullable, defaults to today)
+@param startTime start of time window
+@param endTime end of time window
+@param minCapacity minimum room capacity (optional)
+@param building building filter (optional)
+@return list of available rooms, never null
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\RoomAvailabilityService.java,com.rvce.scas.service,Method,buildCacheKey,AvailabilityQuery query,String,,"Builds a deterministic cache key for the availability query.
+Key format: room:avail:{date}:{startTime}-{endTime}[:{building}][:{minCapacity}]
+
+@param query the availability query
+@return the cache key
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Class,SubstitutionService,,,Slf4j;Service;RequiredArgsConstructor,"<h3>Purpose</h3>
+Service for teacher substitution operations (T-103).
+Handles clash detection and atomic reassignment of teaching slots.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Detect scheduling conflicts for substitution</li>
+  <li>Perform atomic teacher reassignments</li>
+  <li>Write audit logs for substitutions</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on TimetableSlotRepository for slot operations.
+
+<h3>Transaction Behaviour</h3>
+substitute() uses separate read and write transactions.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,substitute,SubstituteRequest req,SubstitutionResultDto,Transactional,"Processes a teacher substitution request.
+Fetches slots, checks for clashes, and applies changes atomically if no conflicts.
+
+<p>Decision DD-11: Full rejection on any clash prevents inconsistent state.</p>
+
+@param req the substitution request
+@return SubstitutionResultDto with reassignment count and clash details
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,fetchSlotsForSubstitution,SubstituteRequest req,List<TimetableSlot>,Transactional,"Fetches slots for the original teacher within the substitution date range.
+Uses @Transactional(readOnly=true) for the fetch operation.
+
+@param req the substitution request
+@return list of slots to be reassigned
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,validateRequest,SubstituteRequest req,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,clashCheck,"List<TimetableSlot> slots, SubstituteRequest req",List<ClashDetail>,,"Checks if any of the slots would conflict with the replacement teacher's schedule.
+Performs individual clash checks for each slot.
+
+@param slots the slots to check
+@param replacementId the replacement teacher ID
+@return list of clash details, empty if no clashes
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,applySubstitution,"List<TimetableSlot> slots, UUID replacementId",int,Transactional,"Applies the substitution atomically to all slots.
+Uses @Transactional to ensure all-or-nothing update.
+
+@param slots the slots to update
+@param replacementId the new teacher ID
+@return number of slots updated
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,buildClashDetail,"TimetableSlot slot, SubstituteRequest req",ClashDetail,,"Builds a ClashDetail from a conflicting slot.
+
+@param slot the conflicting slot
+@param req the substitution request
+@return the clash detail
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,findFirstMatchingDate,"TimetableSlot slot, LocalDate startDate, LocalDate endDate",LocalDate,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,getDayOfWeeksInRange,"LocalDate startDate, LocalDate endDate",Set<Integer>,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,com.rvce.scas.service,Method,buildResult,"int reassigned, List<ClashDetail> clashes",SubstitutionResultDto,,"Builds the result DTO.
+
+@param reassigned number of slots reassigned
+@param clashes list of clashes
+@return the result DTO
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TestService.java,com.rvce.scas.service,Class,TestService,,,Service,"Simple test service for verifying backend connectivity and availability.
+
+<p>This service provides a basic health check endpoint response. It is primarily used
+during development and testing to verify that the Spring Boot backend is running
+and responding to requests.
+
+<p>Example usage:
+<pre>
+  TestResponseDto response = testService.getMessage();
+  // Returns a success response with message ""Backend is working 🚀""
+</pre>
+
+@author RVCE SCAS Team
+@see TestController for the REST endpoint that uses this service
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TestService.java,com.rvce.scas.service,Method,getMessage,,TestResponseDto,,"Generates a test response message indicating the backend is operational.
+
+<p>This method creates a simple success response that can be used for health checks,
+load balancer status verification, or basic connectivity testing.
+
+@return a {@link TestResponseDto} with success status and a test message
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableQueryService.java,com.rvce.scas.service,Class,TimetableQueryService,,,Slf4j;Service;RequiredArgsConstructor,"<h3>Purpose</h3>
+Service for timetable queries and analytics (T-105).
+Provides schedule lookups, utilization metrics, and dashboard data.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Query teacher schedules</li>
+  <li>Query room schedules</li>
+  <li>Compute timetable analytics and utilization metrics</li>
+  <li>Provide dashboard overview data</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on TimetableSlotRepository, RoomRepository.
+
+<h3>Transaction Behaviour</h3>
+All methods are @Transactional(readOnly = true).
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableQueryService.java,com.rvce.scas.service,Method,getTeacherSchedule,"UUID teacherId, Integer dayOfWeek",List<TeacherScheduleDto>,Transactional,"Retrieves the schedule for a specific teacher on a given day of week.
+Returns all recurring slots for that day.
+
+<p>Decision DD-14: Schedule queries use day-of-week recurring model.</p>
+
+@param teacherId the teacher UUID
+@param dayOfWeek day of week (1=Monday, 7=Sunday)
+@return list of teacher's scheduled slots for that day
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableQueryService.java,com.rvce.scas.service,Method,getTeacherWeeklySchedule,UUID teacherId,"Map<Integer, List<TeacherScheduleDto>>",Transactional,"Retrieves the full weekly schedule for a teacher (all 7 days).
+
+@param teacherId the teacher UUID
+@return map of day-of-week to list of scheduled slots
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableQueryService.java,com.rvce.scas.service,Method,getRoomSchedule,"Long roomId, Integer dayOfWeek",List<RoomScheduleDto>,Transactional,"Retrieves the schedule for a specific room on a given day of week.
+
+@param roomId the room ID
+@param dayOfWeek day of week (1=Monday, 7=Sunday)
+@return list of slots scheduled in that room for that day
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableQueryService.java,com.rvce.scas.service,Method,getRoomWeeklySchedule,Long roomId,"Map<Integer, List<RoomScheduleDto>>",Transactional,"Retrieves the full weekly schedule for a room (all 7 days).
+
+@param roomId the room ID
+@return map of day-of-week to list of scheduled slots
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableQueryService.java,com.rvce.scas.service,Method,getTimetableAnalytics,,TimetableAnalyticsDto,Transactional,"Computes timetable analytics: utilization rates, slot distribution, capacity metrics.
+
+@return analytics DTO with summary metrics
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableQueryService.java,com.rvce.scas.service,Method,mapToTeacherScheduleDto,TimetableSlot slot,TeacherScheduleDto,,"Maps a TimetableSlot to a TeacherScheduleDto.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableQueryService.java,com.rvce.scas.service,Method,mapToRoomScheduleDto,TimetableSlot slot,RoomScheduleDto,,"Maps a TimetableSlot to a RoomScheduleDto.
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableUploadService.java,com.rvce.scas.service,Class,TimetableUploadService,,,Slf4j;Service;RequiredArgsConstructor,"<h3>Purpose</h3>
+Service for timetable upload operations (T-101).
+Handles CSV parsing, validation, and transactional persistence of schedule data.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Parse and validate CSV timetable data</li>
+  <li>Transactionally persist valid slots</li>
+  <li>Publish events for cache invalidation</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on CsvRowValidator, TimetableMapper, ApplicationEventPublisher.
+
+<h3>Transaction Behaviour</h3>
+upload() is @Transactional — full rollback on any validation failure.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableUploadService.java,com.rvce.scas.service,Method,upload,MultipartFile file,UploadResultDto,Transactional,"Processes a CSV file upload, validates all rows, and persists valid timetable slots.
+Implements all-or-nothing upload: any validation failure causes complete rollback.
+
+<p>Decision DD-10: All-or-nothing validation prevents partial inconsistent schedules.</p>
+
+@param file the uploaded CSV file (must be text/csv)
+@return UploadResultDto with success/error counts
+@throws CsvValidationException if any row fails validation (triggers rollback)
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableUploadService.java,com.rvce.scas.service,Method,parseAndValidate,java.io.InputStream inputStream,ParseResult,,"Parses the CSV file and validates each row.
+Collects all errors before deciding to proceed or reject.
+
+@param inputStream the CSV file input stream
+@return ParseResult containing valid rows and errors
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableUploadService.java,com.rvce.scas.service,Method,parseRecord,CSVRecord record,CsvRowValidator.CsvRowDto,,"Parses a single CSV record into a CsvRowDto.
+
+@param record the CSV record
+@return the parsed row DTO
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TimetableUploadService.java,com.rvce.scas.service,Method,persistSlots,List<CsvRowValidator.CsvRowDto> rows,int,,"Persists the validated CSV rows as TimetableSlot entities.
+
+@param rows the valid CSV rows
+@return number of slots inserted
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Class,CsvRowValidator,,,Slf4j;Component;RequiredArgsConstructor,"<h3>Purpose</h3>
+Validator for individual CSV rows during timetable upload (T-101).
+Performs business rule validation against live DB state.
+
+<h3>Key Responsibilities</h3>
+<ul>
+  <li>Validate room existence</li>
+  <li>Validate teacher existence</li>
+  <li>Check for slot conflicts</li>
+  <li>Validate time formats and ranges</li>
+</ul>
+
+<h3>Dependencies</h3>
+Depends on RoomRepository and UserRepository for existence checks.
+
+<h3>Transaction Behaviour</h3>
+Validation queries are read-only and can run outside main transaction.
+
+@author SCAS Engineering Team
+@since 1.0
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,validateRow,"CsvRowDto row, int rowNumber",void,,"Validates a single CSV row against business rules.
+Throws exceptions for validation failures.
+
+@param row the parsed CSV row data
+@param rowNumber the row number in the CSV for error reporting
+@throws RoomNotFoundException if room does not exist
+@throws TeacherNotFoundException if teacher does not exist
+@throws IllegalArgumentException for format or range validation failures
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,validateTimeRange,"LocalTime startTime, LocalTime endTime, int rowNumber",void,,"Validates that start time is before end time and within reasonable bounds.
+
+@param startTime the start time
+@param endTime the end time
+@param rowNumber the row number for error reporting
+"
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Class,CsvRowDto,,,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,getRoomId,,UUID,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,setRoomId,UUID roomId,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,getTeacherId,,UUID,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,setTeacherId,UUID teacherId,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,getDayOfWeek,,Integer,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,setDayOfWeek,Integer dayOfWeek,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,getStartTime,,LocalTime,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,setStartTime,LocalTime startTime,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,getEndTime,,LocalTime,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,setEndTime,LocalTime endTime,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,getSubject,,String,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,setSubject,String subject,void,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,getDepartment,,String,,
+c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\validation\CsvRowValidator.java,com.rvce.scas.validation,Method,setDepartment,String department,void,,
