@@ -36,8 +36,9 @@ const SubstitutePage = () => {
     try {
       const response = await substituteTeacher(formState)
       setResult(response)
-    } catch (submitError: any) {
-      setError(submitError?.message || 'Substitution request failed')
+    } catch (submitError: unknown) {
+      const errorMessage = submitError instanceof Error ? submitError.message : 'Substitution request failed'
+      setError(errorMessage)
     } finally {
       setIsSubmitting(false)
     }

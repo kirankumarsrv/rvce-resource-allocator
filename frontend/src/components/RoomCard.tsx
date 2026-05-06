@@ -46,7 +46,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
       setIsBooked(true);
 
       // Call the booking API
-      await bookRoomForToday(room.id as any, `Booked ${room.name} for today`);
+      await bookRoomForToday(parseInt(room.id), `Booked ${room.name} for today`);
 
       // Notify parent component of successful booking
       onBookSuccess?.(room);

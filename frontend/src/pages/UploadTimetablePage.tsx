@@ -25,8 +25,9 @@ const UploadTimetablePage = () => {
     try {
       const result = await uploadTimetable(selectedFile)
       setUploadResult(result)
-    } catch (uploadError: any) {
-      setError(uploadError?.message || 'Unable to upload timetable')
+    } catch (uploadError: unknown) {
+      const errorMessage = uploadError instanceof Error ? uploadError.message : 'Unable to upload timetable'
+      setError(errorMessage)
     } finally {
       setIsUploading(false)
     }

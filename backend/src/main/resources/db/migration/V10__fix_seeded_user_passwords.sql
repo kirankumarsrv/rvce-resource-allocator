@@ -1,16 +1,14 @@
 -- ============================================================
--- V10__fix_seeded_user_passwords.sql
--- Fix seeded user password hashes for known test accounts.
--- This migration corrects the stored bcrypt hash for the seed users
--- so the documented password `Test@1234` works for login.
+-- V10__fix_seeded_user_passwords.sql [REMOVED - SECURITY FIX]
+-- This migration has been removed to prevent hardcoded password
+-- hashes from being exposed in version control.
+--
+-- The passwords were already applied in the database from 
+-- previous migration runs, so this file is no longer needed.
+--
+-- For future test account setup, use environment variables
+-- or Spring Boot configuration profiles (dev, test, prod).
 -- ============================================================
+-- DO NOT DELETE THIS FILE - Flyway tracks executed migrations.
+-- Keep it as a placeholder so Flyway knows it was executed.
 
-UPDATE users
-SET password_hash = '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO'
-WHERE email IN (
-    'admin@rvce.edu.in',
-    'tto@rvce.edu.in',
-    'priya.sharma@rvce.edu.in',
-    'ramesh.kumar@rvce.edu.in',
-    'kiran@rvce.edu.in'
-);

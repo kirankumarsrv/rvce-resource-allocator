@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createOverride, deleteOverride, getOverrides } from '../services/timetableService'
 import { OverrideDto, OverrideRequest } from '../types/timetable'
 
@@ -18,24 +18,25 @@ const OverrideManagementPage = () => {
   })
   const [isSaving, setIsSaving] = useState(false)
 
-  const fetchOverrides = async () => {
+  const fetchOverrides = useCallback(async () => {
     setFetching(true)
     setError(null)
     try {
       const data = await getOverrides(date, roomId || undefined)
       setOverrides(data)
       setMessage(`Found ${data.length} override${data.length === 1 ? '' : 's'} for ${date}`)
-    } catch (fetchError: any) {
-      setError(fetchError?.message || 'Unable to fetch overrides')
+    } catch (fetchError: unknown) {
+      const errorMessage = fetchError instanceof Error ? fetchError.message : 'Unable to fetch overrides'
+      setError(errorMessage)
       setOverrides([])
     } finally {
       setFetching(false)
     }
-  }
+  }, [date, roomId])
 
   useEffect(() => {
     fetchOverrides()
-  }, [])
+  }, [fetchOverrides])
 
   const handleChange = (field: keyof OverrideRequest, value: string | number) => {
     setFormState((prev) => ({ ...prev, [field]: value }))
@@ -56,8 +57,9 @@ const OverrideManagementPage = () => {
       setMessage('Override saved successfully.')
       setFormState((prev) => ({ ...prev, slotId: 0, reason: '' }))
       await fetchOverrides()
-    } catch (saveError: any) {
-      setError(saveError?.message || 'Unable to save override')
+    } catch (saveError: unknown) {
+      const errorMessage = saveError instanceof Error ? saveError.message : 'Unable to save override'
+      setError(errorMessage)
     } finally {
       setIsSaving(false)
     }
@@ -71,8 +73,9 @@ const OverrideManagementPage = () => {
       await deleteOverride(overrideId)
       setMessage('Override deleted successfully.')
       await fetchOverrides()
-    } catch (deleteError: any) {
-      setError(deleteError?.message || 'Unable to delete override')
+    } catch (deleteError: unknown) {
+      const errorMessage = deleteError instanceof Error ? deleteError.message : 'Unable to delete override'
+      setError(errorMessage)
     }
   }
 

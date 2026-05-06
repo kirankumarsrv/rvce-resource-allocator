@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { RoomWeeklySchedule } from '../types/timetable';
+import { RoomWeeklySchedule, RoomScheduleDto } from '../types/timetable';
 import { getRoomWeeklySchedule } from '../services/timetableService';
 
 interface RoomScheduleProps {
@@ -58,7 +58,7 @@ export const RoomScheduleDisplay = ({ roomId }: RoomScheduleProps) => {
           </h3>
           {slots && slots.length > 0 ? (
             <div className="space-y-2">
-              {slots.map((slot: any) => (
+              {slots.map((slot: RoomScheduleDto) => (
                 <div
                   key={slot.slotId}
                   className="bg-gray-50 p-3 rounded border-l-4 border-green-500"
