@@ -14,8 +14,8 @@ import { useAuth } from '@/context/AuthContext'
 const getDefaultRedirect = (roles: string[] | undefined): string => {
   if (roles?.includes('ROLE_ADMIN') || roles?.includes('ROLE_SUPER_ADMIN')) return '/admin'
   if (roles?.includes('ROLE_TTO')) return '/tto'
+  if (roles?.includes('ROLE_DEPT_COORD') || roles?.includes('ROLE_EXAM_CONTROLLER')) return '/exam-ctrl'
   if (roles?.includes('ROLE_TEACHER')) return '/teacher'
-  if (roles?.includes('ROLE_EXAM_CONTROLLER')) return '/exam-ctrl'
   if (roles?.includes('ROLE_STUDENT')) return '/student'
   return '/login'
 }
@@ -104,8 +104,16 @@ function App() {
         <Route
           path="/exam-ctrl"
           element={
-            <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER']}>
+            <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
               {withLayout(<ExamCtrlPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/dept-coord/rooms"
+          element={
+            <RequireRole allowedRoles={['ROLE_DEPT_COORD']}>
+              {withLayout(<RoomAvailabilityPage userRole="DEPT_COORD" />)}
             </RequireRole>
           }
         />

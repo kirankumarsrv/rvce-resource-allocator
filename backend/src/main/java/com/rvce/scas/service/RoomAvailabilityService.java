@@ -93,9 +93,16 @@ public class RoomAvailabilityService {
         // Cache miss: query database
         log.debug("Cache miss, querying database for availability");
         int dayOfWeek = query.date.getDayOfWeek().getValue();
-        List<com.rvce.scas.entity.Room> rooms = roomRepository.findAvailableRooms(
-            query.date, dayOfWeek, query.startTime, query.endTime, query.minCapacity, query.building
-        );
+        List<com.rvce.scas.entity.Room> rooms;
+        if (query.building == null) {
+            rooms = roomRepository.findAvailableRooms(
+                query.date, dayOfWeek, query.startTime, query.endTime, query.minCapacity
+            );
+        } else {
+            rooms = roomRepository.findAvailableRoomsByBuilding(
+                query.date, dayOfWeek, query.startTime, query.endTime, query.minCapacity, query.building
+            );
+        }
 
         List<RoomAvailabilityDto> result = roomMapper.toDtoList(rooms);
 

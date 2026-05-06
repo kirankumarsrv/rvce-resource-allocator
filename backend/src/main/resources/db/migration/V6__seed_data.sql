@@ -111,40 +111,40 @@ ON CONFLICT DO NOTHING;
 
 -- ─── USERS (1 per role, password = BCrypt('Test@1234', 12)) ───
 -- DECISION [S1]: BCrypt hash generated with Spring's BCryptPasswordEncoder.encode("Test@1234")
--- Hash always starts with $2a$12$ (BCrypt algorithm + strength 12)
+-- Hash is a BCrypt string with strength 12 (prefix $2a$, $2b$, or $2y$).
 INSERT INTO users (user_id, name, email, password_hash, usn, department_id) VALUES
     ('44444444-4444-4444-4444-444444444001',
      'Admin User',
      'admin@rvce.edu.in',
-     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8d1pCfHvHBpwMX5CdZy',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
      NULL,
      '11111111-1111-1111-1111-111111111099'),
 
     ('44444444-4444-4444-4444-444444444002',
      'TTO Officer',
      'tto@rvce.edu.in',
-     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8d1pCfHvHBpwMX5CdZy',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
      NULL,
      '11111111-1111-1111-1111-111111111099'),
 
     ('44444444-4444-4444-4444-444444444003',
      'Dr. Priya Sharma',
      'priya.sharma@rvce.edu.in',
-     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8d1pCfHvHBpwMX5CdZy',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
      NULL,
      '11111111-1111-1111-1111-111111111001'),
 
     ('44444444-4444-4444-4444-444444444004',
      'Dr. Ramesh Kumar',
      'ramesh.kumar@rvce.edu.in',
-     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8d1pCfHvHBpwMX5CdZy',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
      NULL,
      '11111111-1111-1111-1111-111111111001'),
 
     ('44444444-4444-4444-4444-444444444005',
      'Kiran Reddy',
      'kiran@rvce.edu.in',
-     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8d1pCfHvHBpwMX5CdZy',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
      '1RV22CS050',
      '11111111-1111-1111-1111-111111111001')
 ON CONFLICT (email) DO NOTHING;

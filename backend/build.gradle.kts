@@ -55,6 +55,9 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	javaLauncher = javaToolchains.launcherFor {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
 tasks.jacocoTestReport {

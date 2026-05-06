@@ -14,8 +14,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -67,6 +69,34 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleConstraintViolation(
             ConstraintViolationException ex, HttpServletRequest request) {
         return ResponseEntity.badRequest().body(base(request, 400, "Bad Request", "CONSTRAINT_VIOLATION", ex.getMessage()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponseDto> handleMissingRequestParameter(
+            MissingServletRequestParameterException ex, HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(base(
+                request,
+                400,
+                "Bad Request",
+                "MISSING_REQUEST_PARAMETER",
+                String.format("Required request parameter '%s' is missing.", ex.getParameterName())
+        ));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponseDto> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(base(
+                request,
+                400,
+                "Bad Request",
+                "INVALID_REQUEST_PARAMETER",
+                String.format("Request parameter '%s' has invalid value '%s'. Expected type: %s.",
+                        ex.getName(),
+                        ex.getValue(),
+                        ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown"
+                )
+        ));
     }
 
         /**
@@ -153,6 +183,20 @@ public class GlobalExceptionHandler {
             AccessDeniedException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(base(request, 403, "Forbidden", "INSUFFICIENT_PERMISSIONS", "You do not have permission to perform this action."));
+    }
+
+    /**
+     * Handles business logic validation errors (e.g., missing required parameters, invalid time ranges).
+     *
+     * @param ex the illegal argument exception
+     * @param request the current HTTP request
+     * @return a 400 response with the validation error message
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgument(
+            IllegalArgumentException ex, HttpServletRequest request) {
+        return ResponseEntity.badRequest()
+                .body(base(request, 400, "Bad Request", "INVALID_REQUEST", ex.getMessage()));
     }
 
     /**
