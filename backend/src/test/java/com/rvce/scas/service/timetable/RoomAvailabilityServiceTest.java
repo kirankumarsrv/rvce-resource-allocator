@@ -113,7 +113,7 @@ class RoomAvailabilityServiceTest {
         List<RoomAvailabilityDto> expectedDtos = List.of(dto1, dto2);
 
         when(cache.get(anyString())).thenReturn(Optional.empty());
-        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null), eq(null)))
+        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null)))
             .thenReturn(availableRooms);
         when(roomMapper.toDtoList(eq(availableRooms))).thenReturn(expectedDtos);
         doNothing().when(cache).put(anyString(), eq(expectedDtos));
@@ -127,7 +127,7 @@ class RoomAvailabilityServiceTest {
         assertEquals("LH-101", result.get(0).getName());
         assertEquals("LH-102", result.get(1).getName());
 
-        verify(roomRepository, times(1)).findAvailableRooms(testDate, dayOfWeek, startTime, endTime, null, null);
+        verify(roomRepository, times(1)).findAvailableRooms(testDate, dayOfWeek, startTime, endTime, null);
         verify(cache, times(1)).put(anyString(), anyList());
     }
 
@@ -144,7 +144,7 @@ class RoomAvailabilityServiceTest {
         List<RoomAvailabilityDto> allDtos = List.of(dto1, dto2, dto3);
 
         when(cache.get(anyString())).thenReturn(Optional.empty());
-        when(roomRepository.findAvailableRooms(eq(today), eq(dayOfWeek), eq(earlyMorning), eq(midnight), eq(null), eq(null)))
+        when(roomRepository.findAvailableRooms(eq(today), eq(dayOfWeek), eq(earlyMorning), eq(midnight), eq(null)))
             .thenReturn(allRooms);
         when(roomMapper.toDtoList(eq(allRooms))).thenReturn(allDtos);
         doNothing().when(cache).put(anyString(), eq(allDtos));
@@ -166,7 +166,7 @@ class RoomAvailabilityServiceTest {
         List<RoomAvailabilityDto> expectedDtos = List.of(dto2, dto3);
 
         when(cache.get(anyString())).thenReturn(Optional.empty());
-        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null), eq(null)))
+        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null)))
             .thenReturn(availableRooms);
         when(roomMapper.toDtoList(eq(availableRooms))).thenReturn(expectedDtos);
         doNothing().when(cache).put(anyString(), eq(expectedDtos));
@@ -188,7 +188,7 @@ class RoomAvailabilityServiceTest {
         List<RoomAvailabilityDto> dtoList = List.of(dto1);
 
         when(cache.get(anyString())).thenReturn(Optional.empty());
-        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null), eq(null)))
+        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null)))
             .thenReturn(roomList);
         when(roomMapper.toDtoList(eq(roomList))).thenReturn(dtoList);
         doNothing().when(cache).put(anyString(), eq(dtoList));
@@ -199,7 +199,7 @@ class RoomAvailabilityServiceTest {
         // Verify
         assertEquals(1, result.size());
         verify(cache, times(1)).get(anyString());
-        verify(roomRepository, times(1)).findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null), eq(null));
+        verify(roomRepository, times(1)).findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null));
         verify(cache, times(1)).put(anyString(), eq(dtoList));
     }
 
@@ -222,7 +222,7 @@ class RoomAvailabilityServiceTest {
         // Verify
         assertEquals(2, result.size());
         verify(cache, times(1)).get(cacheKey);
-        verify(roomRepository, never()).findAvailableRooms(any(), anyInt(), any(), any(), any(), any());
+        verify(roomRepository, never()).findAvailableRooms(any(), anyInt(), any(), any(), any());
         assertTrue(elapsedMillis < 50, "Cache hit should be faster than 50ms");
     }
 
@@ -236,7 +236,7 @@ class RoomAvailabilityServiceTest {
         List<RoomAvailabilityDto> expectedDtos = List.of(dto1, dto2);
 
         when(cache.get(anyString())).thenReturn(Optional.empty());
-        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(minCapacity), eq(null)))
+        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(minCapacity)))
             .thenReturn(availableRooms);
         when(roomMapper.toDtoList(eq(availableRooms))).thenReturn(expectedDtos);
         doNothing().when(cache).put(anyString(), eq(expectedDtos));
@@ -247,7 +247,7 @@ class RoomAvailabilityServiceTest {
         // Verify
         assertEquals(2, result.size());
         assertFalse(result.stream().anyMatch(r -> r.getCapacity() < minCapacity));
-        verify(roomRepository, times(1)).findAvailableRooms(testDate, dayOfWeek, startTime, endTime, minCapacity, null);
+        verify(roomRepository, times(1)).findAvailableRooms(testDate, dayOfWeek, startTime, endTime, minCapacity);
     }
 
     @Test
@@ -260,7 +260,7 @@ class RoomAvailabilityServiceTest {
         List<RoomAvailabilityDto> expectedDtos = List.of(dto1, dto3);
 
         when(cache.get(anyString())).thenReturn(Optional.empty());
-        when(roomRepository.findAvailableRooms(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null), eq(building)))
+        when(roomRepository.findAvailableRoomsByBuilding(eq(testDate), eq(dayOfWeek), eq(startTime), eq(endTime), eq(null), eq(building)))
             .thenReturn(availableRooms);
         when(roomMapper.toDtoList(eq(availableRooms))).thenReturn(expectedDtos);
         doNothing().when(cache).put(anyString(), eq(expectedDtos));
@@ -271,7 +271,7 @@ class RoomAvailabilityServiceTest {
         // Verify
         assertEquals(2, result.size());
         assertTrue(result.stream().allMatch(r -> "Block A".equals(r.getBuilding())));
-        verify(roomRepository, times(1)).findAvailableRooms(testDate, dayOfWeek, startTime, endTime, null, building);
+        verify(roomRepository, times(1)).findAvailableRoomsByBuilding(testDate, dayOfWeek, startTime, endTime, null, building);
     }
 
     @Test

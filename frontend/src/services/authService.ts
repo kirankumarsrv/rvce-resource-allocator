@@ -92,7 +92,7 @@ export const authenticatedFetch = async (
       await refreshAccessToken()
       const newToken = getAccessToken()
       response = await makeRequest(newToken!)
-    } catch (refreshError) {
+    } catch {
       // If refresh fails, clear auth and rethrow
       clearAuth()
       throw new Error('Authentication failed - please log in again')

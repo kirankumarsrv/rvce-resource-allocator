@@ -4,8 +4,9 @@ import { useAuth } from '@/context/AuthContext'
 
 const getDefaultRedirect = (roles: string[] | undefined): string => {
   if (!roles?.length) return '/student'
-  if (roles.includes('ROLE_ADMIN')) return '/admin'
+  if (roles.includes('ROLE_ADMIN') || roles.includes('ROLE_SUPER_ADMIN')) return '/admin'
   if (roles.includes('ROLE_TTO')) return '/tto'
+  if (roles.includes('ROLE_DEPT_COORD') || roles.includes('ROLE_EXAM_CONTROLLER')) return '/exam-ctrl'
   if (roles.includes('ROLE_TEACHER')) return '/teacher'
   if (roles.includes('ROLE_STUDENT')) return '/student'
   return '/student'

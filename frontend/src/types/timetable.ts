@@ -85,6 +85,34 @@ export interface RoomAvailabilityQuery {
 }
 
 /**
+ * DTO for uploading timetable CSV file results.
+ */
+export interface UploadResultDto {
+  /** Number of rows successfully imported */
+  successCount: number;
+  /** Number of rows that failed validation */
+  errorCount: number;
+  /** Optional list of validation or parsing errors. */
+  errors?: string[];
+  /** Optional summary message returned by the backend. */
+  message?: string;
+}
+
+export interface SubstituteRequest {
+  originalTeacherId: string;
+  replacementTeacherId: string;
+  startDate: string;
+  endDate: string;
+  scope: 'ONE_DAY' | 'SEMESTER';
+}
+
+export interface SubstitutionResultDto {
+  reassignedCount: number;
+  clashes: string[];
+  message?: string;
+}
+
+/**
  * DTO for creating room booking overrides (T-104)
  */
 export interface OverrideRequest {

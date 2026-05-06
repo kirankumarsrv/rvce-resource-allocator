@@ -41,6 +41,20 @@ const TeacherPage = () => {
               </div>
             </div>
           </Link>
+          <Link
+            to="/teacher/overrides"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
+          >
+            <div className="flex items-center">
+              <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7M4 6h16M4 18h16" />
+              </svg>
+              <div>
+                <h3 className="font-semibold">Manage Overrides</h3>
+                <p className="text-sm opacity-90">Cancel or book your slots</p>
+              </div>
+            </div>
+          </Link>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">

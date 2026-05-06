@@ -45,7 +45,6 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
      * @param startTime start of the time window
      * @param endTime end of the time window
      * @param minCapacity minimum room capacity (optional filter)
-     * @param building building filter (optional)
      * @return list of available rooms matching criteria
      */
     @Query("""
@@ -63,9 +62,33 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
             AND do.status = 'OCCUPIED'
         )
         AND (:minCapacity IS NULL OR r.capacity >= :minCapacity)
-        AND (:building IS NULL OR r.building = :building)
         """)
     List<Room> findAvailableRooms(
+        @Param("date") LocalDate date,
+        @Param("dayOfWeek") int dayOfWeek,
+        @Param("startTime") LocalTime startTime,
+        @Param("endTime") LocalTime endTime,
+        @Param("minCapacity") Integer minCapacity
+    );
+
+    @Query("""
+        SELECT r FROM Room r
+        WHERE r.id NOT IN (
+            SELECT ts.room.id FROM TimetableSlot ts
+            WHERE ts.isActive = true
+            AND ts.dayOfWeek = :dayOfWeek
+            AND ts.startTime < :endTime
+            AND ts.endTime > :startTime
+        )
+        AND r.id NOT IN (
+            SELECT do.slot.room.id FROM DayOverride do
+            WHERE do.date = :date
+            AND do.status = 'OCCUPIED'
+        )
+        AND (:minCapacity IS NULL OR r.capacity >= :minCapacity)
+        AND r.building = :building
+        """)
+    List<Room> findAvailableRoomsByBuilding(
         @Param("date") LocalDate date,
         @Param("dayOfWeek") int dayOfWeek,
         @Param("startTime") LocalTime startTime,

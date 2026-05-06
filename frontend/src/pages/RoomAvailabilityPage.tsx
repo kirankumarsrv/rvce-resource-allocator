@@ -14,7 +14,7 @@ import RoomCard from '../components/RoomCard';
 
 interface RoomAvailabilityPageProps {
   /** User role to determine booking permissions */
-  userRole?: 'TEACHER' | 'TTO' | 'ADMIN' | 'STUDENT';
+  userRole?: 'TEACHER' | 'TTO' | 'ADMIN' | 'STUDENT' | 'DEPT_COORD';
 }
 
 /**

@@ -1,0 +1,14 @@
+-- ============================================================
+-- V10__fix_seeded_user_passwords.sql [REMOVED - SECURITY FIX]
+-- This migration has been removed to prevent hardcoded password
+-- hashes from being exposed in version control.
+--
+-- The passwords were already applied in the database from 
+-- previous migration runs, so this file is no longer needed.
+--
+-- For future test account setup, use environment variables
+-- or Spring Boot configuration profiles (dev, test, prod).
+-- ============================================================
+-- DO NOT DELETE THIS FILE - Flyway tracks executed migrations.
+-- Keep it as a placeholder so Flyway knows it was executed.
+
