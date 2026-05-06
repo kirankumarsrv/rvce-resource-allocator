@@ -6,6 +6,9 @@ import LoginPage from '@/pages/LoginPage'
 import StudentPage from '@/pages/StudentPage'
 import TeacherPage from '@/pages/TeacherPage'
 import TTOPage from '@/pages/TTOPage'
+import UploadTimetablePage from '@/pages/UploadTimetablePage'
+import SubstitutePage from '@/pages/SubstitutePage'
+import OverrideManagementPage from '@/pages/OverrideManagementPage'
 import RoomAvailabilityPage from '@/pages/RoomAvailabilityPage'
 import UnauthorizedPage from '@/pages/UnauthorizedPage'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
@@ -86,6 +89,14 @@ function App() {
           }
         />
         <Route
+          path="/teacher/overrides"
+          element={
+            <RequireRole allowedRoles={['ROLE_TEACHER']}>
+              {withLayout(<OverrideManagementPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
           path="/tto"
           element={
             <RequireRole allowedRoles={['ROLE_TTO']}>
@@ -94,10 +105,50 @@ function App() {
           }
         />
         <Route
+          path="/tto/upload"
+          element={
+            <RequireRole allowedRoles={['ROLE_TTO']}>
+              {withLayout(<UploadTimetablePage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/tto/substitute"
+          element={
+            <RequireRole allowedRoles={['ROLE_TTO']}>
+              {withLayout(<SubstitutePage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/tto/overrides"
+          element={
+            <RequireRole allowedRoles={['ROLE_TTO']}>
+              {withLayout(<OverrideManagementPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
           path="/tto/rooms"
           element={
             <RequireRole allowedRoles={['ROLE_TTO']}>
               {withLayout(<RoomAvailabilityPage userRole="TTO" />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/substitute"
+          element={
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
+              {withLayout(<SubstitutePage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/overrides"
+          element={
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
+              {withLayout(<OverrideManagementPage />)}
             </RequireRole>
           }
         />

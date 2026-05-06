@@ -39,12 +39,57 @@ const TTOPage = () => {
       {/* Quick Actions Navigation */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Link
-          to="/tto/rooms"
-          className="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
+          to="/tto/upload"
+          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
         >
           <div className="flex items-center">
             <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <div>
+              <h3 className="font-semibold">Upload Timetable</h3>
+              <p className="text-sm opacity-90">Upload CSV timetable data</p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/tto/substitute"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
+        >
+          <div className="flex items-center">
+            <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div>
+              <h3 className="font-semibold">Teacher Substitution</h3>
+              <p className="text-sm opacity-90">Assign substitute teachers</p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/tto/overrides"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
+        >
+          <div className="flex items-center">
+            <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7M4 6h16M4 18h16" />
+            </svg>
+            <div>
+              <h3 className="font-semibold">Manage Overrides</h3>
+              <p className="text-sm opacity-90">Cancel or book slots</p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/tto/rooms"
+          className="bg-slate-600 hover:bg-slate-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
+        >
+          <div className="flex items-center">
+            <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 6h18M3 14h18M3 18h18" />
             </svg>
             <div>
               <h3 className="font-semibold">Manage Room Availability</h3>

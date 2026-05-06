@@ -10,6 +10,9 @@ import {
   RoomWeeklySchedule,
   RoomAvailabilityDto,
   RoomAvailabilityQuery,
+  UploadResultDto,
+  SubstituteRequest,
+  SubstitutionResultDto,
   OverrideRequest,
   OverrideDto,
 } from '../types/timetable'
@@ -99,6 +102,85 @@ export const getAvailableRooms = async (
 
   if (!response.ok) throw new Error('Failed to fetch available rooms')
   return response.json()
+};
+
+export const uploadTimetable = async (file: File): Promise<UploadResultDto> => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await authenticatedFetch(`${API_BASE}/upload`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(errorText || 'Failed to upload timetable')
+  }
+
+  return response.json()
+};
+
+export const substituteTeacher = async (
+  request: SubstituteRequest
+): Promise<SubstitutionResultDto> => {
+  const response = await authenticatedFetch(`${API_BASE}/substitute`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(errorText || 'Failed to submit substitution')
+  }
+
+  return response.json()
+};
+
+export const getOverrides = async (
+  date: string,
+  roomId?: string
+): Promise<OverrideDto[]> => {
+  const params = new URLSearchParams({ date })
+  if (roomId) params.append('roomId', roomId)
+
+  const response = await authenticatedFetch(`${API_BASE}/overrides?${params.toString()}`)
+
+  if (!response.ok) throw new Error('Failed to fetch overrides')
+  return response.json()
+};
+
+export const createOverride = async (
+  request: OverrideRequest
+): Promise<OverrideDto> => {
+  const response = await authenticatedFetch(`${API_BASE}/override`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(errorText || 'Failed to create override')
+  }
+
+  return response.json()
+};
+
+export const deleteOverride = async (overrideId: string): Promise<void> => {
+  const response = await authenticatedFetch(`${API_BASE}/override/${overrideId}`, {
+    method: 'DELETE',
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(errorText || 'Failed to delete override')
+  }
 };
 
 /**
