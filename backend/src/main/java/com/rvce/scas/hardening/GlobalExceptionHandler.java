@@ -2,7 +2,9 @@ package com.rvce.scas.hardening;
 
 import com.rvce.scas.dto.ErrorResponseDto;
 import com.rvce.scas.exception.AccountLockedException;
+import com.rvce.scas.exception.DirectionsNotFoundException;
 import com.rvce.scas.exception.InvalidTokenException;
+import com.rvce.scas.exception.RoomNotFoundException;
 import com.rvce.scas.exception.SlotAlreadyClaimedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -91,10 +93,9 @@ public class GlobalExceptionHandler {
                 400,
                 "Bad Request",
                 "INVALID_REQUEST_PARAMETER",
-                String.format("Request parameter '%s' has invalid value '%s'. Expected type: %s.",
+                                String.format("Request parameter '%s' has invalid value '%s'.",
                         ex.getName(),
-                        ex.getValue(),
-                        ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown"
+                                                ex.getValue()
                 )
         ));
     }
@@ -197,6 +198,20 @@ public class GlobalExceptionHandler {
             IllegalArgumentException ex, HttpServletRequest request) {
         return ResponseEntity.badRequest()
                 .body(base(request, 400, "Bad Request", "INVALID_REQUEST", ex.getMessage()));
+    }
+
+    @ExceptionHandler(RoomNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleRoomNotFound(
+            RoomNotFoundException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(base(request, 404, "Not Found", "ROOM_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DirectionsNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleDirectionsNotFound(
+            DirectionsNotFoundException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(base(request, 404, "Not Found", "DIRECTIONS_NOT_FOUND", ex.getMessage()));
     }
 
     /**

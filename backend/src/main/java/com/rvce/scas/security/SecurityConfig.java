@@ -79,6 +79,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/refresh",
+                                "/api/rooms/*/location",
+                                "/api/rooms/*/directions",
+                                "/api/rooms/search",
                                 "/actuator/health",
                                 "/actuator/info",
                                 "/v3/api-docs/**",

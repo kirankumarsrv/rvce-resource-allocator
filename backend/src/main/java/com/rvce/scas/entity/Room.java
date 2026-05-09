@@ -73,6 +73,12 @@ public class Room {
     private String directionsText; // Navigation instructions
 
     @Column(nullable = true)
+    private String landmarkDescription; // e.g., "Blue building next to basketball court"
+
+    @Column(nullable = true)
+    private String floorPlanS3Key; // S3 object key for floor plan image
+
+    @Column(nullable = true)
     private UUID deptOwnerId; // Department owner reference
 
     @Column(nullable = false)

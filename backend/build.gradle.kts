@@ -12,7 +12,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
@@ -51,12 +51,15 @@ dependencies {
 
 	// swagger - for API documentation
 	implementation(libs.springdoc.openapi.starter.webmvc.ui)
+
+	// AWS SDK v2 for S3 (floor plan image storage and pre-signed URLs)
+	implementation(libs.aws.sdk.s3)
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
 	javaLauncher = javaToolchains.launcherFor {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 

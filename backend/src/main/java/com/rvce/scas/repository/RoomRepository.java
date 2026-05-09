@@ -1,13 +1,16 @@
 package com.rvce.scas.repository;
 
-import com.rvce.scas.entity.Room;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
+
+import com.rvce.scas.entity.Room;
 
 /**
  * <h3>Purpose</h3>
@@ -95,6 +98,49 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
         @Param("endTime") LocalTime endTime,
         @Param("minCapacity") Integer minCapacity,
         @Param("building") String building
+    );
+
+    /**
+     * Fast path for exact room name prefix matches.
+     * Uses a B-Tree index on rooms.name for O(log n) lookup.
+     * Returns only active rooms.
+     *
+     * @param namePrefix the prefix to match (case-insensitive)
+     * @param isActive whether the room is active
+     * @param pageable pagination parameters (includes limit)
+     * @return list of matching active rooms
+     */
+    List<Room> findByNameStartingWithIgnoreCaseAndIsActive(
+        String namePrefix, Boolean isActive, Pageable pageable
+    );
+
+    /**
+     * Full-text search using PostgreSQL GIN index.
+     * Searches across name, display_name, block, and building fields.
+     * Supports multi-word and partial matches.
+     *
+     * @param query the search query
+     * @param limit maximum number of results
+     * @return list of matching active rooms (unordered by relevance)
+     */
+    @Query(value = """
+        SELECT r.*
+        FROM rooms r
+        WHERE r.is_active = true
+          AND to_tsvector('simple', r.name || ' ' || COALESCE(r.display_name, '')
+                                      || ' ' || r.block || ' ' || COALESCE(r.building, ''))
+              @@ plainto_tsquery('simple', :query)
+        ORDER BY ts_rank(
+            to_tsvector('simple', r.name || ' ' || COALESCE(r.display_name, '')
+                                        || ' ' || r.block || ' ' || COALESCE(r.building, '')),
+            plainto_tsquery('simple', :query)
+        ) DESC,
+        r.name ASC
+        LIMIT :limit
+        """, nativeQuery = true)
+    List<Room> searchByFullText(
+        @Param("query") String query,
+        @Param("limit") int limit
     );
 
 }

@@ -35,6 +35,21 @@ scas:
     access-token-expiry-ms: ${JWT_ACCESS_TOKEN_EXPIRY_MS:900000}  # 15 minutes
     refresh-token-expiry-seconds: ${JWT_REFRESH_TOKEN_EXPIRY_SECONDS:604800}  # 7 days
 
+# Room Navigation configuration (T-301, T-302, T-303)
+room:
+  search:
+    min-query-length: ${ROOM_SEARCH_MIN_QUERY_LENGTH:2}
+    max-results: ${ROOM_SEARCH_MAX_RESULTS:10}
+  floor-plan:
+    presigned-url:
+      ttl-seconds: ${ROOM_FLOOR_PLAN_PRESIGNED_URL_TTL_SECONDS:3600}  # 1 hour
+
+# AWS configuration for S3 (floor plans)
+aws:
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME:scas-rvce-floor-plans}
+    region: ${AWS_REGION:ap-south-1}
+
 server:
   port: 8080
 
@@ -76,6 +91,21 @@ scas:
     public-key-path: ${JWT_PUBLIC_KEY_PATH:}
     access-token-expiry-ms: ${JWT_ACCESS_TOKEN_EXPIRY_MS:900000}  # 15 minutes
     refresh-token-expiry-seconds: ${JWT_REFRESH_TOKEN_EXPIRY_SECONDS:604800}  # 7 days
+
+# Room Navigation configuration (T-301, T-302, T-303)
+room:
+  search:
+    min-query-length: ${ROOM_SEARCH_MIN_QUERY_LENGTH:2}
+    max-results: ${ROOM_SEARCH_MAX_RESULTS:10}
+  floor-plan:
+    presigned-url:
+      ttl-seconds: ${ROOM_FLOOR_PLAN_PRESIGNED_URL_TTL_SECONDS:3600}  # 1 hour
+
+# AWS configuration for S3 (floor plans)
+aws:
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME:scas-rvce-floor-plans}
+    region: ${AWS_REGION:ap-south-1}
 
 server:
   port: 8080
