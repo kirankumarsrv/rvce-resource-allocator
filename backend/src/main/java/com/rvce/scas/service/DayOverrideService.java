@@ -16,6 +16,7 @@ import com.rvce.scas.security.JwtPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
@@ -50,7 +51,6 @@ public class DayOverrideService {
 
     private final DayOverrideRepository overrideRepository;
     private final TimetableSlotRepository slotRepository;
-    private final UserRepository userRepository;
     private final RoomAvailabilityCache cache;
     private final TimetableMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
@@ -132,7 +132,7 @@ public class DayOverrideService {
      * @throws AccessDeniedException if actor lacks permission
      */
     @Transactional
-    public void deleteOverride(java.util.UUID overrideId, JwtPrincipal actor) {
+    public void deleteOverride(@NonNull java.util.UUID overrideId, JwtPrincipal actor) {
         log.info("Deleting override {} by user {}", overrideId, actor.getUserId());
 
         DayOverride override = overrideRepository.findById(overrideId)

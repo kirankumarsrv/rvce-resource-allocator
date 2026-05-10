@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 
 import AdminPage from '@/pages/AdminPage'
 import ExamCtrlPage from '@/pages/ExamCtrlPage'
+import CreateExamPage from '@/pages/CreateExamPage'
+import { SeatingDashboard } from '@/pages/SeatingDashboardPage'
 import LoginPage from '@/pages/LoginPage'
 import StudentPage from '@/pages/StudentPage'
 import TeacherPage from '@/pages/TeacherPage'
@@ -153,10 +155,26 @@ function App() {
           }
         />
         <Route
+          path="/create-exam"
+          element={
+            <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
+              {withLayout(<CreateExamPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
           path="/exam-ctrl"
           element={
             <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
               {withLayout(<ExamCtrlPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/exam-ctrl/:examId"
+          element={
+            <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
+              {withLayout(<SeatingDashboard />)}
             </RequireRole>
           }
         />

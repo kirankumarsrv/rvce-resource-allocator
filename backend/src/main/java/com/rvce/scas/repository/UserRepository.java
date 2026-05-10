@@ -3,7 +3,9 @@ package com.rvce.scas.repository;
 import com.rvce.scas.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -64,4 +66,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @return Optional containing the User if found, empty Optional otherwise
      */
     Optional<User> findByEmailIgnoreCase(String email);
+
+    /**
+     * Finds users by a set of USN values.
+     *
+     * <p><strong>Purpose:</strong> Supports bulk lookup of users by their University Seat Numbers
+     * for exam student linking operations.</p>
+     *
+     * @param usns the set of USN values to search for
+     * @return List of User entities matching the provided USNs
+     */
+    List<User> findByUsnIn(Set<String> usns);
 }

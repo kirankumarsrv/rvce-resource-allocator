@@ -120,8 +120,8 @@ export interface OverrideRequest {
   slotId: number;
   /** Date of the override */
   date: string;
-  /** Status of the override (CANCELLED or OCCUPIED) */
-  status: 'CANCELLED' | 'OCCUPIED';
+  /** Status of the override (CANCELLED, CLAIMED, or EXTRA_CLASS) */
+  status: 'CANCELLED' | 'CLAIMED' | 'EXTRA_CLASS';
   /** Optional reason for the override */
   reason?: string;
 }
@@ -137,7 +137,7 @@ export interface OverrideDto {
   /** Date of the override */
   date: string;
   /** Status of the override */
-  status: 'CANCELLED' | 'OCCUPIED';
+  status: 'CANCELLED' | 'CLAIMED' | 'EXTRA_CLASS';
   /** Reason for the override */
   reason?: string;
   /** User who created the override */

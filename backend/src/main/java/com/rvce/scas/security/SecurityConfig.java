@@ -83,12 +83,15 @@ public class SecurityConfig {
                                 "/actuator/info",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api/exam/*/rooms/available"
                         ).permitAll()
                         .requestMatchers("/api/auth/logout", "/api/auth/logout-all").authenticated()
                         .requestMatchers("/api/exam/*/seating/my-seat").hasRole("STUDENT")
                         .requestMatchers("/api/exam/**").hasAnyRole("DEPT_COORD", "ADMIN", "TTO", "EXAM_CONTROLLER")
                         .requestMatchers("/api/timetable/available").hasAnyRole("TEACHER", "TTO", "DEPT_COORD", "ADMIN", "SUPER_ADMIN")
+                        .requestMatchers("/api/timetable/overrides", "/api/timetable/override", "/api/timetable/override/**")
+                        .hasAnyRole("TEACHER", "TTO", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/timetable/generate", "/api/timetable/upload", "/api/timetable/**")
                         .hasAnyRole("TTO", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

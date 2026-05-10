@@ -38,7 +38,7 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
      *
      * <p>The query excludes rooms that have:
      * 1. A timetable slot on the same day_of_week and overlapping time
-     * 2. A day override with OCCUPIED status on the exact date
+    * 2. A day override with CLAIMED or EXTRA_CLASS status on the exact date
      * (CANCELLED overrides make the room available, so they are not excluded)</p>
      *
      * @param date the date to check availability for
@@ -59,7 +59,7 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
         AND r.id NOT IN (
             SELECT do.slot.room.id FROM DayOverride do
             WHERE do.date = :date
-            AND do.status = 'OCCUPIED'
+            AND do.status IN ('CLAIMED', 'EXTRA_CLASS')
         )
         AND (:minCapacity IS NULL OR r.capacity >= :minCapacity)
         """)
@@ -83,7 +83,7 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
         AND r.id NOT IN (
             SELECT do.slot.room.id FROM DayOverride do
             WHERE do.date = :date
-            AND do.status = 'OCCUPIED'
+            AND do.status IN ('CLAIMED', 'EXTRA_CLASS')
         )
         AND (:minCapacity IS NULL OR r.capacity >= :minCapacity)
         AND r.building = :building

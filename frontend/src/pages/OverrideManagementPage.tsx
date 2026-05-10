@@ -199,7 +199,8 @@ const OverrideManagementPage = () => {
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               >
                 <option value="CANCELLED">CANCELLED</option>
-                <option value="OCCUPIED">OCCUPIED</option>
+                <option value="CLAIMED">CLAIMED</option>
+                <option value="EXTRA_CLASS">EXTRA_CLASS</option>
               </select>
             </div>
             <div>

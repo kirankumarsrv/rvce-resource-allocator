@@ -196,7 +196,7 @@ export const bookRoomForToday = async (
   const request: OverrideRequest = {
     slotId,
     date: today,
-    status: 'OCCUPIED',
+    status: 'CLAIMED',
     reason: reason || 'Booked for today',
   };
 

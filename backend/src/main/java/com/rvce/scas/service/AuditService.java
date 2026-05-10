@@ -58,4 +58,19 @@ public class AuditService {
     public void logLogout(UUID userId) {
         log.info("AUDIT logout userId={}", userId);
     }
+
+    /**
+     * Logs a general audit event with actor, action, table, and entity information.
+     *
+     * <p>This method provides centralized logging of security and operational events
+     * including CRUD operations on entities.</p>
+     *
+     * @param actorId the UUID of the user performing the action
+     * @param action the action performed (e.g., "ADD_EXAM_HALL", "DELETE_EXAM_HALL")
+     * @param table the table/entity affected (e.g., "exam_halls", "exam_students")
+     * @param entityId the UUID of the affected entity
+     */
+    public void log(UUID actorId, String action, String table, UUID entityId) {
+        log.info("AUDIT actorId={} action={} table={} entityId={}", actorId, action, table, entityId);
+    }
 }

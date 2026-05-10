@@ -6,7 +6,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -60,8 +64,14 @@ public class User {
     @Column(name = "user_id")
     private UUID userId;
 
+    @Column(name = "name", nullable = false, length = 150)
+    private String name;
+
     @Column(name = "email", nullable = false, length = 255)
     private String email;
+
+    @Column(name = "usn", length = 20)
+    private String usn;
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
@@ -69,8 +79,40 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
+    @Column(name = "failed_login_count", nullable = false)
+    private short failedLoginCount;
+
+    @Column(name = "last_login_at")
+    private Instant lastLoginAt;
+
     @Column(name = "locked_until")
     private Instant lockedUntil;
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    @PrePersist
+    public void prePersist() {
+        Instant now = Instant.now();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<UserRole> userRoles = new HashSet<>();

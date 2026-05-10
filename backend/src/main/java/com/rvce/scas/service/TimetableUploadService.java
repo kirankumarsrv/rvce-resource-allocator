@@ -16,6 +16,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,7 +70,7 @@ public class TimetableUploadService {
      * @throws CsvValidationException if any row fails validation (triggers rollback)
      */
     @Transactional
-    public UploadResultDto upload(MultipartFile file) {
+    public UploadResultDto upload(@NonNull MultipartFile file) {
         log.info("Starting timetable upload for file: {}", file.getOriginalFilename());
 
         List<CsvRowValidator.CsvRowDto> validRows;
@@ -122,7 +123,10 @@ public class TimetableUploadService {
         List<String> errors = new ArrayList<>();
 
         try (CSVParser parser = CSVFormat.DEFAULT
-                .withFirstRecordAsHeader()
+                .builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .build()
                 .parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             int rowNumber = 1; // Start after header
