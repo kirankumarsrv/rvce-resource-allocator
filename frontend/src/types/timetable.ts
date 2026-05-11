@@ -53,7 +53,7 @@ export interface WeeklySchedule {
 
 /**
  * DTO for room availability queries (T-102).
- * Represents a room that is available for booking.
+ * Represents a room that is available for the selected time slot.
  */
 export interface RoomAvailabilityDto {
   /** Unique identifier of the room */
@@ -62,6 +62,8 @@ export interface RoomAvailabilityDto {
   name: string;
   /** Maximum capacity of the room */
   capacity: number;
+  /** Room type, such as CLASSROOM or EXAM_HALL */
+  roomType: string;
   /** Building where the room is located */
   building: string;
   /** Floor number of the room */
@@ -98,6 +100,11 @@ export interface UploadResultDto {
   message?: string;
 }
 
+export interface SimpleDto {
+  id: string;
+  text: string;
+}
+
 export interface SubstituteRequest {
   originalTeacherId: string;
   replacementTeacherId: string;
@@ -112,36 +119,19 @@ export interface SubstitutionResultDto {
   message?: string;
 }
 
-/**
- * DTO for creating room booking overrides (T-104)
- */
 export interface OverrideRequest {
-  /** ID of the timetable slot to override */
   slotId: number;
-  /** Date of the override */
   date: string;
-  /** Status of the override (CANCELLED, CLAIMED, or EXTRA_CLASS) */
-  status: 'CANCELLED' | 'CLAIMED' | 'EXTRA_CLASS';
-  /** Optional reason for the override */
-  reason?: string;
+  status: 'CANCELLED' | 'ACTIVE';
+  reason: string;
 }
 
-/**
- * Response DTO for override operations
- */
 export interface OverrideDto {
-  /** Unique identifier of the override */
-  id: number;
-  /** ID of the slot being overridden */
+  id: string;
   slotId: number;
-  /** Date of the override */
   date: string;
-  /** Status of the override */
-  status: 'CANCELLED' | 'CLAIMED' | 'EXTRA_CLASS';
-  /** Reason for the override */
-  reason?: string;
-  /** User who created the override */
-  createdBy: string;
-  /** Timestamp when the override was created */
+  status: 'CANCELLED' | 'ACTIVE';
+  reason: string;
   createdAt: string;
+  createdBy?: string;
 }

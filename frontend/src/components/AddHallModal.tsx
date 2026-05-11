@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { X, Loader } from 'lucide-react'
 import type { ExamHallConfigRequest } from '@/types/exam'
+import type { RoomAvailabilityDto } from '@/types/timetable'
 import { listAvailableRooms } from '@/services/examService'
 
 interface AddHallModalProps {
@@ -16,14 +17,7 @@ interface AddHallModalProps {
   isSubmitting: boolean
 }
 
-interface AvailableRoom {
-  id: string
-  name: string
-  block: string
-  floor: number
-  capacity: number
-}
-
+type AvailableRoom = RoomAvailabilityDto
 export const AddHallModal = ({
   examId,
   isOpen,
@@ -53,17 +47,16 @@ export const AddHallModal = ({
 
     listAvailableRooms(examId)
       .then((availableRooms) => {
-        setRooms(availableRooms)
-        if (availableRooms.length > 0) {
-          setRoomId(availableRooms[0].id)
-          
-          // Auto-fill reasonable bench counts for the first room
-          const firstRoom = availableRooms[0]
+        const examHallRooms = availableRooms.filter((room) => room.roomType === 'EXAM_HALL')
+        setRooms(examHallRooms)
+        if (examHallRooms.length > 0) {
+          setRoomId(examHallRooms[0].id)
+          const firstRoom = examHallRooms[0]
           const capacity = firstRoom.capacity
           const threeSeaterCount = Math.min(2, Math.floor(capacity / 3))
           const remainingCapacity = capacity - (threeSeaterCount * 3)
           const twoSeaterCount = Math.floor(remainingCapacity / 2)
-          
+
           setTwoSeaterCount(twoSeaterCount)
           setThreeSeaterCount(threeSeaterCount)
         }
@@ -125,7 +118,7 @@ export const AddHallModal = ({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Add New Hall</h2>
-            <p className="text-sm text-gray-600">Select an available room and configure seating.</p>
+            <p className="text-sm text-gray-600">Select an exam hall and configure seating.</p>
           </div>
           <button
             type="button"
@@ -150,7 +143,7 @@ export const AddHallModal = ({
             <>
               {rooms.length === 0 ? (
                 <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700">
-                  No exam hall rooms are available for this exam time. Please ensure a room is configured as an exam hall and try again.
+                  No exam hall rooms are available for this exam time. Please ensure at least one room is configured as an exam hall and try again.
                 </div>
               ) : (
                 <div>
@@ -165,14 +158,13 @@ export const AddHallModal = ({
                       setRoomId(selectedRoomId)
                       
                       // Auto-fill reasonable bench counts based on room capacity
-                      const selectedRoom = rooms.find(r => r.id === selectedRoomId)
+                      const selectedRoom = rooms.find((r) => r.id === selectedRoomId)
                       if (selectedRoom) {
                         const capacity = selectedRoom.capacity
-                        // Try to use mostly 2-seater benches, with some 3-seater for flexibility
                         const threeSeaterCount = Math.min(2, Math.floor(capacity / 3))
                         const remainingCapacity = capacity - (threeSeaterCount * 3)
                         const twoSeaterCount = Math.floor(remainingCapacity / 2)
-                        
+
                         setTwoSeaterCount(twoSeaterCount)
                         setThreeSeaterCount(threeSeaterCount)
                       }
@@ -181,7 +173,7 @@ export const AddHallModal = ({
                   >
                     {rooms.map((room) => (
                       <option key={room.id} value={room.id}>
-                        {room.name} • Block {room.block}, Floor {room.floor} • Capacity {room.capacity}
+                        {room.name} • Block {room.building}, Floor {room.floor} • Capacity {room.capacity}
                       </option>
                     ))}
                   </select>

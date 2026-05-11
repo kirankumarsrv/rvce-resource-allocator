@@ -1,21 +1,19 @@
 package com.rvce.scas.controller;
 
-import com.rvce.scas.dto.request.OverrideRequest;
 import com.rvce.scas.dto.request.SubstituteRequest;
 import com.rvce.scas.dto.response.*;
-import com.rvce.scas.security.JwtPrincipal;
-import com.rvce.scas.service.DayOverrideService;
 import com.rvce.scas.service.RoomAvailabilityService;
 import com.rvce.scas.service.SubstitutionService;
 import com.rvce.scas.service.TimetableQueryService;
 import com.rvce.scas.service.TimetableUploadService;
+import com.rvce.scas.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
@@ -23,11 +21,12 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * <h3>Purpose</h3>
- * REST controller for all Epic 1 timetable operations (T-101 to T-105).
- * Provides endpoints for upload, queries, substitutions, and overrides.
+ * REST controller for Epic 1 timetable operations (T-101 to T-105).
+ * Provides endpoints for upload, room availability, substitutions, and queries.
  *
  * <h3>Key Responsibilities</h3>
  * <ul>
@@ -37,7 +36,7 @@ import java.util.UUID;
  * </ul>
  *
  * <h3>Dependencies</h3>
- * Depends on all Epic 1 services.
+ * Depends on: TimetableUploadService, RoomAvailabilityService, SubstitutionService, TimetableQueryService.
  *
  * <h3>Transaction Behaviour</h3>
  * Controllers are not transactional — services handle transactions.
@@ -54,8 +53,8 @@ public class TimetableController {
     private final TimetableUploadService uploadService;
     private final RoomAvailabilityService availabilityService;
     private final SubstitutionService substitutionService;
-    private final DayOverrideService overrideService;
     private final TimetableQueryService queryService;
+    private final UserRepository userRepository;
 
     /**
      * Uploads a CSV timetable file (T-101).
@@ -67,14 +66,15 @@ public class TimetableController {
     @PostMapping("/upload")
     @PreAuthorize("hasRole('TTO')")
     @Operation(summary = "Upload timetable CSV", description = "Parse and persist CSV timetable data")
-    public ResponseEntity<UploadResultDto> uploadTimetable(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<UploadResultDto> uploadTimetable(@RequestParam("file") @NonNull MultipartFile file) {
         UploadResultDto result = uploadService.upload(file);
         return ResponseEntity.ok(result);
     }
 
     /**
-     * Queries available rooms for booking (T-102).
+     * Queries available rooms for information (T-102).
      * Returns cached results when available, otherwise queries database.
+     * Read-only endpoint for checking room availability.
      *
      * @param date date to check (optional, defaults to today)
      * @param startTime start of time window
@@ -84,7 +84,7 @@ public class TimetableController {
      * @return list of available rooms
      */
     @GetMapping("/available")
-    @Operation(summary = "Get available rooms", description = "Query rooms available for booking")
+    @Operation(summary = "Get available rooms", description = "Query rooms available during specified time")
     public ResponseEntity<List<RoomAvailabilityDto>> getAvailableRooms(
             @RequestParam(required = false) LocalDate date,
             @RequestParam LocalTime startTime,
@@ -102,6 +102,29 @@ public class TimetableController {
         return ResponseEntity.ok(rooms);
     }
 
+
+
+    /**
+     * Lists teachers for substitution and scheduling lookups.
+     *
+     * @return teachers as lightweight id/text pairs
+     */
+    @GetMapping("/teachers")
+    @PreAuthorize("hasAnyRole('TTO','ADMIN','SUPER_ADMIN')")
+    @Operation(summary = "List teachers", description = "Retrieve teachers for dropdown selectors")
+    public ResponseEntity<List<SimpleDto>> listTeachers() {
+        List<SimpleDto> teachers = userRepository.findAllByRoleName("TEACHER").stream()
+                .map(user -> new SimpleDto(user.getUserId().toString(), user.getName() + " (" + user.getEmail() + ")"))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(teachers);
+    }
+
+
+
+
+
+
+
     /**
      * Substitutes one teacher with another for a date range (T-103).
      * Requires TTO or ADMIN role. Performs clash detection and atomic reassignment.
@@ -117,59 +140,11 @@ public class TimetableController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * Creates a day override for cancelling or booking (T-104).
-     * Teachers can cancel their own slots, admins can override any.
-     *
-     * @param request override details
-     * @param principal authenticated user
-     * @return created override details
-     */
-    @PostMapping("/override")
-    @PreAuthorize("hasAnyRole('TEACHER','TTO','ADMIN')")
-    @Operation(summary = "Create day override", description = "Cancel or book a specific slot for a date")
-    public ResponseEntity<OverrideDto> createOverride(
-            @Valid @RequestBody OverrideRequest request,
-            @AuthenticationPrincipal JwtPrincipal principal) {
 
-        OverrideDto result = overrideService.createOverride(request, principal);
-        return ResponseEntity.status(201).body(result);
-    }
 
-    /**
-     * Retrieves overrides for a specific date (T-104).
-     *
-     * @param date date to query
-     * @param roomId optional room filter
-     * @return list of overrides
-     */
-    @GetMapping("/overrides")
-    @Operation(summary = "Get day overrides", description = "Retrieve overrides for a specific date")
-    public ResponseEntity<List<OverrideDto>> getOverrides(
-            @RequestParam LocalDate date,
-            @RequestParam(required = false) java.util.UUID roomId) {
 
-        List<OverrideDto> overrides = overrideService.getOverrides(date, roomId);
-        return ResponseEntity.ok(overrides);
-    }
 
-    /**
-     * Deletes a day override, restoring canonical schedule (T-104).
-     *
-     * @param id override ID to delete
-     * @param principal authenticated user
-     * @return no content on success
-     */
-    @DeleteMapping("/override/{id}")
-    @PreAuthorize("hasAnyRole('TEACHER','TTO','ADMIN')")
-    @Operation(summary = "Delete day override", description = "Remove override and restore canonical schedule")
-    public ResponseEntity<Void> deleteOverride(
-            @PathVariable java.util.UUID id,
-            @AuthenticationPrincipal JwtPrincipal principal) {
 
-        overrideService.deleteOverride(id, principal);
-        return ResponseEntity.noContent().build();
-    }
 
     // ===== T-105: Timetable Queries and Analytics =====
 

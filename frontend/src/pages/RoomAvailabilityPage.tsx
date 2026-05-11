@@ -1,9 +1,9 @@
 /**
- * RoomAvailabilityPage Component - T-105: Room Availability Frontend
+ * RoomAvailabilityPage Component - Room Availability Display (Read-Only)
  *
- * Main page for room availability search and booking functionality.
- * Provides filters for date, time, capacity, and building, with auto-refresh.
- * Displays available rooms in a responsive grid with booking capabilities.
+ * Main page for room availability search functionality.
+ * Displays available rooms in a responsive grid with filter options.
+ * This is a read-only informational page.
  */
 
 import React, { useState } from 'react';
@@ -13,17 +13,15 @@ import { RoomAvailabilityQuery } from '../types/timetable';
 import RoomCard from '../components/RoomCard';
 
 interface RoomAvailabilityPageProps {
-  /** User role to determine booking permissions */
+  /** User role (for context, but no role-based restrictions) */
   userRole?: 'TEACHER' | 'TTO' | 'ADMIN' | 'STUDENT' | 'DEPT_COORD';
 }
 
 /**
- * Main page component for room availability search and booking
- * Features React Query for data fetching with auto-refresh every 60 seconds
+ * Read-only room availability display component
+ * Shows available rooms based on search filters with auto-refresh
  */
-const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
-  userRole = 'TEACHER'
-}) => {
+const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = () => {
   // Form state for search filters
   const [date, setDate] = useState(() => {
     const today = new Date();
@@ -73,11 +71,6 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
     return startTime < endTime;
   };
 
-  /**
-   * Determines if user can book rooms (teachers only)
-   */
-  const canBookRooms = userRole === 'TEACHER';
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -87,7 +80,7 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
             Room Availability
           </h1>
           <p className="text-gray-600">
-            Find and book available rooms for your classes and meetings
+            Search and view available rooms (read-only information)
           </p>
         </div>
 
@@ -226,7 +219,6 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
               <RoomCard
                 key={room.id}
                 room={room}
-                isTeacher={canBookRooms}
               />
             ))}
           </div>

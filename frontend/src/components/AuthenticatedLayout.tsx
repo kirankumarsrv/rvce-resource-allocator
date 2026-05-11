@@ -66,6 +66,14 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
           <path d="M8 3v4" />
         </svg>
       ),
+      reservation: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M8 3v4" />
+          <path d="M16 3v4" />
+          <path d="M3 11h18" />
+        </svg>
+      ),
       exam: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 6h16" />
@@ -89,21 +97,18 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
       addLink({ label: 'TTO Dashboard', path: '/tto', icon: icons.dashboard })
       addLink({ label: 'Upload Timetable', path: '/tto/upload', icon: icons.upload })
       addLink({ label: 'Substitute Teacher', path: '/tto/substitute', icon: icons.substitute })
-      addLink({ label: 'Override Management', path: '/tto/overrides', icon: icons.override })
       addLink({ label: 'Room Availability', path: '/tto/rooms', icon: icons.room })
     }
 
     if (hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPER_ADMIN')) {
       addLink({ label: 'Admin Dashboard', path: '/admin', icon: icons.dashboard })
       addLink({ label: 'Substitute Teacher', path: '/admin/substitute', icon: icons.substitute })
-      addLink({ label: 'Override Management', path: '/admin/overrides', icon: icons.override })
       addLink({ label: 'Room Availability', path: '/tto/rooms', icon: icons.room })
     }
 
     if (hasRole('ROLE_TEACHER')) {
       addLink({ label: 'Teacher Dashboard', path: '/teacher', icon: icons.dashboard })
       addLink({ label: 'Room Availability', path: '/teacher/rooms', icon: icons.room })
-      addLink({ label: 'Override Management', path: '/teacher/overrides', icon: icons.override })
     }
 
     if (hasRole('ROLE_EXAM_CONTROLLER') || hasRole('ROLE_DEPT_COORD')) {

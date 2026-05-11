@@ -11,10 +11,11 @@ import {
   RoomAvailabilityDto,
   RoomAvailabilityQuery,
   UploadResultDto,
+  SimpleDto,
   SubstituteRequest,
   SubstitutionResultDto,
-  OverrideRequest,
   OverrideDto,
+  OverrideRequest,
 } from '../types/timetable'
 import { authenticatedFetch } from '@/services/authService'
 
@@ -84,7 +85,7 @@ export const getTimetableAnalytics = async (): Promise<TimetableAnalyticsDto> =>
 };
 
 /**
- * Get available rooms for booking (T-102)
+ * Get available rooms for the selected time slot (T-102)
  * Queries the availability query engine with optional filters
  */
 export const getAvailableRooms = async (
@@ -121,6 +122,13 @@ export const uploadTimetable = async (file: File): Promise<UploadResultDto> => {
   return response.json()
 };
 
+export const getTeachers = async (): Promise<SimpleDto[]> => {
+  const response = await authenticatedFetch(`${API_BASE}/teachers`)
+
+  if (!response.ok) throw new Error('Failed to fetch teachers')
+  return response.json()
+};
+
 export const substituteTeacher = async (
   request: SubstituteRequest
 ): Promise<SubstitutionResultDto> => {
@@ -140,74 +148,27 @@ export const substituteTeacher = async (
   return response.json()
 };
 
-export const getOverrides = async (
-  date: string,
-  roomId?: string
-): Promise<OverrideDto[]> => {
-  const params = new URLSearchParams({ date })
-  if (roomId) params.append('roomId', roomId)
-
-  const response = await authenticatedFetch(`${API_BASE}/overrides?${params.toString()}`)
-
-  if (!response.ok) throw new Error('Failed to fetch overrides')
-  return response.json()
+export const getOverrides = async (date: string, roomId?: string): Promise<OverrideDto[]> => {
+  const params = new URLSearchParams({ date });
+  if (roomId) params.append('roomId', roomId);
+  const response = await authenticatedFetch(`${API_BASE}/overrides?${params.toString()}`);
+  if (!response.ok) throw new Error('Failed to fetch overrides');
+  return response.json();
 };
 
-export const createOverride = async (
-  request: OverrideRequest
-): Promise<OverrideDto> => {
-  const response = await authenticatedFetch(`${API_BASE}/override`, {
+export const createOverride = async (request: OverrideRequest): Promise<OverrideDto> => {
+  const response = await authenticatedFetch(`${API_BASE}/overrides`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText || 'Failed to create override')
-  }
-
-  return response.json()
+  });
+  if (!response.ok) throw new Error('Failed to create override');
+  return response.json();
 };
 
-export const deleteOverride = async (overrideId: string): Promise<void> => {
-  const response = await authenticatedFetch(`${API_BASE}/override/${overrideId}`, {
+export const deleteOverride = async (id: string): Promise<void> => {
+  const response = await authenticatedFetch(`${API_BASE}/overrides/${id}`, {
     method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText || 'Failed to delete override')
-  }
-};
-
-/**
- * Book a room for today by creating an override (T-104)
- * Teachers can book available rooms for immediate use
- */
-export const bookRoomForToday = async (
-  slotId: number,
-  reason?: string
-): Promise<OverrideDto> => {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-
-  const request: OverrideRequest = {
-    slotId,
-    date: today,
-    status: 'CLAIMED',
-    reason: reason || 'Booked for today',
-  };
-
-  const response = await authenticatedFetch(`${API_BASE}/override`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  })
-
-  if (!response.ok) throw new Error('Failed to book room')
-  return response.json()
+  });
+  if (!response.ok) throw new Error('Failed to delete override');
 };

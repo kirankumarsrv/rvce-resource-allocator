@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.nio.charset.StandardCharsets;
@@ -51,19 +52,23 @@ class TimetableUploadServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private JdbcTemplate jdbcTemplate;
+
     private UUID teacherId;
 
     @BeforeEach
     void setUp() {
         teacherId = UUID.randomUUID();
         csvValidator = new CsvRowValidator(roomRepository, userRepository, slotRepository);
-        uploadService = new TimetableUploadService(csvValidator, slotRepository, roomRepository, userRepository, eventPublisher);
+        uploadService = new TimetableUploadService(csvValidator, slotRepository, roomRepository, userRepository, jdbcTemplate, eventPublisher);
     }
 
     @Test
     @DisplayName("Valid CSV upload should persist one slot and publish event")
     void testValidCsvUpload() {
         UUID roomId = UUID.randomUUID();
+           UUID versionId = UUID.randomUUID();
         String csvContent = "room_id,teacher_id,day_of_week,start_time,end_time,subject,department\n" +
                 roomId + "," + teacherId + ",1,09:00,10:00,Maths,CSE\n";
         var file = new MockMultipartFile("file", "timetable.csv", "text/csv", csvContent.getBytes(StandardCharsets.UTF_8));
@@ -74,6 +79,10 @@ class TimetableUploadServiceTest {
         when(userRepository.findById(teacherId)).thenReturn(Optional.of(new com.rvce.scas.entity.User()));
         when(slotRepository.existsRoomTimeConflict(roomId, 1, LocalTime.of(9, 0), LocalTime.of(10, 0))).thenReturn(false);
         when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+            when(jdbcTemplate.queryForObject(
+                "SELECT version_id FROM timetable_versions WHERE status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1",
+                UUID.class
+            )).thenReturn(versionId);
 
         UploadResultDto result = uploadService.upload(file);
 

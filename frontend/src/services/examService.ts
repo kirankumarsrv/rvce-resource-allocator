@@ -13,6 +13,7 @@ import type {
   HallGridDto,
   ExamHallConfigRequest,
 } from '@/types/exam'
+import type { RoomAvailabilityDto } from '@/types/timetable'
 
 const API_BASE = 'http://localhost:8080/api/exam'
 
@@ -27,7 +28,26 @@ export const createExamSession = async (
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(examData),
   })
-  if (!response.ok) throw new Error('Failed to create exam session')
+  if (!response.ok) {
+    let details = ''
+    try {
+      details = (await response.text()).trim()
+    } catch {
+      details = ''
+    }
+
+    const fallbackByStatus: Record<number, string> = {
+      400: 'Bad Request',
+      401: 'Unauthorized',
+      403: 'Forbidden',
+      404: 'Not Found',
+      409: 'Conflict',
+      500: 'Internal Server Error',
+    }
+    const statusReason = fallbackByStatus[response.status] ?? 'Request failed'
+    const statusLine = `HTTP ${response.status} ${statusReason}`
+    throw new Error(details ? `${statusLine}: ${details}` : statusLine)
+  }
   return response.json()
 }
 
@@ -44,7 +64,7 @@ export const searchDepartments = async (q = ''): Promise<{ id: string; text: str
 /**
  * List available rooms for exam hall assignment
  */
-export const listAvailableRooms = async (examId: string): Promise<{ id: string; name: string; block: string; floor: number; capacity: number }[]> => {
+export const listAvailableRooms = async (examId: string): Promise<RoomAvailabilityDto[]> => {
   const url = `http://localhost:8080/api/exam/${examId}/rooms/available`
   const response = await authenticatedFetch(url)
   if (!response.ok) return []
@@ -111,7 +131,34 @@ export const uploadStudentsCSV = async (examId: string, file: File): Promise<{
       body: formData,
     }
   )
-  if (!response.ok) throw new Error('Failed to upload students')
+  if (!response.ok) {
+    let errorMessage = 'Failed to upload students'
+    try {
+      const errorData = await response.json()
+      if (Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+        const firstErrors = errorData.errors.slice(0, 5).map((item: { row?: number; usn?: string; error?: string }) => {
+          const rowLabel = item.row ? `row ${item.row}` : 'row ?'
+          const usnLabel = item.usn ? ` [${item.usn}]` : ''
+          return `${rowLabel}${usnLabel}: ${item.error ?? 'Unknown error'}`
+        })
+        errorMessage = `CSV validation failed (${errorData.inserted ?? 0} inserted, ${errorData.skipped ?? 0} skipped): ${firstErrors.join('; ')}`
+      } else if (typeof errorData.message === 'string' && errorData.message.trim()) {
+        errorMessage = errorData.message.trim()
+      } else if (typeof errorData.error === 'string' && errorData.error.trim()) {
+        errorMessage = errorData.error.trim()
+      }
+    } catch {
+      try {
+        const errorText = await response.text()
+        if (errorText.trim()) {
+          errorMessage = errorText.trim()
+        }
+      } catch {
+        // Keep default message.
+      }
+    }
+    throw new Error(errorMessage)
+  }
   return response.json()
 }
 

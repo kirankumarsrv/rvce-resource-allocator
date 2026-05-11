@@ -32,11 +32,11 @@ public class ExamHall {
     @Column(name = "hall_id", nullable = false, updatable = false)
     private UUID hallId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.MERGE)
     @JoinColumn(name = "exam_id", nullable = false)
     private ExamSession examSession;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.MERGE)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
@@ -61,7 +61,7 @@ public class ExamHall {
     @Column(name = "bench_cols", nullable = false)
     private Short benchCols;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.MERGE)
     @JoinColumn(name = "invigilator_id")
     private User invigilator;
 

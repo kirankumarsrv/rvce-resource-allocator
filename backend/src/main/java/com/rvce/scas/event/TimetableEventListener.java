@@ -48,18 +48,4 @@ public class TimetableEventListener {
         log.debug("Cache invalidation completed for {} inserted slots", event.getInsertedCount());
     }
 
-    /**
-     * Handles class cancellation events for notification processing.
-     * Currently logs the event; future epics will add notification logic.
-     *
-     * @param event the class cancelled event
-     */
-    @EventListener
-    @Async
-    public void handleClassCancelled(ClassCancelledEvent event) {
-        log.info("Processing ClassCancelledEvent: slot {} cancelled on {} by user {}",
-                event.getSlotId(), event.getDate(), event.getCancelledBy());
-        // TODO: Integrate with notification system in future epic
-    }
-
 }

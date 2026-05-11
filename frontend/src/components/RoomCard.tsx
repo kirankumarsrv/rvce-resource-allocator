@@ -1,8 +1,8 @@
 /**
  * RoomCard Component - T-105: Room Availability Frontend
  *
- * Displays individual room information in a card format with booking functionality.
- * Used in the room availability grid to show available rooms for booking.
+ * Displays individual room information in a card format.
+ * Used in the room availability grid to show rooms that are free for the selected slot.
  */
 
 import React from 'react';
@@ -11,17 +11,14 @@ import { RoomAvailabilityDto } from '../types/timetable';
 interface RoomCardProps {
   /** Room data to display */
   room: RoomAvailabilityDto;
-  /** Whether the current user is a teacher (shows book button) */
-  isTeacher?: boolean;
 }
 
 /**
- * Card component displaying room availability information
- * Features optimistic UI updates for booking actions
+ * Card component displaying room availability information.
+ * Read-only presentation for room availability and exam hall assignment.
  */
 const RoomCard: React.FC<RoomCardProps> = ({
   room,
-  isTeacher = false,
 }) => {
   return (
     <div className={`
@@ -45,18 +42,17 @@ const RoomCard: React.FC<RoomCardProps> = ({
           </svg>
           Capacity: {room.capacity} students
         </div>
+        <div className="flex items-center text-gray-700">
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 18h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+          </svg>
+          Type: {room.roomType}
+        </div>
       </div>
 
-      {isTeacher ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          This page only checks room availability for the selected date and time window.
-          Direct booking is not supported here because the backend override flow is slot-based.
-        </div>
-      ) : (
-        <div className="text-center py-3 px-4 bg-gray-100 rounded-lg">
-          <span className="text-gray-600 text-sm">Available for booking</span>
-        </div>
-      )}
+      <div className="text-center rounded-lg bg-gray-100 px-4 py-3">
+        <span className="text-sm text-gray-600">Free for the selected time slot</span>
+      </div>
     </div>
   );
 };

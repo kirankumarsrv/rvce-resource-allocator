@@ -104,11 +104,6 @@ public class RoomAvailabilityService {
             );
         }
 
-        // Only exam halls can be added as exam seating halls.
-        rooms = rooms.stream()
-                .filter(room -> room.getRoomType() != null && room.getRoomType().equalsIgnoreCase("EXAM_HALL"))
-                .toList();
-
         List<RoomAvailabilityDto> result = roomMapper.toDtoList(rooms);
 
         // Cache the result

@@ -16,6 +16,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +58,7 @@ public class TimetableUploadService {
     private final TimetableSlotRepository slotRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final JdbcTemplate jdbcTemplate;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -174,6 +176,7 @@ public class TimetableUploadService {
      */
     private int persistSlots(List<CsvRowValidator.CsvRowDto> rows) {
         List<TimetableSlot> slots = new ArrayList<>();
+        UUID activeVersionId = resolveActiveVersionId();
         for (CsvRowValidator.CsvRowDto row : rows) {
             Room room = roomRepository.findById(row.getRoomId())
                     .orElseThrow(() -> new CsvValidationException("Room not found during persistence: " + row.getRoomId()));
@@ -184,6 +187,7 @@ public class TimetableUploadService {
             TimetableSlot slot = new TimetableSlot();
             slot.setRoom(room);
             slot.setTeacher(teacher);
+            slot.setVersionId(activeVersionId);
             slot.setDayOfWeek(row.getDayOfWeek());
             slot.setStartTime(row.getStartTime());
             slot.setEndTime(row.getEndTime());
@@ -196,6 +200,18 @@ public class TimetableUploadService {
         slotRepository.saveAll(slots);
         log.debug("Persisted {} timetable slots", slots.size());
         return slots.size();
+    }
+
+    private UUID resolveActiveVersionId() {
+        UUID activeVersionId = jdbcTemplate.queryForObject(
+                "SELECT version_id FROM timetable_versions WHERE status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1",
+                UUID.class);
+
+        if (activeVersionId == null) {
+            throw new CsvValidationException("No ACTIVE timetable version found. Upload cannot continue.");
+        }
+
+        return activeVersionId;
     }
 
     /**

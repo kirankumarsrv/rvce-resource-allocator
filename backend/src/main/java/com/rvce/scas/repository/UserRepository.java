@@ -2,6 +2,8 @@ package com.rvce.scas.repository;
 
 import com.rvce.scas.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -77,4 +79,14 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @return List of User entities matching the provided USNs
      */
     List<User> findByUsnIn(Set<String> usns);
+
+    @Query("""
+        SELECT DISTINCT u FROM User u
+        JOIN u.userRoles ur
+        JOIN ur.role r
+                WHERE LOWER(r.name) = LOWER(:roleName)
+                    AND u.active = true
+        ORDER BY u.name ASC
+        """)
+    List<User> findAllByRoleName(@Param("roleName") String roleName);
 }

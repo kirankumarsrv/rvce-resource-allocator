@@ -6,24 +6,18 @@ import java.time.LocalDate;
 
 /**
  * <h3>Purpose</h3>
- * Event published when a class is cancelled via day override (T-104).
- * Triggers notifications to affected students and faculty.
+ * Event for class cancellations (deprecated - no longer used).
+ * Was published when a class was cancelled via day override (T-104).
+ * Override feature has been removed as of this version.
  *
- * <h3>Key Responsibilities</h3>
- * <ul>
- *   <li>Notify notification subsystem of class cancellations</li>
- *   <li>Carry details about the cancelled slot</li>
- * </ul>
- *
- * <h3>Dependencies</h3>
- * Published by DayOverrideService; consumed by notification listeners.
- *
- * <h3>Transaction Behaviour</h3>
- * Published synchronously after DB commit in T-104.
+ * <h3>Status</h3>
+ * DEPRECATED: Override feature removed. This event is not published or used.
  *
  * @author SCAS Engineering Team
  * @since 1.0
+ * @deprecated Override feature has been removed
  */
+@Deprecated(since = "2.0", forRemoval = true)
 @Getter
 public class ClassCancelledEvent extends ApplicationEvent {
 

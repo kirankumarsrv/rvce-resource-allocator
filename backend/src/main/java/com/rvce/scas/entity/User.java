@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -88,6 +89,10 @@ public class User {
     @Column(name = "locked_until")
     private Instant lockedUntil;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -114,6 +119,6 @@ public class User {
         updatedAt = Instant.now();
     }
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = jakarta.persistence.CascadeType.MERGE)
     private Set<UserRole> userRoles = new HashSet<>();
 }

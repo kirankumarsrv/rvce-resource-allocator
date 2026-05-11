@@ -7,7 +7,7 @@ import { TeacherScheduleDisplay } from '../components/TeacherScheduleDisplay';
  *
  * Main dashboard for teachers providing access to:
  * - Personal schedule viewing
- * - Room availability and booking
+ * - Room availability lookup
  * - Other teacher-specific features
  */
 const TeacherPage = () => {
@@ -26,7 +26,7 @@ const TeacherPage = () => {
         <h1 className="text-3xl font-bold mb-4">Teacher Portal</h1>
 
         {/* Quick Actions Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 gap-4 mb-6">
           <Link
             to="/teacher/rooms"
             className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
@@ -36,22 +36,8 @@ const TeacherPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
               <div>
-                <h3 className="font-semibold">Find Available Rooms</h3>
-                <p className="text-sm opacity-90">Book rooms for your classes</p>
-              </div>
-            </div>
-          </Link>
-          <Link
-            to="/teacher/overrides"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
-          >
-            <div className="flex items-center">
-              <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7M4 6h16M4 18h16" />
-              </svg>
-              <div>
-                <h3 className="font-semibold">Manage Overrides</h3>
-                <p className="text-sm opacity-90">Cancel or book your slots</p>
+                <h3 className="font-semibold">View Room Availability</h3>
+                <p className="text-sm opacity-90">Check which rooms are free at a given time</p>
               </div>
             </div>
           </Link>

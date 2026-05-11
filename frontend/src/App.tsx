@@ -10,7 +10,6 @@ import TeacherPage from '@/pages/TeacherPage'
 import TTOPage from '@/pages/TTOPage'
 import UploadTimetablePage from '@/pages/UploadTimetablePage'
 import SubstitutePage from '@/pages/SubstitutePage'
-import OverrideManagementPage from '@/pages/OverrideManagementPage'
 import RoomAvailabilityPage from '@/pages/RoomAvailabilityPage'
 import UnauthorizedPage from '@/pages/UnauthorizedPage'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
@@ -90,14 +89,7 @@ function App() {
             </RequireRole>
           }
         />
-        <Route
-          path="/teacher/overrides"
-          element={
-            <RequireRole allowedRoles={['ROLE_TEACHER']}>
-              {withLayout(<OverrideManagementPage />)}
-            </RequireRole>
-          }
-        />
+
         <Route
           path="/tto"
           element={
@@ -123,14 +115,6 @@ function App() {
           }
         />
         <Route
-          path="/tto/overrides"
-          element={
-            <RequireRole allowedRoles={['ROLE_TTO']}>
-              {withLayout(<OverrideManagementPage />)}
-            </RequireRole>
-          }
-        />
-        <Route
           path="/tto/rooms"
           element={
             <RequireRole allowedRoles={['ROLE_TTO']}>
@@ -146,18 +130,11 @@ function App() {
             </RequireRole>
           }
         />
-        <Route
-          path="/admin/overrides"
-          element={
-            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
-              {withLayout(<OverrideManagementPage />)}
-            </RequireRole>
-          }
-        />
+
         <Route
           path="/create-exam"
           element={
-            <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
               {withLayout(<CreateExamPage />)}
             </RequireRole>
           }
@@ -165,7 +142,7 @@ function App() {
         <Route
           path="/exam-ctrl"
           element={
-            <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
               {withLayout(<ExamCtrlPage />)}
             </RequireRole>
           }
@@ -173,7 +150,7 @@ function App() {
         <Route
           path="/exam-ctrl/:examId"
           element={
-            <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
               {withLayout(<SeatingDashboard />)}
             </RequireRole>
           }

@@ -29,6 +29,11 @@ public class RoomAvailabilityDto {
     private Integer capacity;
 
     /**
+     * Type of the room, for example CLASSROOM or EXAM_HALL.
+     */
+    private String roomType;
+
+    /**
      * Building where the room is located.
      */
     private String building;
