@@ -25,8 +25,6 @@ export interface CreateExamSessionRequest {
   subjectName: string
   section: string | null
   semester: number
-  departmentId?: string
-  departmentName?: string
   examDate: string
   startTime: string
   endTime: string
@@ -69,11 +67,47 @@ export interface HallGridDto {
 }
 
 export interface SeatWarningDto {
-  type: 'SAME_BRANCH_ON_BENCH' | 'EMPTY_MIDDLE_SEAT' | 'ACCESSIBILITY_NOT_FRONT'
-  benchNumber: string
-  hallId: string
+  type: 'SAME_BRANCH_BENCH' | 'MIDDLE_SEAT_EMPTY' | 'OVER_CAPACITY' | string
+  benchNumber?: string
+  hallId?: string
   message: string
   detail?: string
+}
+
+export interface StudentSeatAssignmentDto {
+  examId: string
+  examName: string
+  subjectCode: string
+  subjectName: string
+  examDate: string
+  startTime: string
+  endTime: string
+  status: string
+  publishedAt?: string | null
+  hallId: string
+  hallName: string
+  benchNumber: string
+  benchRow: number
+  benchCol: number
+  benchSeatIndex: number
+}
+
+export interface StudentPublishedExamDto {
+  examId: string
+  examName: string
+  subjectCode: string
+  subjectName: string
+  examDate: string
+  startTime: string
+  endTime: string
+  status: string
+  publishedAt?: string | null
+  hallId?: string | null
+  hallName?: string | null
+  benchNumber?: string | null
+  benchRow?: number | null
+  benchCol?: number | null
+  benchSeatIndex?: number | null
 }
 
 export interface ExamSeatDto {
@@ -173,7 +207,7 @@ export interface ExamHallConfigRequest {
   roomId: string
   twoSeaterCount: number
   threeSeaterCount: number
-  invigilatorId?: string | null
+  invigilatorId: string  // REQUIRED: Must select an invigilator (UUID)
 }
 
 export interface RoomDto {

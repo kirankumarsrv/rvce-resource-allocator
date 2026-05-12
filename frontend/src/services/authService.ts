@@ -4,7 +4,7 @@
 
 import type { LoginRequest, LoginResponse } from '@/types/auth'
 
-const API_BASE = 'http://localhost:8080/api/auth'
+const API_BASE = '/api/auth'
 const ACCESS_TOKEN_KEY = 'accessToken'
 const REFRESH_TOKEN_KEY = 'refreshToken'
 

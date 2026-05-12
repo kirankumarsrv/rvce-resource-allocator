@@ -5,8 +5,10 @@ import com.rvce.scas.dto.request.SeatPlacementRequest;
 import com.rvce.scas.dto.response.ExamHallDto;
 import com.rvce.scas.dto.response.ExamSeatDto;
 import com.rvce.scas.dto.response.HallGridDto;
+import com.rvce.scas.dto.response.StudentPublishedExamDto;
 import com.rvce.scas.dto.response.SeatingDashboardStateDto;
 import com.rvce.scas.dto.response.SeatingSessionDto;
+import com.rvce.scas.dto.response.StudentSeatAssignmentDto;
 import com.rvce.scas.dto.response.UnassignedStudentDto;
 import com.rvce.scas.entity.ExamHall;
 import com.rvce.scas.entity.ExamSeat;
@@ -20,7 +22,6 @@ import com.rvce.scas.repository.ExamSeatRepository;
 import com.rvce.scas.repository.ExamSessionRepository;
 import com.rvce.scas.repository.ExamStudentRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,15 +81,21 @@ public class SeatingDashboardService {
 
         List<ExamHallDto> hallDtos = examMapper.toHallDtoList(halls);
 
-        List<HallGridDto> hallGrids = halls.stream()
-                .map(hall -> benchLayoutBuilder.buildHallGrid(hall, examSeatRepository.findByExamSession_ExamIdAndHall_HallId(examId, hall.getHallId())))
-                .toList();
-
         List<ExamSeatDto> seatDtos = seats.stream()
-                .map(seat -> enrichSeatDto(seat, studentsByUserId.get(seat.getStudentId())))
-                .sorted(Comparator.comparing(ExamSeatDto::getBenchRow)
-                        .thenComparing(ExamSeatDto::getBenchCol)
-                        .thenComparing(ExamSeatDto::getBenchSeatIndex))
+            .map(seat -> enrichSeatDto(seat, studentsByUserId.get(seat.getStudentId())))
+            .sorted(Comparator.comparing(ExamSeatDto::getBenchRow)
+                .thenComparing(ExamSeatDto::getBenchCol)
+                .thenComparing(ExamSeatDto::getBenchSeatIndex))
+            .toList();
+
+        Map<UUID, List<ExamSeatDto>> seatsByHall = seatDtos.stream()
+            .collect(Collectors.groupingBy(ExamSeatDto::getHallId));
+
+        List<HallGridDto> hallGrids = halls.stream()
+            .map(hall -> benchLayoutBuilder.buildHallGrid(
+                hall,
+                seatsByHall.getOrDefault(hall.getHallId(), List.of())
+            ))
                 .toList();
 
         List<UnassignedStudentDto> unassignedStudents = students.stream()
@@ -109,7 +116,7 @@ public class SeatingDashboardService {
     }
 
     @Transactional
-    public SeatingDashboardStateDto bulkSave(@NonNull UUID examId, BulkSeatSaveRequest request, @NonNull UUID actorId) {
+    public SeatingDashboardStateDto bulkSave(UUID examId, BulkSeatSaveRequest request, UUID actorId) {
         ExamSession examSession = ensureExamExists(examId);
         ensureMutable(examSession);
 
@@ -188,7 +195,7 @@ public class SeatingDashboardService {
     }
 
     @Transactional
-    public void clearHall(@NonNull UUID examId, @NonNull UUID hallId, @NonNull UUID actorId) {
+    public void clearHall(UUID examId, UUID hallId, UUID actorId) {
         ensureMutable(ensureExamExists(examId));
         if (examHallRepository.findByHallIdAndExamSession_ExamId(hallId, examId).isEmpty()) {
             throw new ExamHallNotFoundException("Exam hall not found: " + hallId);
@@ -269,7 +276,7 @@ public class SeatingDashboardService {
     }
 
     private ExamSession ensureExamExists(UUID examId) {
-        return examSessionRepository.findById(examId)
+        return examSessionRepository.findById(Objects.requireNonNull(examId))
                 .orElseThrow(() -> new ExamSessionNotFoundException("Exam session not found: " + examId));
     }
 
@@ -283,26 +290,64 @@ public class SeatingDashboardService {
     /**
      * Publish exam seating arrangement
      * Validates all students are assigned, updates status to PUBLISHED, and emits event
+     * 
+     * State transition: CONFIGURED -> PUBLISHED
+     * Validates:
+     * - All enrolled students have assigned seats
+     * - Hall integrity (no benches over capacity)
+     * - Proper state machine progression
      */
     @Transactional
-    public com.rvce.scas.dto.response.ExamSessionDto publishExam(@NonNull UUID examId, @NonNull UUID actorId) {
+    public com.rvce.scas.dto.response.ExamSessionDto publishExam(UUID examId, UUID actorId) {
         ExamSession examSession = ensureExamExists(examId);
 
-        // Check all students are assigned
-        long unassignedCount = examStudentRepository.countUnassignedStudents(examId);
-        if (unassignedCount > 0) {
-            throw new IllegalArgumentException(unassignedCount + " students are not assigned to seats");
+        // Validate state transition
+        if (examSession.getStatus() != ExamSession.ExamStatus.CONFIGURED 
+                && examSession.getStatus() != ExamSession.ExamStatus.DRAFT) {
+            throw new IllegalArgumentException(
+                "Cannot publish exam in " + examSession.getStatus() + " status. " +
+                "Exam must be in DRAFT or CONFIGURED status before publishing."
+            );
         }
 
-        // Update status
+        // Validate all students are assigned
+        long totalStudents = examStudentRepository.countByExamId(examId);
+        long unassignedCount = examStudentRepository.countUnassignedStudents(examId);
+        
+        if (unassignedCount > 0) {
+            throw new IllegalArgumentException(
+                "Cannot publish: " + unassignedCount + " of " + totalStudents + 
+                " students are not assigned to seats. " +
+                "Assign all enrolled students before publishing."
+            );
+        }
+
+        // Validate seat integrity
+        List<ExamSeat> allSeats = examSeatRepository.findByExamSession_ExamIdOrderByHall_SortOrderAscBenchRowAscBenchColAscBenchSeatIndexAsc(examId);
+        List<ExamHall> halls = examHallRepository.findByExamSession_ExamIdOrderBySortOrderAsc(examId);
+        
+        for (ExamHall hall : halls) {
+            long hallSeats = allSeats.stream()
+                .filter(seat -> seat.getHall().getHallId().equals(hall.getHallId()))
+                .count();
+            
+            if (hallSeats > hall.getTotalCapacity()) {
+                throw new IllegalArgumentException(
+                    "Hall " + hall.getRoom().getDisplayName() + " has " + hallSeats + 
+                    " assigned seats but capacity is only " + hall.getTotalCapacity()
+                );
+            }
+        }
+
+        // Update status and publish timestamp
         examSession.setStatus(ExamSession.ExamStatus.PUBLISHED);
         examSession.setPublishedAt(Instant.now());
         ExamSession saved = examSessionRepository.save(examSession);
 
-        // Audit
-        auditService.log(actorId, "EXAM_PUBLISHED", "EXAM", examId);
+        // Audit log
+        auditService.log(actorId, "EXAM_PUBLISHED", "exam_sessions", examId);
 
-        // Emit event for notifications
+        // Emit event for notifications and downstream processing
         eventPublisher.publishEvent(
             new com.rvce.scas.event.ExamPublishedEvent(
                 this, examId, examSession.getName(), actorId
@@ -310,5 +355,83 @@ public class SeatingDashboardService {
         );
 
         return examMapper.toDto(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentSeatAssignmentDto> getPublishedSeatsForStudent(UUID studentId) {
+        List<ExamSeat> seats = examSeatRepository.findPublishedSeatsByStudentId(studentId);
+        return seats.stream()
+                .map(this::toStudentSeatAssignment)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentPublishedExamDto> getPublishedExamsForStudent(UUID studentId) {
+        List<UUID> examIds = examStudentRepository.findExamIdsByStudentId(studentId);
+        if (examIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<ExamSession> examSessions = examSessionRepository.findAllById(examIds).stream()
+                .filter(examSession -> examSession.getStatus() == ExamSession.ExamStatus.PUBLISHED)
+                .sorted(Comparator.comparing(ExamSession::getExamDate)
+                        .thenComparing(ExamSession::getStartTime)
+                        .thenComparing(ExamSession::getName))
+                .toList();
+
+        List<StudentPublishedExamDto> response = new ArrayList<>(examSessions.size());
+        for (ExamSession examSession : examSessions) {
+            StudentPublishedExamDto dto = new StudentPublishedExamDto();
+            dto.setExamId(examSession.getExamId());
+            dto.setExamName(examSession.getName());
+            dto.setSubjectCode(examSession.getSubjectCode());
+            dto.setSubjectName(examSession.getSubjectName());
+            dto.setExamDate(examSession.getExamDate());
+            dto.setStartTime(examSession.getStartTime());
+            dto.setEndTime(examSession.getEndTime());
+            dto.setStatus(examSession.getStatus().name());
+            dto.setPublishedAt(examSession.getPublishedAt());
+
+            examSeatRepository.findPublishedSeatByExamAndStudent(examSession.getExamId(), studentId)
+                    .ifPresent(seat -> {
+                        dto.setHallId(seat.getHall().getHallId());
+                        dto.setHallName(seat.getHall().getRoom().getDisplayName());
+                        dto.setBenchNumber(seat.getBenchNumber());
+                        dto.setBenchRow((int) seat.getBenchRow());
+                        dto.setBenchCol((int) seat.getBenchCol());
+                        dto.setBenchSeatIndex((int) seat.getBenchSeatIndex());
+                    });
+
+            response.add(dto);
+        }
+
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public StudentSeatAssignmentDto getPublishedSeatForStudentByExam(UUID examId, UUID studentId) {
+        ExamSeat seat = examSeatRepository.findPublishedSeatByExamAndStudent(examId, studentId)
+                .orElseThrow(() -> new IllegalArgumentException("No published seating assignment found for this student and exam."));
+        return toStudentSeatAssignment(seat);
+    }
+
+    private StudentSeatAssignmentDto toStudentSeatAssignment(ExamSeat seat) {
+        StudentSeatAssignmentDto dto = new StudentSeatAssignmentDto();
+        dto.setExamId(seat.getExamSession().getExamId());
+        dto.setExamName(seat.getExamSession().getName());
+        dto.setSubjectCode(seat.getExamSession().getSubjectCode());
+        dto.setSubjectName(seat.getExamSession().getSubjectName());
+        dto.setExamDate(seat.getExamSession().getExamDate());
+        dto.setStartTime(seat.getExamSession().getStartTime());
+        dto.setEndTime(seat.getExamSession().getEndTime());
+        dto.setStatus(seat.getExamSession().getStatus().name());
+        dto.setPublishedAt(seat.getExamSession().getPublishedAt());
+        dto.setHallId(seat.getHall().getHallId());
+        dto.setHallName(seat.getHall().getRoom().getDisplayName());
+        dto.setBenchNumber(seat.getBenchNumber());
+        dto.setBenchRow((int) seat.getBenchRow());
+        dto.setBenchCol((int) seat.getBenchCol());
+        dto.setBenchSeatIndex((int) seat.getBenchSeatIndex());
+        return dto;
     }
 }

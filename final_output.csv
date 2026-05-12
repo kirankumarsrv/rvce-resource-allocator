@@ -4,15 +4,21 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\.gitignore,,File,.gitignore,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\=,,File,=,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\build.log,,File,build.log,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\build.log~,,File,build.log~,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\build_full.log,,File,build_full.log,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\build_log.txt,,File,build_log.txt,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\docker-build.log,,File,docker-build.log,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\docker-compose.yml,,File,docker-compose.yml,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\docker-compose.yml,,YAML,services,,,"{'backend': {'build': {'context': './backend', 'dockerfile': 'Dockerfile'}, 'ports': ['8080:8080'], 'environment': {'SPRING_PROFILES_ACTIVE': 'dev', 'DB_URL': 'jdbc:postgresql://postgres:5432/scas_db?stringtype=unspecified', 'DB_USER': 'scas', 'DB_PASSWORD': 'scas_dev_password', 'REDIS_HOST': 'redis', 'REDIS_PORT': '6379', 'SPRING_REDIS_HOST': 'redis', 'SPRING_REDIS_PORT': '6379', 'SPRING_DATA_REDIS_HOST': 'redis', 'SPRING_DATA_REDIS_PORT': '6379'}, 'depends_on': {'postgres': {'condition': 'service_healthy'}, 'redis': {'condition': 'service_started'}}}, 'frontend': {'build': {'context': './frontend', 'dockerfile': 'Dockerfile'}, 'ports': ['5173:80'], 'depends_on': ['backend']}, 'postgres': {'image': 'postgres:15', 'environment': {'POSTGRES_USER': 'scas', 'POSTGRES_PASSWORD': 'scas_dev_password', 'POSTGRES_DB': 'scas_db', 'TZ': 'UTC'}, 'ports': ['5432:5432'], 'volumes': ['postgres_data:/var/lib/postgresql/data'], 'healthcheck': {'test': ['CMD-SHELL', 'pg_isready -U scas -d scas_db'], 'interval': '5s', 'timeout': '3s', 'retries': 20}}, 'redis': {'image': 'redis:7-alpine', 'ports': ['6379:6379']}}"
 C:\Users\kiran\Desktop\rvce-resource-allocator\docker-compose.yml,,YAML,volumes,,,{'postgres_data': None}
 C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,File,final_output.csv,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L694,,,"c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableEventListener.java,,TODO,L62,,,// TODO: Integrate with notification system in future epic"
-C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1529,,,"c:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L6,,,""- Scans project files and emits `final_output.csv` with rows for files, Java symbols, TODOs, YAML keys, ENV vars, SQL comments, and Docker commands."""
-C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1530,,,"c:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L80,,,""if """"TODO"""" in line or """"FIXME"""" in line:"""
-C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1531,,,"c:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L81,,,""results.append((""""TODO"""", f""""L{i}"""", line.strip()))"""
+C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L12,,,"C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L694,,,""c:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableEventListener.java,,TODO,L62,,,// TODO: Integrate with notification system in future epic"""
+C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L13,,,"C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1529,,,""c:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L6,,,""""- Scans project files and emits `final_output.csv` with rows for files, Java symbols, TODOs, YAML keys, ENV vars, SQL comments, and Docker commands."""""""
+C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L14,,,"C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1530,,,""c:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L80,,,""""if """"""""TODO"""""""" in line or """"""""FIXME"""""""" in line:"""""""
+C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L15,,,"C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1531,,,""c:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L81,,,""""results.append((""""""""TODO"""""""", f""""""""L{i}"""""""", line.strip()))"""""""
+C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L684,,,"C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableEventListener.java,,TODO,L62,,,// TODO: Integrate with notification system in future epic"
+C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1394,,,"C:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L6,,,""- Scans project files and emits `final_output.csv` with rows for files, Java symbols, TODOs, YAML keys, ENV vars, SQL comments, and Docker commands."""
+C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1395,,,"C:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L80,,,""if """"TODO"""" in line or """"FIXME"""" in line:"""
+C:\Users\kiran\Desktop\rvce-resource-allocator\final_output.csv,,TODO,L1396,,,"C:\Users\kiran\Desktop\rvce-resource-allocator\tools\generate_docs.py,,TODO,L81,,,""results.append((""""TODO"""", f""""L{i}"""", line.strip()))"""
 C:\Users\kiran\Desktop\rvce-resource-allocator\nul,,File,nul,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\PROJECT_SETUP.md,,File,PROJECT_SETUP.md,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\reading,,File,reading,,,
@@ -26,7 +32,9 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\.vscode\settings.json,,File,setti
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\.dockerignore,,File,.dockerignore,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\.gitattributes,,File,.gitattributes,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\.gitignore,,File,.gitignore,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\build-error.log,,File,build-error.log,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\build.gradle.kts,,File,build.gradle.kts,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\build.log,,File,build.log,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\Dockerfile,,File,Dockerfile,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\Dockerfile,,Docker,L2,,,FROM gradle:8-jdk17 AS builder
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\Dockerfile,,Docker,L4,,,WORKDIR /app
@@ -51,7 +59,6 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\test-output.log,,File,tes
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\test-run-output.txt,,File,test-run-output.txt,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\generated-sources\annotations\com\rvce\scas\mapper\ExamMapperImpl.java,,File,ExamMapperImpl.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\generated-sources\annotations\com\rvce\scas\mapper\RoomMapperImpl.java,,File,RoomMapperImpl.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\generated-sources\annotations\com\rvce\scas\mapper\TimetableMapperImpl.java,,File,TimetableMapperImpl.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\application-test.yml,,File,application-test.yml,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\application-test.yml,,YAML,spring,,,"{'config': {'activate': {'on-profile': 'test'}}, 'datasource': {'url': 'jdbc:h2:mem:testdb;MODE=PostgreSQL;INIT=CREATE DOMAIN IF NOT EXISTS citext AS VARCHAR(255);DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE', 'driver-class-name': 'org.h2.Driver', 'username': 'sa', 'password': None}, 'jpa': {'database-platform': 'org.hibernate.dialect.H2Dialect', 'hibernate': {'ddl-auto': 'create-drop'}, 'properties': {'hibernate': {'dialect': 'org.hibernate.dialect.H2Dialect', 'show_sql': False, 'format_sql': False}}}, 'h2': {'console': {'enabled': True, 'path': '/h2-console'}}, 'redis': {'host': 'localhost', 'port': 6370, 'timeout': '1s'}}"
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\application-test.yml,,YAML,spring.flyway.enabled,,,False
@@ -102,6 +109,26 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V14
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V14__remove_needs_front_row.sql,,SQL,L9,,,-- ============================================================
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V14__remove_needs_front_row.sql,,SQL,L11,,,-- Drop the needs_front_row column from exam_students table
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V14__remove_needs_front_row.sql,,SQL,L14,,,-- Update the comment on exam_students table
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,File,V16__remove_unused_override_reservation_tables.sql,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L1,,,-- ============================================================
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L2,,,-- V16__remove_unused_override_reservation_tables.sql
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L3,,,-- Remove day_overrides and room_reservations tables.
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L4,,,--
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L5,,,-- Context:
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L6,,,--   Override and room reservation features have been removed from the application.
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L7,,,--   This migration safely removes the unused schema and associated foreign keys.
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L8,,,-- ============================================================
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L10,,,-- Drop foreign key from occupancy_records to day_overrides
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L14,,,-- Drop day_overrides table
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L17,,,-- Drop room_reservations table
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V17__add_version_to_users.sql,,File,V17__add_version_to_users.sql,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V17__add_version_to_users.sql,,SQL,L1,,,-- ============================================================
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V17__add_version_to_users.sql,,SQL,L2,,,-- V17__add_version_to_users.sql
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V17__add_version_to_users.sql,,SQL,L3,,,-- Add optimistic locking version column to users table
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V17__add_version_to_users.sql,,SQL,L4,,,--
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V17__add_version_to_users.sql,,SQL,L5,,,-- This prevents StaleObjectStateException during concurrent
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V17__add_version_to_users.sql,,SQL,L6,,,-- user updates in DevDataInitializer and other scenarios.
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V17__add_version_to_users.sql,,SQL,L7,,,-- ============================================================
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V1__users_roles.sql,,File,V1__users_roles.sql,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V1__users_roles.sql,,SQL,L1,,,-- ============================================================
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\bin\main\db\migration\V1__users_roles.sql,,SQL,L2,,,-- V1__users_roles.sql
@@ -636,7 +663,7 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\BulkSeatSaveRequest.java,,File,BulkSeatSaveRequest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\CreateExamSessionRequest.java,,File,CreateExamSessionRequest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\ExamHallConfigRequest.java,,File,ExamHallConfigRequest.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\OverrideRequest.java,,File,OverrideRequest.java,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\RoomReservationRequest.java,,File,RoomReservationRequest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\SeatPlacementRequest.java,,File,SeatPlacementRequest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\request\SubstituteRequest.java,,File,SubstituteRequest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\ClashDetail.java,,File,ClashDetail.java,,,
@@ -650,8 +677,8 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\HallGridCellDto.java,,File,HallGridCellDto.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\HallGridDto.java,,File,HallGridDto.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\NotificationDto.java,,File,NotificationDto.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\OverrideDto.java,,File,OverrideDto.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\RoomAvailabilityDto.java,,File,RoomAvailabilityDto.java,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\RoomReservationDto.java,,File,RoomReservationDto.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\RoomScheduleDto.java,,File,RoomScheduleDto.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\SeatingDashboardStateDto.java,,File,SeatingDashboardStateDto.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\SeatingSessionDto.java,,File,SeatingSessionDto.java,,,
@@ -662,7 +689,6 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\TimetableAnalyticsDto.java,,File,TimetableAnalyticsDto.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\UnassignedStudentDto.java,,File,UnassignedStudentDto.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\dto\response\UploadResultDto.java,,File,UploadResultDto.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\DayOverride.java,,File,DayOverride.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\Department.java,,File,Department.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\ExamHall.java,,File,ExamHall.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\ExamSeat.java,,File,ExamSeat.java,,,
@@ -674,6 +700,7 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermission.java,,File,RolePermission.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RolePermissionId.java,,File,RolePermissionId.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\Room.java,,File,Room.java,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\RoomReservation.java,,File,RoomReservation.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\TimetableSlot.java,,File,TimetableSlot.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\User.java,,File,User.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\entity\UserRole.java,,File,UserRole.java,,,
@@ -681,7 +708,6 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\ClassCancelledEvent.java,,File,ClassCancelledEvent.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\ExamPublishedEvent.java,,File,ExamPublishedEvent.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableEventListener.java,,File,TimetableEventListener.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableEventListener.java,,TODO,L62,,,// TODO: Integrate with notification system in future epic
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\event\TimetableUploadedEvent.java,,File,TimetableUploadedEvent.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\AccountLockedException.java,,File,AccountLockedException.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\CsvValidationException.java,,File,CsvValidationException.java,,,
@@ -690,8 +716,8 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\ExamSessionNotFoundException.java,,File,ExamSessionNotFoundException.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\ExamStudentCsvValidationException.java,,File,ExamStudentCsvValidationException.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\InvalidTokenException.java,,File,InvalidTokenException.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\OverrideNotFoundException.java,,File,OverrideNotFoundException.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\RoomNotFoundException.java,,File,RoomNotFoundException.java,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\RoomReservationConflictException.java,,File,RoomReservationConflictException.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\SlotAlreadyClaimedException.java,,File,SlotAlreadyClaimedException.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\SlotConflictException.java,,File,SlotConflictException.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\exception\TeacherNotFoundException.java,,File,TeacherNotFoundException.java,,,
@@ -699,10 +725,8 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\hardening\SecurityHeadersFilter.java,,File,SecurityHeadersFilter.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\ExamMapper.java,,File,ExamMapper.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\RoomMapper.java,,File,RoomMapper.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\mapper\TimetableMapper.java,,File,TimetableMapper.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\rbac\CustomAccessDeniedHandler.java,,File,CustomAccessDeniedHandler.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\rbac\PermissionConstants.java,,File,PermissionConstants.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\DayOverrideRepository.java,,File,DayOverrideRepository.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\DepartmentRepository.java,,File,DepartmentRepository.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\ExamHallRepository.java,,File,ExamHallRepository.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\ExamSeatRepository.java,,File,ExamSeatRepository.java,,,
@@ -710,6 +734,7 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\ExamStudentRepository.java,,File,ExamStudentRepository.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\NotificationRepository.java,,File,NotificationRepository.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\RoomRepository.java,,File,RoomRepository.java,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\RoomReservationRepository.java,,File,RoomReservationRepository.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\TimetableSlotRepository.java,,File,TimetableSlotRepository.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\repository\UserRepository.java,,File,UserRepository.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\security\JwtAuthFilter.java,,File,JwtAuthFilter.java,,,
@@ -721,7 +746,6 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuditService.java,,File,AuditService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\AuthService.java,,File,AuthService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\BenchLayoutBuilder.java,,File,BenchLayoutBuilder.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\DayOverrideService.java,,File,DayOverrideService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\ExamHallService.java,,File,ExamHallService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\ExamUploadService.java,,File,ExamUploadService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\ExcelExportService.java,,File,ExcelExportService.java,,,
@@ -729,6 +753,7 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\NotificationService.java,,File,NotificationService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\PdfExportService.java,,File,PdfExportService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\RoomAvailabilityService.java,,File,RoomAvailabilityService.java,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\RoomReservationService.java,,File,RoomReservationService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SeatingDashboardService.java,,File,SeatingDashboardService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\SubstitutionService.java,,File,SubstitutionService.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\java\com\rvce\scas\service\TestService.java,,File,TestService.java,,,
@@ -785,6 +810,26 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\mig
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V14__remove_needs_front_row.sql,,SQL,L9,,,-- ============================================================
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V14__remove_needs_front_row.sql,,SQL,L11,,,-- Drop the needs_front_row column from exam_students table
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V14__remove_needs_front_row.sql,,SQL,L14,,,-- Update the comment on exam_students table
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,File,V16__remove_unused_override_reservation_tables.sql,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L1,,,-- ============================================================
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L2,,,-- V16__remove_unused_override_reservation_tables.sql
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L3,,,-- Remove day_overrides and room_reservations tables.
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L4,,,--
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L5,,,-- Context:
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L6,,,--   Override and room reservation features have been removed from the application.
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L7,,,--   This migration safely removes the unused schema and associated foreign keys.
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L8,,,-- ============================================================
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L10,,,-- Drop foreign key from occupancy_records to day_overrides
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L14,,,-- Drop day_overrides table
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V16__remove_unused_override_reservation_tables.sql,,SQL,L17,,,-- Drop room_reservations table
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V17__add_version_to_users.sql,,File,V17__add_version_to_users.sql,,,
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V17__add_version_to_users.sql,,SQL,L1,,,-- ============================================================
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V17__add_version_to_users.sql,,SQL,L2,,,-- V17__add_version_to_users.sql
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V17__add_version_to_users.sql,,SQL,L3,,,-- Add optimistic locking version column to users table
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V17__add_version_to_users.sql,,SQL,L4,,,--
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V17__add_version_to_users.sql,,SQL,L5,,,-- This prevents StaleObjectStateException during concurrent
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V17__add_version_to_users.sql,,SQL,L6,,,-- user updates in DevDataInitializer and other scenarios.
+C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V17__add_version_to_users.sql,,SQL,L7,,,-- ============================================================
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V1__users_roles.sql,,File,V1__users_roles.sql,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V1__users_roles.sql,,SQL,L1,,,-- ============================================================
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\main\resources\db\migration\V1__users_roles.sql,,SQL,L2,,,-- V1__users_roles.sql
@@ -1291,7 +1336,6 @@ C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\test\java\com\rvce\sc
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\test\java\com\rvce\scas\service\ExamUploadServiceTest.java,,File,ExamUploadServiceTest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\test\java\com\rvce\scas\service\SeatingDashboardServiceTest.java,,File,SeatingDashboardServiceTest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\test\java\com\rvce\scas\service\integration\TimetableUploadIntegrationTest.java,,File,TimetableUploadIntegrationTest.java,,,
-C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\test\java\com\rvce\scas\service\timetable\DayOverrideServiceTest.java,,File,DayOverrideServiceTest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\test\java\com\rvce\scas\service\timetable\RoomAvailabilityServiceTest.java,,File,RoomAvailabilityServiceTest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\test\java\com\rvce\scas\service\timetable\SubstitutionServiceTest.java,,File,SubstitutionServiceTest.java,,,
 C:\Users\kiran\Desktop\rvce-resource-allocator\backend\src\test\java\com\rvce\scas\service\timetable\TimetableUploadServiceTest.java,,File,TimetableUploadServiceTest.java,,,

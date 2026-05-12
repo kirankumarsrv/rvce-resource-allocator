@@ -14,4 +14,19 @@ public class CsvValidationException extends RuntimeException {
         super(message);
     }
 
+    public CsvValidationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    private java.util.List<String> errors;
+
+    public CsvValidationException(java.util.List<String> errors) {
+        super(errors == null ? "CSV validation failed" : String.join("; ", errors));
+        this.errors = errors;
+    }
+
+    public java.util.List<String> getErrors() {
+        return errors == null ? java.util.List.of() : errors;
+    }
+
 }

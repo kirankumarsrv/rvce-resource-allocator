@@ -10,4 +10,7 @@ public class SeatWarningDto {
 
     private String type;
     private String message;
+    private String benchNumber;
+    private String hallId;
+    private String detail;
 }

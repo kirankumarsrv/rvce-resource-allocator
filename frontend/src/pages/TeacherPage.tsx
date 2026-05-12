@@ -23,7 +23,7 @@ const TeacherPage = () => {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Teacher Portal</h1>
+        <h1 data-test-id="teacher-dashboard-heading" className="text-3xl font-bold mb-4">Teacher Portal</h1>
 
         {/* Quick Actions Navigation */}
         <div className="grid grid-cols-1 gap-4 mb-6">

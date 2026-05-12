@@ -38,11 +38,13 @@ ON CONFLICT (code) DO NOTHING;
 
 -- ─── ROLES ───────────────────────────────────────────────────
 INSERT INTO roles (role_id, name, description) VALUES
-    ('22222222-2222-2222-2222-222222222001', 'STUDENT',    'Read-only: timetable view, exam seat view, notifications'),
-    ('22222222-2222-2222-2222-222222222002', 'TEACHER',    'Cancel own classes, claim free slots, verify occupancy'),
-    ('22222222-2222-2222-2222-222222222003', 'TTO',        'Upload and manage timetables, run timetable generator'),
-    ('22222222-2222-2222-2222-222222222004', 'DEPT_COORD', 'Manage exam sessions, generate and publish seating plans'),
-    ('22222222-2222-2222-2222-222222222005', 'ADMIN',      'Full system access: users, rooms, config, analytics')
+    ('22222222-2222-2222-2222-222222222001', 'STUDENT',       'Read-only: timetable view, exam seat view, notifications'),
+    ('22222222-2222-2222-2222-222222222002', 'TEACHER',       'Cancel own classes, claim free slots, verify occupancy'),
+    ('22222222-2222-2222-2222-222222222003', 'TTO',           'Upload and manage timetables, run timetable generator'),
+    ('22222222-2222-2222-2222-222222222004', 'DEPT_COORD',    'Manage exam sessions, generate and publish seating plans'),
+    ('22222222-2222-2222-2222-222222222005', 'ADMIN',         'Full system access: users, rooms, config, analytics'),
+    ('22222222-2222-2222-2222-222222222006', 'EXAM_CONTROLLER','Exam hall management and invigilator assignment'),
+    ('22222222-2222-2222-2222-222222222007', 'SUPER_ADMIN',   'Super administrator with all permissions')
 ON CONFLICT (name) DO NOTHING;
 
 -- ─── PERMISSIONS ─────────────────────────────────────────────
@@ -230,7 +232,120 @@ INSERT INTO users (user_id, name, email, password_hash, usn, department_id) VALU
      'ananya.das@rvce.edu.in',
      '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
      '1RV22EE012',
-     '11111111-1111-1111-1111-111111111006')
+     '11111111-1111-1111-1111-111111111006'),
+
+    -- Phase 2: Additional Teachers (15+)
+    ('44444444-4444-4444-4444-444444444018',
+     'Dr. Vikram Singh',
+     'vikram.singh@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111001'),
+
+    ('44444444-4444-4444-4444-444444444019',
+     'Prof. Anjali Gupta',
+     'anjali.gupta@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111001'),
+
+    ('44444444-4444-4444-4444-444444444020',
+     'Dr. Rajesh Patel',
+     'rajesh.patel@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111002'),
+
+    ('44444444-4444-4444-4444-444444444021',
+     'Prof. Swathi Sharma',
+     'swathi.sharma@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111002'),
+
+    ('44444444-4444-4444-4444-444444444022',
+     'Dr. Akshay Reddy',
+     'akshay.reddy@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111003'),
+
+    ('44444444-4444-4444-4444-444444444023',
+     'Prof. Divya Menon',
+     'divya.menon@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111003'),
+
+    ('44444444-4444-4444-4444-444444444024',
+     'Dr. Suresh Kumar',
+     'suresh.kumar@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111004'),
+
+    ('44444444-4444-4444-4444-444444444025',
+     'Prof. Neha Joshi',
+     'neha.joshi@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111004'),
+
+    ('44444444-4444-4444-4444-444444444026',
+     'Dr. Arjun Rao',
+     'arjun.rao@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111005'),
+
+    ('44444444-4444-4444-4444-444444444027',
+     'Prof. Kavya Iyer',
+     'kavya.iyer@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111005'),
+
+    ('44444444-4444-4444-4444-444444444028',
+     'Dr. Manoj Reddy',
+     'manoj.reddy@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111006'),
+
+    ('44444444-4444-4444-4444-444444444029',
+     'Prof. Priya Singh',
+     'priya.singh@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111006'),
+
+    ('44444444-4444-4444-4444-444444444030',
+     'Dr. Sanjay Kulkarni',
+     'sanjay.kulkarni@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111001'),
+
+    ('44444444-4444-4444-4444-444444444031',
+     'Prof. Anusha Verma',
+     'anusha.verma@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111002'),
+
+    ('44444444-4444-4444-4444-444444444032',
+     'Dr. Rohan Sharma',
+     'rohan.sharma@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111003'),
+
+    ('44444444-4444-4444-4444-444444444033',
+     'Prof. Deepika Patel',
+     'deepika.patel@rvce.edu.in',
+     '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO',
+     NULL,
+     '11111111-1111-1111-1111-111111111004')
 ON CONFLICT (email) DO NOTHING;
 
 -- Assign roles
@@ -251,7 +366,24 @@ INSERT INTO user_roles (user_id, role_id, granted_by) VALUES
     ('44444444-4444-4444-4444-444444444014', '22222222-2222-2222-2222-222222222001', '44444444-4444-4444-4444-444444444001'),
     ('44444444-4444-4444-4444-444444444015', '22222222-2222-2222-2222-222222222001', '44444444-4444-4444-4444-444444444001'),
     ('44444444-4444-4444-4444-444444444016', '22222222-2222-2222-2222-222222222001', '44444444-4444-4444-4444-444444444001'),
-    ('44444444-4444-4444-4444-444444444017', '22222222-2222-2222-2222-222222222001', '44444444-4444-4444-4444-444444444001')
+    ('44444444-4444-4444-4444-444444444017', '22222222-2222-2222-2222-222222222001', '44444444-4444-4444-4444-444444444001'),
+    -- New teachers (Phase 2): All assigned TEACHER role
+    ('44444444-4444-4444-4444-444444444018', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444019', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444020', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444021', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444022', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444023', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444024', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444025', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444026', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444027', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444028', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444029', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444030', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444031', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444032', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001'),
+    ('44444444-4444-4444-4444-444444444033', '22222222-2222-2222-2222-222222222002', '44444444-4444-4444-4444-444444444001')
 ON CONFLICT DO NOTHING;
 
 -- Update HODs now that users exist (DEFERRABLE FK)
@@ -455,7 +587,7 @@ BEGIN
         RAISE EXCEPTION 'Seed verification failed: expected 5 users, found %', v_user_count;
     END IF;
     IF v_role_count < 5 THEN
-        RAISE EXCEPTION 'Seed verification failed: expected 5 roles, found %', v_role_count;
+        RAISE EXCEPTION 'Seed verification failed: expected 7 roles, found %', v_role_count;
     END IF;
 
     RAISE NOTICE 'Seed verification passed: % rooms, % users, % roles', v_room_count, v_user_count, v_role_count;

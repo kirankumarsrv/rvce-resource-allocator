@@ -91,7 +91,7 @@ export interface RoomAvailabilityQuery {
  */
 export interface UploadResultDto {
   /** Number of rows successfully imported */
-  successCount: number;
+  insertedCount: number;
   /** Number of rows that failed validation */
   errorCount: number;
   /** Optional list of validation or parsing errors. */

@@ -176,6 +176,8 @@ export const ClassroomGrid = ({
             {warnings.map((warning, idx) => (
               <li key={idx}>
                 • {warning.type}: {warning.message}
+                {warning.benchNumber ? ` (Bench ${warning.benchNumber})` : ''}
+                {warning.detail ? ` - ${warning.detail}` : ''}
               </li>
             ))}
           </ul>

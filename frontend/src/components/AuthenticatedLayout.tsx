@@ -154,6 +154,7 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
             )}
             <button
               type="button"
+              data-test-id="logout-button"
               onClick={handleLogout}
               disabled={isLoggingOut}
               className="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
@@ -201,6 +202,7 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
                 return (
                   <Link
                     key={item.path}
+                    data-test-id={`nav-${item.path.replace(/[^a-z0-9]/gi, '-')}`}
                     to={item.path}
                     onClick={() => setIsSidebarOpen(false)}
                     className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${

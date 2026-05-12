@@ -5,6 +5,8 @@ import ExamCtrlPage from '@/pages/ExamCtrlPage'
 import CreateExamPage from '@/pages/CreateExamPage'
 import { SeatingDashboard } from '@/pages/SeatingDashboardPage'
 import LoginPage from '@/pages/LoginPage'
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
+import ResetPasswordPage from '@/pages/ResetPasswordPage'
 import StudentPage from '@/pages/StudentPage'
 import TeacherPage from '@/pages/TeacherPage'
 import TTOPage from '@/pages/TTOPage'
@@ -63,6 +65,8 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
         <Route

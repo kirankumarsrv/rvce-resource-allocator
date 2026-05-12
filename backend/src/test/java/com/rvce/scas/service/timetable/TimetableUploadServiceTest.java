@@ -132,7 +132,12 @@ class TimetableUploadServiceTest {
 
         CsvValidationException exception = assertThrows(CsvValidationException.class, () -> uploadService.upload(file));
 
-        assertTrue(exception.getMessage().contains("Validation failed"));
+        assertTrue(
+            exception.getMessage().contains("Row 2") &&
+            exception.getMessage().contains("room_id") &&
+            exception.getMessage().contains("Invalid UUID"),
+            "Error should indicate malformed header or field mapping failure"
+        );
         verify(slotRepository, never()).saveAll(anyList());
         verify(eventPublisher, never()).publishEvent(any());
     }

@@ -1,6 +1,8 @@
 package com.rvce.scas.hardening;
 
 import com.rvce.scas.dto.ErrorResponseDto;
+import com.rvce.scas.dto.response.UploadResultDto;
+import com.rvce.scas.exception.CsvValidationException;
 import com.rvce.scas.dto.response.ExamStudentUploadResultDto;
 import com.rvce.scas.exception.AccountLockedException;
 import com.rvce.scas.exception.ExamStudentCsvValidationException;
@@ -206,6 +208,22 @@ public class GlobalExceptionHandler {
                 ex.getResult().getErrors() != null ? ex.getResult().getErrors().size() : 0);
         return ResponseEntity.badRequest().body(ex.getResult());
     }
+
+        @ExceptionHandler(CsvValidationException.class)
+        public ResponseEntity<UploadResultDto> handleTimetableCsvValidation(
+                        CsvValidationException ex, HttpServletRequest request) {
+                log.warn("Timetable CSV upload validation failed path={} message={}", request.getRequestURI(), ex.getMessage());
+
+                UploadResultDto result = new UploadResultDto();
+                result.setInsertedCount(0);
+                java.util.List<String> errors = ex.getErrors();
+                if (errors == null || errors.isEmpty()) {
+                    errors = java.util.List.of(ex.getMessage());
+                }
+                result.setErrorCount(errors.size());
+                result.setErrors(errors);
+                return ResponseEntity.badRequest().body(result);
+        }
 
     /**
      * Handles business logic validation errors (e.g., missing required parameters, invalid time ranges).

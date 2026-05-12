@@ -2,10 +2,12 @@ package com.rvce.scas.service;
 
 import com.rvce.scas.dto.request.ExamHallConfigRequest;
 import com.rvce.scas.dto.response.ExamHallDto;
+import com.rvce.scas.dto.response.ExamSeatDto;
 import com.rvce.scas.dto.response.HallGridDto;
 import com.rvce.scas.entity.ExamHall;
 import com.rvce.scas.entity.ExamSeat;
 import com.rvce.scas.entity.ExamSession;
+import com.rvce.scas.entity.Role;
 import com.rvce.scas.entity.Room;
 import com.rvce.scas.entity.User;
 import com.rvce.scas.exception.ExamHallConflictException;
@@ -15,17 +17,17 @@ import com.rvce.scas.mapper.ExamMapper;
 import com.rvce.scas.repository.ExamHallRepository;
 import com.rvce.scas.repository.ExamSeatRepository;
 import com.rvce.scas.repository.ExamSessionRepository;
+import com.rvce.scas.repository.RoleRepository;
 import com.rvce.scas.repository.RoomRepository;
 import com.rvce.scas.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rvce.scas.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -40,6 +42,8 @@ public class ExamHallService {
     private final ExamSeatRepository examSeatRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
     private final ExamMapper examMapper;
     private final AuditService auditService;
     private final BenchLayoutBuilder benchLayoutBuilder;
@@ -49,7 +53,7 @@ public class ExamHallService {
         ExamSession examSession = requireExamSession(examId);
         ensureMutable(examSession);
 
-        Room room = roomRepository.findById(request.getRoomId())
+        Room room = roomRepository.findById(Objects.requireNonNull(request.getRoomId()))
                 .orElseThrow(() -> new IllegalArgumentException("Room not found: " + request.getRoomId()));
 
         if (room.getRoomType() == null || !"EXAM_HALL".equalsIgnoreCase(room.getRoomType())) {
@@ -73,6 +77,9 @@ public class ExamHallService {
             throw new ExamHallConflictException("Room already configured for this exam.");
         }
 
+        // Validate and resolve invigilator (mandatory)
+        User invigilator = validateAndResolveInvigilator(request.getInvigilatorId());
+
         ExamHall hall = new ExamHall();
         hall.setExamSession(examSession);
         hall.setRoom(room);
@@ -84,17 +91,7 @@ public class ExamHallService {
         hall.setBenchRows(room.getBenchRows().shortValue());
         hall.setBenchCols(room.getBenchCols().shortValue());
         hall.setSortOrder((short) ((int) examHallRepository.countByExamSession_ExamId(examId) + 1));
-
-        if (request.getInvigilatorId() != null && !request.getInvigilatorId().trim().isEmpty()) {
-            try {
-                UUID invigilatorUUID = UUID.fromString(request.getInvigilatorId());
-                User invigilator = userRepository.findById(invigilatorUUID)
-                        .orElseThrow(() -> new IllegalArgumentException("Invigilator not found: " + request.getInvigilatorId()));
-                hall.setInvigilator(invigilator);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid invigilator ID format: " + request.getInvigilatorId(), e);
-            }
-        }
+        hall.setInvigilator(invigilator);
 
         ExamHall saved = examHallRepository.save(hall);
         auditService.log(actorId, "ADD_EXAM_HALL", "exam_halls", saved.getHallId());
@@ -113,7 +110,8 @@ public class ExamHallService {
     public HallGridDto getHallGrid(@NonNull UUID examId, @NonNull UUID hallId) {
         ExamHall hall = requireHall(examId, hallId);
         List<ExamSeat> seats = examSeatRepository.findByExamSession_ExamIdAndHall_HallId(examId, hallId);
-        return benchLayoutBuilder.buildHallGrid(hall, seats);
+        List<ExamSeatDto> seatDtos = seats.stream().map(examMapper::toDto).toList();
+        return benchLayoutBuilder.buildHallGrid(hall, seatDtos);
     }
 
     @Transactional
@@ -140,5 +138,36 @@ public class ExamHallService {
                 && examSession.getStatus() != ExamSession.ExamStatus.CONFIGURED) {
             throw new IllegalArgumentException("Exam halls can only be modified while the exam is in DRAFT or CONFIGURED status.");
         }
+    }
+
+    /**
+     * Validates and resolves an invigilator by ID.
+     * Ensures the invigilator exists and has ROLE_TEACHER.
+     *
+     * @param invigilatorId the invigilator ID (must be a valid UUID string)
+     * @return the resolved User with teacher role
+     * @throws IllegalArgumentException if the ID is invalid, user not found, or user is not a teacher
+     */
+    private User validateAndResolveInvigilator(@NonNull String invigilatorId) {
+        UUID invigilatorUUID;
+        try {
+            invigilatorUUID = UUID.fromString(invigilatorId);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid invigilator ID format: " + invigilatorId, e);
+        }
+
+        User invigilator = userRepository.findById(invigilatorUUID)
+                .orElseThrow(() -> new IllegalArgumentException("Invigilator not found: " + invigilatorId));
+
+        // Verify invigilator has ROLE_TEACHER
+        Role teacherRole = roleRepository.findByName("ROLE_TEACHER")
+                .orElseThrow(() -> new IllegalArgumentException("ROLE_TEACHER not found in system"));
+
+        boolean isTeacher = userRoleRepository.existsByUser_UserIdAndRole_RoleId(invigilatorUUID, teacherRole.getRoleId());
+        if (!isTeacher) {
+            throw new IllegalArgumentException("User " + invigilatorId + " is not assigned the ROLE_TEACHER role");
+        }
+
+        return invigilator;
     }
 }

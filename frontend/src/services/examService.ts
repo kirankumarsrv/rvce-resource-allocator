@@ -12,10 +12,12 @@ import type {
   BulkSeatSaveRequest,
   HallGridDto,
   ExamHallConfigRequest,
+  StudentPublishedExamDto,
+  StudentSeatAssignmentDto,
 } from '@/types/exam'
 import type { RoomAvailabilityDto } from '@/types/timetable'
 
-const API_BASE = 'http://localhost:8080/api/exam'
+const API_BASE = '/api/exam'
 
 /**
  * Create a new exam session
@@ -55,7 +57,7 @@ export const createExamSession = async (
  * Search departments for autocomplete
  */
 export const searchDepartments = async (q = ''): Promise<{ id: string; text: string }[]> => {
-  const url = `http://localhost:8080/api/departments?q=${encodeURIComponent(q)}`
+  const url = `/api/departments?q=${encodeURIComponent(q)}`
   const response = await authenticatedFetch(url)
   if (!response.ok) return []
   return response.json()
@@ -65,7 +67,7 @@ export const searchDepartments = async (q = ''): Promise<{ id: string; text: str
  * List available rooms for exam hall assignment
  */
 export const listAvailableRooms = async (examId: string): Promise<RoomAvailabilityDto[]> => {
-  const url = `http://localhost:8080/api/exam/${examId}/rooms/available`
+  const url = `/api/exam/${examId}/rooms/available`
   const response = await authenticatedFetch(url)
   if (!response.ok) return []
   return response.json()
@@ -311,5 +313,45 @@ export const publishExam = async (examId: string): Promise<ExamSessionDto> => {
     headers: { 'Content-Type': 'application/json' },
   })
   if (!response.ok) throw new Error('Failed to publish exam')
+  return response.json()
+}
+
+/**
+ * Student-facing published seating assignments.
+ */
+export const getStudentPublishedSeating = async (): Promise<StudentSeatAssignmentDto[]> => {
+  const response = await authenticatedFetch(`${API_BASE}/student/seating`)
+  if (!response.ok) {
+    let message = 'Failed to fetch published exam seating'
+    try {
+      const payload = await response.json()
+      if (payload?.message) {
+        message = payload.message
+      }
+    } catch {
+      // keep fallback
+    }
+    throw new Error(message)
+  }
+  return response.json()
+}
+
+/**
+ * Student-facing published exams, including seat details when assigned.
+ */
+export const getStudentPublishedExams = async (): Promise<StudentPublishedExamDto[]> => {
+  const response = await authenticatedFetch(`${API_BASE}/student/exams`)
+  if (!response.ok) {
+    let message = 'Failed to fetch published exams'
+    try {
+      const payload = await response.json()
+      if (payload?.message) {
+        message = payload.message
+      }
+    } catch {
+      // keep fallback
+    }
+    throw new Error(message)
+  }
   return response.json()
 }

@@ -110,7 +110,7 @@ public class TimetableController {
      * @return teachers as lightweight id/text pairs
      */
     @GetMapping("/teachers")
-    @PreAuthorize("hasAnyRole('TTO','ADMIN','SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('TTO','ADMIN','SUPER_ADMIN','DEPT_COORD','EXAM_CONTROLLER')")
     @Operation(summary = "List teachers", description = "Retrieve teachers for dropdown selectors")
     public ResponseEntity<List<SimpleDto>> listTeachers() {
         List<SimpleDto> teachers = userRepository.findAllByRoleName("TEACHER").stream()

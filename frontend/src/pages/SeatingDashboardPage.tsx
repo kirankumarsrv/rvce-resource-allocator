@@ -589,6 +589,9 @@ export const SeatingDashboard = () => {
     : 0
   const examName = examSession?.name || 'Exam'
   const statusLabel = examSession?.status || 'UNKNOWN'
+  const examSchedule = examSession
+    ? `${examSession.examDate} | ${String(examSession.startTime).slice(0, 5)} - ${String(examSession.endTime).slice(0, 5)}`
+    : 'Schedule not available'
   const lastModified = examSession?.updatedAt
     ? new Date(examSession.updatedAt).toLocaleString()
     : examSession?.createdAt
@@ -627,6 +630,9 @@ export const SeatingDashboard = () => {
             <h1 className="text-2xl font-bold text-gray-800">{examName}</h1>
             <div className="text-sm text-gray-600">
               Status: <span className="font-semibold">{statusLabel}</span>
+            </div>
+            <div className="text-sm text-gray-600 mt-1">
+              Exam schedule: {examSchedule}
             </div>
             <div className="text-sm text-gray-600 mt-1">
               Last modified: {lastModified}
@@ -672,6 +678,9 @@ export const SeatingDashboard = () => {
           <h1 className="text-2xl font-bold text-gray-800">{examName}</h1>
           <div className="text-sm text-gray-600">
             Status: <span className="font-semibold">{statusLabel}</span>
+          </div>
+          <div className="text-sm text-gray-600 mt-1">
+            Exam schedule: {examSchedule}
           </div>
           <div className="text-sm text-gray-600 mt-1">
             Last modified: {lastModified}

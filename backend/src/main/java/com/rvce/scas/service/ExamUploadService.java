@@ -75,10 +75,13 @@ public class ExamUploadService {
         UUID deptId = request.getDepartmentId();
         if (deptId == null) {
             String deptName = normalizeOptional(request.getDepartmentName());
-            if (deptName == null) {
-                throw new IllegalArgumentException("departmentId or departmentName is required");
+            if (deptName != null) {
+                deptId = findOrCreateDepartmentByName(deptName);
+            } else {
+                deptId = departmentRepository.findByCodeIgnoreCase("ADMIN")
+                        .map(Department::getDepartmentId)
+                        .orElseGet(() -> findOrCreateDepartmentByName("Administration"));
             }
-            deptId = findOrCreateDepartmentByName(deptName);
         }
         examSession.setDepartmentId(deptId);
         examSession.setExamDate(request.getExamDate());
@@ -97,7 +100,7 @@ public class ExamUploadService {
 
     @Transactional
     public ExamStudentUploadResultDto uploadStudents(UUID examId, MultipartFile file, UUID actorId) {
-        ExamSession examSession = examSessionRepository.findById(examId)
+        ExamSession examSession = examSessionRepository.findById(Objects.requireNonNull(examId))
                 .orElseThrow(() -> new ExamSessionNotFoundException("Exam session not found: " + examId));
 
         if (examSession.getStatus() == ExamSession.ExamStatus.CANCELLED
@@ -299,20 +302,6 @@ public class ExamUploadService {
             code = (candidate + suffix).substring(0, Math.min(10, candidate.length() + String.valueOf(suffix).length()));
         }
         return code;
-    }
-
-    private boolean parseBooleanFlag(String rawValue) {
-        if (rawValue == null) {
-            throw new IllegalArgumentException("needs_front_row is required");
-        }
-        String normalized = rawValue.trim();
-        if (normalized.equalsIgnoreCase("true") || normalized.equals("1")) {
-            return true;
-        }
-        if (normalized.equalsIgnoreCase("false") || normalized.equals("0")) {
-            return false;
-        }
-        throw new IllegalArgumentException("Invalid needs_front_row value. Use true/false or 1/0.");
     }
 
     private ExamStudentUploadErrorDto error(int row, String usn, String message) {

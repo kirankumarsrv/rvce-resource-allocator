@@ -27,6 +27,28 @@ public interface ExamSeatRepository extends JpaRepository<ExamSeat, UUID> {
 
     Optional<ExamSeat> findByExamSession_ExamIdAndStudentId(UUID examId, UUID studentId);
 
+        @Query("""
+                        SELECT es FROM ExamSeat es
+                        JOIN FETCH es.examSession exam
+                        JOIN FETCH es.hall hall
+                        JOIN FETCH hall.room room
+                        WHERE es.studentId = :studentId
+                            AND exam.status = com.rvce.scas.entity.ExamSession$ExamStatus.PUBLISHED
+                        ORDER BY exam.examDate ASC, exam.startTime ASC
+                        """)
+        List<ExamSeat> findPublishedSeatsByStudentId(@Param("studentId") UUID studentId);
+
+        @Query("""
+                        SELECT es FROM ExamSeat es
+                        JOIN FETCH es.examSession exam
+                        JOIN FETCH es.hall hall
+                        JOIN FETCH hall.room room
+                        WHERE es.studentId = :studentId
+                            AND exam.examId = :examId
+                            AND exam.status = com.rvce.scas.entity.ExamSession$ExamStatus.PUBLISHED
+                        """)
+        Optional<ExamSeat> findPublishedSeatByExamAndStudent(@Param("examId") UUID examId, @Param("studentId") UUID studentId);
+
     boolean existsByHall_HallIdAndBenchRowAndBenchColAndBenchSeatIndex(UUID hallId, Integer benchRow, Integer benchCol, Integer benchSeatIndex);
 
     long countByExamSession_ExamId(UUID examId);

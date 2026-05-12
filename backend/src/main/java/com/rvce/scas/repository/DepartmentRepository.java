@@ -12,6 +12,7 @@ import java.util.UUID;
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, UUID> {
     Optional<Department> findByNameIgnoreCase(String name);
+    Optional<Department> findByCodeIgnoreCase(String code);
     boolean existsByCode(String code);
 
     Page<Department> findByNameContainingIgnoreCase(String name, Pageable pageable);

@@ -87,7 +87,7 @@ public class SecurityConfig {
                                 "/api/exam/*/rooms/available"
                         ).permitAll()
                         .requestMatchers("/api/auth/logout", "/api/auth/logout-all").authenticated()
-                        .requestMatchers("/api/exam/*/seating/my-seat").hasRole("STUDENT")
+                        .requestMatchers("/api/exam/*/seating/my-seat", "/api/exam/student/seating").hasRole("STUDENT")
                         .requestMatchers("/api/exam/**").hasAnyRole("DEPT_COORD", "ADMIN", "TTO", "EXAM_CONTROLLER")
                         .requestMatchers("/api/timetable/available").hasAnyRole("TEACHER", "TTO", "DEPT_COORD", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/timetable/reservations", "/api/timetable/reservations/**")
@@ -175,6 +175,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "http://localhost:5173",
+                "http://localhost:5174",
                 "https://scas.rvce.edu.in"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

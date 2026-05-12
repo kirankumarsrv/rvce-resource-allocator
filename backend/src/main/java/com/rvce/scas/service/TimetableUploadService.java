@@ -16,6 +16,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -85,7 +86,7 @@ public class TimetableUploadService {
 
             if (!errors.isEmpty()) {
                 log.warn("CSV validation failed with {} errors", errors.size());
-                throw new CsvValidationException("Validation failed: " + String.join("; ", errors));
+                throw new CsvValidationException(errors);
             }
 
             if (validRows.isEmpty()) {
@@ -107,6 +108,8 @@ public class TimetableUploadService {
             log.info("Timetable upload completed successfully: {} slots inserted", insertedCount);
             return resultDto;
 
+        } catch (CsvValidationException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Timetable upload failed", e);
             throw new CsvValidationException("Upload failed: " + e.getMessage());
@@ -144,7 +147,7 @@ public class TimetableUploadService {
             }
 
         } catch (Exception e) {
-            errors.add("CSV parsing error: " + e.getMessage());
+            errors.add("Validation failed: CSV parsing error: " + e.getMessage());
         }
 
         return new ParseResult(validRows, errors);
@@ -152,17 +155,54 @@ public class TimetableUploadService {
 
     /**
      * Parses a single CSV record into a CsvRowDto.
+     * Provides detailed error messages for field parsing failures.
      *
      * @param record the CSV record
      * @return the parsed row DTO
+     * @throws IllegalArgumentException if any field fails to parse
      */
     private CsvRowValidator.CsvRowDto parseRecord(CSVRecord record) {
         CsvRowValidator.CsvRowDto row = new CsvRowValidator.CsvRowDto();
-        row.setRoomId(UUID.fromString(record.get("room_id")));
-        row.setTeacherId(UUID.fromString(record.get("teacher_id")));
-        row.setDayOfWeek(Integer.parseInt(record.get("day_of_week")));
-        row.setStartTime(LocalTime.parse(record.get("start_time")));
-        row.setEndTime(LocalTime.parse(record.get("end_time")));
+        
+        try {
+            String roomIdStr = record.get("room_id");
+            row.setRoomId(UUID.fromString(roomIdStr));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("room_id: Invalid UUID format - " + record.get("room_id"), e);
+        }
+        
+        try {
+            String teacherIdStr = record.get("teacher_id");
+            row.setTeacherId(UUID.fromString(teacherIdStr));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("teacher_id: Invalid UUID format - " + record.get("teacher_id"), e);
+        }
+        
+        try {
+            String dayStr = record.get("day_of_week");
+            int day = Integer.parseInt(dayStr);
+            if (day < 0 || day > 6) {
+                throw new IllegalArgumentException("day_of_week must be between 0-6 (Monday-Sunday)");
+            }
+            row.setDayOfWeek(day);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("day_of_week: Invalid integer - " + record.get("day_of_week"), e);
+        }
+        
+        try {
+            String startTimeStr = record.get("start_time");
+            row.setStartTime(LocalTime.parse(startTimeStr));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("start_time: Invalid time format (expected HH:mm:ss) - " + record.get("start_time"), e);
+        }
+        
+        try {
+            String endTimeStr = record.get("end_time");
+            row.setEndTime(LocalTime.parse(endTimeStr));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("end_time: Invalid time format (expected HH:mm:ss) - " + record.get("end_time"), e);
+        }
+        
         row.setSubject(record.get("subject"));
         row.setDepartment(record.get("department"));
         return row;
@@ -178,11 +218,14 @@ public class TimetableUploadService {
         List<TimetableSlot> slots = new ArrayList<>();
         UUID activeVersionId = resolveActiveVersionId();
         for (CsvRowValidator.CsvRowDto row : rows) {
-            Room room = roomRepository.findById(row.getRoomId())
-                    .orElseThrow(() -> new CsvValidationException("Room not found during persistence: " + row.getRoomId()));
+            UUID roomId = java.util.Objects.requireNonNull(row.getRoomId(), "roomId must not be null during persistence");
+            UUID teacherId = java.util.Objects.requireNonNull(row.getTeacherId(), "teacherId must not be null during persistence");
 
-            User teacher = userRepository.findById(row.getTeacherId())
-                    .orElseThrow(() -> new CsvValidationException("Teacher not found during persistence: " + row.getTeacherId()));
+            Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new CsvValidationException("Room not found during persistence: " + roomId));
+
+            User teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new CsvValidationException("Teacher not found during persistence: " + teacherId));
 
             TimetableSlot slot = new TimetableSlot();
             slot.setRoom(room);
@@ -203,15 +246,19 @@ public class TimetableUploadService {
     }
 
     private UUID resolveActiveVersionId() {
-        UUID activeVersionId = jdbcTemplate.queryForObject(
-                "SELECT version_id FROM timetable_versions WHERE status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1",
-                UUID.class);
+        try {
+            UUID activeVersionId = jdbcTemplate.queryForObject(
+                    "SELECT version_id FROM timetable_versions WHERE status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1",
+                    UUID.class);
 
-        if (activeVersionId == null) {
-            throw new CsvValidationException("No ACTIVE timetable version found. Upload cannot continue.");
+            if (activeVersionId == null) {
+                throw new CsvValidationException("No ACTIVE timetable version found. Upload cannot continue.");
+            }
+
+            return activeVersionId;
+        } catch (DataAccessException e) {
+            throw new CsvValidationException("No ACTIVE timetable version found. Upload cannot continue.", e);
         }
-
-        return activeVersionId;
     }
 
     /**

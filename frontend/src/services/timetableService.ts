@@ -19,7 +19,7 @@ import {
 } from '../types/timetable'
 import { authenticatedFetch } from '@/services/authService'
 
-const API_BASE = 'http://localhost:8080/api/timetable'
+const API_BASE = '/api/timetable'
 
 /**
  * Get teacher's schedule for a specific day of week
@@ -115,8 +115,23 @@ export const uploadTimetable = async (file: File): Promise<UploadResultDto> => {
   })
 
   if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText || 'Failed to upload timetable')
+    let message = 'Failed to upload timetable'
+    try {
+      const payload = await response.json()
+      if (Array.isArray(payload?.errors) && payload.errors.length > 0) {
+        message = payload.errors.join('; ')
+      } else if (typeof payload?.message === 'string' && payload.message.trim()) {
+        message = payload.message.trim()
+      } else if (typeof payload?.error === 'string' && payload.error.trim()) {
+        message = payload.error.trim()
+      }
+    } catch {
+      const errorText = await response.text()
+      if (errorText) {
+        message = errorText
+      }
+    }
+    throw new Error(message)
   }
 
   return response.json()

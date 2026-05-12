@@ -1,13 +1,15 @@
 /**
  * AddHallModal Component
  * Form to add a new exam hall to the current exam session.
+ * Updated: Invigilator is now required with teacher dropdown.
  */
 
 import { useEffect, useState } from 'react'
 import { X, Loader } from 'lucide-react'
 import type { ExamHallConfigRequest } from '@/types/exam'
-import type { RoomAvailabilityDto } from '@/types/timetable'
+import type { RoomAvailabilityDto, SimpleDto } from '@/types/timetable'
 import { listAvailableRooms } from '@/services/examService'
+import { getTeachers } from '@/services/timetableService'
 
 interface AddHallModalProps {
   examId: string
@@ -26,6 +28,7 @@ export const AddHallModal = ({
   isSubmitting,
 }: AddHallModalProps) => {
   const [rooms, setRooms] = useState<AvailableRoom[]>([])
+  const [teachers, setTeachers] = useState<SimpleDto[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [roomId, setRoomId] = useState('')
@@ -45,10 +48,16 @@ export const AddHallModal = ({
 
     setIsLoading(true)
 
-    listAvailableRooms(examId)
-      .then((availableRooms) => {
+    // Load rooms and teachers in parallel
+    Promise.all([
+      listAvailableRooms(examId),
+      getTeachers()
+    ])
+      .then(([availableRooms, teacherList]) => {
         const examHallRooms = availableRooms.filter((room) => room.roomType === 'EXAM_HALL')
         setRooms(examHallRooms)
+        setTeachers(teacherList)
+
         if (examHallRooms.length > 0) {
           setRoomId(examHallRooms[0].id)
           const firstRoom = examHallRooms[0]
@@ -62,7 +71,7 @@ export const AddHallModal = ({
         }
       })
       .catch((err) => {
-        setLoadError(err instanceof Error ? err.message : 'Failed to load rooms')
+        setLoadError(err instanceof Error ? err.message : 'Failed to load rooms or teachers')
       })
       .finally(() => {
         setIsLoading(false)
@@ -79,6 +88,11 @@ export const AddHallModal = ({
   const handleSubmit = () => {
     if (!roomId) {
       setLoadError('Please select a room.')
+      return
+    }
+
+    if (!invigilatorId) {
+      setLoadError('Please select an invigilator (required).')
       return
     }
 
@@ -106,7 +120,7 @@ export const AddHallModal = ({
       roomId,
       twoSeaterCount,
       threeSeaterCount,
-      invigilatorId: invigilatorId.trim() === '' ? null : invigilatorId.trim(),
+      invigilatorId: invigilatorId.trim(),
     })
   }
 
@@ -118,7 +132,7 @@ export const AddHallModal = ({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Add New Hall</h2>
-            <p className="text-sm text-gray-600">Select an exam hall and configure seating.</p>
+            <p className="text-sm text-gray-600">Select an exam hall, invigilator, and configure seating.</p>
           </div>
           <button
             type="button"
@@ -133,7 +147,7 @@ export const AddHallModal = ({
         <div className="mt-6 space-y-4">
           {isLoading ? (
             <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-              <Loader className="animate-spin" size={18} /> Loading available rooms...
+              <Loader className="animate-spin" size={18} /> Loading rooms and teachers...
             </div>
           ) : loadError ? (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -152,6 +166,7 @@ export const AddHallModal = ({
                   </label>
                   <select
                     id="roomId"
+                    data-test-id="add-hall-room"
                     value={roomId}
                     onChange={(event) => {
                       const selectedRoomId = event.target.value
@@ -180,6 +195,32 @@ export const AddHallModal = ({
                 </div>
               )}
 
+              {teachers.length === 0 ? (
+                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700">
+                  No teachers are available. Please contact admin to add teachers.
+                </div>
+              ) : (
+                <div>
+                  <label htmlFor="invigilatorId" className="text-sm font-semibold text-gray-700">
+                    Invigilator <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    id="invigilatorId"
+                    data-test-id="add-hall-invigilator"
+                    value={invigilatorId}
+                    onChange={(event) => setInvigilatorId(event.target.value)}
+                    className="mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+                  >
+                    <option value="">-- Select an invigilator --</option>
+                    {teachers.map((teacher) => (
+                      <option key={teacher.id} value={teacher.id}>
+                        {teacher.text}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="twoSeaterCount" className="text-sm font-semibold text-gray-700">
@@ -187,6 +228,7 @@ export const AddHallModal = ({
                   </label>
                   <input
                     id="twoSeaterCount"
+                    data-test-id="add-hall-two-seater"
                     type="number"
                     min={0}
                     value={twoSeaterCount}
@@ -200,6 +242,7 @@ export const AddHallModal = ({
                   </label>
                   <input
                     id="threeSeaterCount"
+                    data-test-id="add-hall-three-seater"
                     type="number"
                     min={0}
                     value={threeSeaterCount}
@@ -207,20 +250,6 @@ export const AddHallModal = ({
                     className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label htmlFor="invigilatorId" className="text-sm font-semibold text-gray-700">
-                  Invigilator ID (optional)
-                </label>
-                <input
-                  id="invigilatorId"
-                  type="text"
-                  value={invigilatorId}
-                  onChange={(event) => setInvigilatorId(event.target.value)}
-                  className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="Leave empty if not assigned"
-                />
               </div>
 
               {/* Capacity Summary */}
@@ -248,6 +277,7 @@ export const AddHallModal = ({
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
+            data-test-id="add-hall-cancel"
             onClick={onClose}
             className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
             disabled={isSubmitting}
@@ -256,6 +286,7 @@ export const AddHallModal = ({
           </button>
           <button
             type="button"
+            data-test-id="add-hall-submit"
             onClick={handleSubmit}
             className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isSubmitting || isLoading || rooms.length === 0}

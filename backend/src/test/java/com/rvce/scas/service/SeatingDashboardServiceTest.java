@@ -4,6 +4,7 @@ import com.rvce.scas.dto.request.BulkSeatSaveRequest;
 import com.rvce.scas.dto.request.SeatPlacementRequest;
 import com.rvce.scas.dto.response.ExamHallDto;
 import com.rvce.scas.dto.response.SeatingDashboardStateDto;
+import com.rvce.scas.dto.response.StudentPublishedExamDto;
 import com.rvce.scas.entity.ExamHall;
 import com.rvce.scas.entity.ExamSeat;
 import com.rvce.scas.entity.ExamSession;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.when;
  * Unit tests for the manual seating dashboard flow.
  */
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 class SeatingDashboardServiceTest {
 
     @Mock
@@ -80,7 +83,7 @@ class SeatingDashboardServiceTest {
         ExamSession examSession = new ExamSession();
         examSession.setExamId(examId);
         examSession.setStatus(ExamSession.ExamStatus.CONFIGURED);
-        when(examSessionRepository.findById(examId)).thenReturn(Optional.of(examSession));
+        when(examSessionRepository.findById(java.util.Objects.requireNonNull(examId))).thenReturn(Optional.of(examSession));
 
         Room room = new Room();
         room.setId(roomId);
@@ -141,7 +144,6 @@ class SeatingDashboardServiceTest {
         seat.setManualOverride(true);
         when(examSeatRepository.findByExamSession_ExamIdOrderByHall_SortOrderAscBenchRowAscBenchColAscBenchSeatIndexAsc(examId))
                 .thenReturn(List.of(seat));
-        when(examSeatRepository.findByExamSession_ExamIdAndHall_HallId(examId, hallId)).thenReturn(List.of(seat));
 
         SeatingDashboardStateDto response = seatingDashboardService.loadState(examId);
 
@@ -163,7 +165,7 @@ class SeatingDashboardServiceTest {
         ExamSession examSession = new ExamSession();
         examSession.setExamId(examId);
         examSession.setStatus(ExamSession.ExamStatus.CONFIGURED);
-        when(examSessionRepository.findById(examId)).thenReturn(Optional.of(examSession));
+        when(examSessionRepository.findById(java.util.Objects.requireNonNull(examId))).thenReturn(Optional.of(examSession));
 
         Room room = new Room();
         room.setId(roomId);
@@ -216,9 +218,10 @@ class SeatingDashboardServiceTest {
         seat.setManualOverride(true);
         when(examSeatRepository.findByExamSession_ExamIdOrderByHall_SortOrderAscBenchRowAscBenchColAscBenchSeatIndexAsc(examId))
                 .thenReturn(List.of(seat));
-        when(examSeatRepository.findByExamSession_ExamIdAndHall_HallId(examId, hallId)).thenReturn(List.of(seat));
         doNothing().when(examSeatRepository).deleteByExamId(examId);
-        when(examSeatRepository.saveAll(any())).thenReturn(List.of(seat));
+        @SuppressWarnings("unchecked")
+        Iterable<ExamSeat> savedSeats = (Iterable<ExamSeat>) any(Iterable.class);
+        when(examSeatRepository.saveAll(savedSeats)).thenReturn(List.of(seat));
 
         BulkSeatSaveRequest request = new BulkSeatSaveRequest();
         SeatPlacementRequest assignment = new SeatPlacementRequest();
@@ -236,5 +239,66 @@ class SeatingDashboardServiceTest {
         assertEquals(1, response.getHallGrids().size());
         assertEquals(1, response.getAssignedSeats().size());
         assertEquals("1RV23CS001", response.getAssignedSeats().get(0).getUsn());
+    }
+
+    @Test
+    void getPublishedExamsForStudentIncludesSeatDetailsWhenPublished() {
+        UUID examId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        UUID hallId = UUID.randomUUID();
+        UUID roomId = UUID.randomUUID();
+
+        ExamSession examSession = new ExamSession();
+        examSession.setExamId(examId);
+        examSession.setName("Midterm CSE");
+        examSession.setSubjectCode("21CS51");
+        examSession.setSubjectName("DAA");
+        examSession.setStatus(ExamSession.ExamStatus.PUBLISHED);
+        examSession.setExamDate(java.time.LocalDate.of(2026, 5, 12));
+        examSession.setStartTime(java.time.LocalTime.of(9, 0));
+        examSession.setEndTime(java.time.LocalTime.of(12, 0));
+        examSession.setPublishedAt(java.time.Instant.now());
+
+        Room room = new Room();
+        room.setId(roomId);
+        room.setName("D101");
+        room.setDisplayName("Block D - Examination Block");
+
+        ExamHall hall = new ExamHall();
+        hall.setHallId(hallId);
+        hall.setExamSession(examSession);
+        hall.setRoom(room);
+
+        ExamSeat seat = new ExamSeat();
+        seat.setSeatId(UUID.randomUUID());
+        seat.setExamSession(examSession);
+        seat.setHall(hall);
+        seat.setStudentId(studentId);
+        seat.setBenchRow((short) 1);
+        seat.setBenchCol((short) 1);
+        seat.setBenchSeatIndex((short) 0);
+        seat.setBenchNumber("A-1");
+        seat.setManualOverride(false);
+
+        ExamStudent enrolledStudent = new ExamStudent();
+        enrolledStudent.setEntryId(UUID.randomUUID());
+        enrolledStudent.setExamId(examId);
+        enrolledStudent.setStudentId(studentId);
+        enrolledStudent.setUsn("1RV23CS001");
+        enrolledStudent.setStudentName("Ishita Jain");
+        enrolledStudent.setBranchCode("CSE");
+
+        when(examStudentRepository.findExamIdsByStudentId(studentId)).thenReturn(List.of(examId));
+        when(examSessionRepository.findAllById(Collections.singletonList(java.util.Objects.requireNonNull(examId))))
+            .thenReturn(List.of(examSession));
+        when(examSeatRepository.findPublishedSeatByExamAndStudent(examId, studentId)).thenReturn(Optional.of(seat));
+
+        List<StudentPublishedExamDto> response = seatingDashboardService.getPublishedExamsForStudent(studentId);
+
+        assertEquals(1, response.size());
+        assertEquals(examId, response.get(0).getExamId());
+        assertEquals("Midterm CSE", response.get(0).getExamName());
+        assertEquals("Block D - Examination Block", response.get(0).getHallName());
+        assertEquals("A-1", response.get(0).getBenchNumber());
     }
 }

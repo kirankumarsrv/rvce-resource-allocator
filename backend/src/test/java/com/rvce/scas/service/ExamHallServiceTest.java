@@ -6,15 +6,19 @@ import com.rvce.scas.dto.response.HallGridDto;
 import com.rvce.scas.entity.ExamHall;
 import com.rvce.scas.entity.ExamSeat;
 import com.rvce.scas.entity.ExamSession;
+import com.rvce.scas.entity.Role;
 import com.rvce.scas.entity.Room;
 import com.rvce.scas.entity.User;
+import com.rvce.scas.dto.response.ExamSeatDto;
 import com.rvce.scas.exception.ExamHallConflictException;
 import com.rvce.scas.mapper.ExamMapper;
 import com.rvce.scas.repository.ExamHallRepository;
 import com.rvce.scas.repository.ExamSeatRepository;
 import com.rvce.scas.repository.ExamSessionRepository;
+import com.rvce.scas.repository.RoleRepository;
 import com.rvce.scas.repository.RoomRepository;
 import com.rvce.scas.repository.UserRepository;
+import com.rvce.scas.repository.UserRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +58,12 @@ class ExamHallServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private UserRoleRepository userRoleRepository;
+
+    @Mock
     private ExamMapper examMapper;
 
     private ExamHallService examHallService;
@@ -66,6 +76,8 @@ class ExamHallServiceTest {
                 examSeatRepository,
                 roomRepository,
                 userRepository,
+                roleRepository,
+                userRoleRepository,
                 examMapper,
                 new AuditService(),
                 new BenchLayoutBuilder()
@@ -97,6 +109,12 @@ class ExamHallServiceTest {
         User invigilator = new User();
         invigilator.setUserId(invigilatorId);
         when(userRepository.findById(invigilatorId)).thenReturn(Optional.of(invigilator));
+
+        Role teacherRole = new Role();
+        teacherRole.setRoleId(UUID.randomUUID());
+        teacherRole.setName("ROLE_TEACHER");
+        when(roleRepository.findByName("ROLE_TEACHER")).thenReturn(Optional.of(teacherRole));
+        when(userRoleRepository.existsByUser_UserIdAndRole_RoleId(invigilatorId, teacherRole.getRoleId())).thenReturn(true);
 
         when(examHallRepository.existsByExamSession_ExamIdAndRoom_Id(examId, roomId)).thenReturn(false);
         when(examHallRepository.countByExamSession_ExamId(examId)).thenReturn(0L);
@@ -181,6 +199,21 @@ class ExamHallServiceTest {
         when(examSeatRepository.findByExamSession_ExamIdAndHall_HallId(examId, hallId))
                 .thenReturn(List.of(occupiedSeat));
 
+        when(examMapper.toDto(any(ExamSeat.class))).thenAnswer(invocation -> {
+            ExamSeat seat = invocation.getArgument(0);
+            ExamSeatDto dto = new ExamSeatDto();
+            dto.setSeatId(seat.getSeatId());
+            dto.setExamId(seat.getExamSession().getExamId());
+            dto.setHallId(seat.getHall().getHallId());
+            dto.setStudentId(seat.getStudentId());
+            dto.setBenchRow(seat.getBenchRow());
+            dto.setBenchCol(seat.getBenchCol());
+            dto.setBenchSeatIndex(seat.getBenchSeatIndex());
+            dto.setBenchNumber(seat.getBenchNumber());
+            dto.setManualOverride(seat.isManualOverride());
+            return dto;
+        });
+
         HallGridDto response = examHallService.getHallGrid(examId, hallId);
 
         assertEquals(2, response.getBenchRows());
@@ -220,5 +253,78 @@ class ExamHallServiceTest {
         request.setThreeSeaterCount(2);
 
         assertThrows(ExamHallConflictException.class, () -> examHallService.addHall(examId, request, UUID.randomUUID()));
+    }
+
+    @Test
+    void addHallRejectsNonTeacherInvigilator() {
+        UUID examId = UUID.randomUUID();
+        UUID roomId = UUID.randomUUID();
+        UUID invigilatorId = UUID.randomUUID();
+
+        ExamSession examSession = new ExamSession();
+        examSession.setExamId(examId);
+        examSession.setStatus(ExamSession.ExamStatus.DRAFT);
+        when(examSessionRepository.findById(examId)).thenReturn(Optional.of(examSession));
+
+        Room room = new Room();
+        room.setId(roomId);
+        room.setName("D101");
+        room.setDisplayName("Block D - Examination Block");
+        room.setRoomType("EXAM_HALL");
+        room.setCapacity(120);
+        room.setBenchRows(10);
+        room.setBenchCols(12);
+        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
+
+        User invigilator = new User();
+        invigilator.setUserId(invigilatorId);
+        when(userRepository.findById(invigilatorId)).thenReturn(Optional.of(invigilator));
+
+        Role teacherRole = new Role();
+        teacherRole.setRoleId(UUID.randomUUID());
+        teacherRole.setName("ROLE_TEACHER");
+        when(roleRepository.findByName("ROLE_TEACHER")).thenReturn(Optional.of(teacherRole));
+        when(userRoleRepository.existsByUser_UserIdAndRole_RoleId(invigilatorId, teacherRole.getRoleId())).thenReturn(false);
+
+        when(examHallRepository.existsByExamSession_ExamIdAndRoom_Id(examId, roomId)).thenReturn(false);
+
+        ExamHallConfigRequest request = new ExamHallConfigRequest();
+        request.setRoomId(roomId);
+        request.setTwoSeaterCount(4);
+        request.setThreeSeaterCount(2);
+        request.setInvigilatorId(invigilatorId.toString());
+
+        assertThrows(IllegalArgumentException.class, () -> examHallService.addHall(examId, request, UUID.randomUUID()));
+    }
+
+    @Test
+    void addHallRejectsInvalidInvigilatorIdFormat() {
+        UUID examId = UUID.randomUUID();
+        UUID roomId = UUID.randomUUID();
+
+        ExamSession examSession = new ExamSession();
+        examSession.setExamId(examId);
+        examSession.setStatus(ExamSession.ExamStatus.DRAFT);
+        when(examSessionRepository.findById(examId)).thenReturn(Optional.of(examSession));
+
+        Room room = new Room();
+        room.setId(roomId);
+        room.setName("D101");
+        room.setDisplayName("Block D - Examination Block");
+        room.setRoomType("EXAM_HALL");
+        room.setCapacity(120);
+        room.setBenchRows(10);
+        room.setBenchCols(12);
+        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
+
+        when(examHallRepository.existsByExamSession_ExamIdAndRoom_Id(examId, roomId)).thenReturn(false);
+
+        ExamHallConfigRequest request = new ExamHallConfigRequest();
+        request.setRoomId(roomId);
+        request.setTwoSeaterCount(4);
+        request.setThreeSeaterCount(2);
+        request.setInvigilatorId("not-a-uuid");
+
+        assertThrows(IllegalArgumentException.class, () -> examHallService.addHall(examId, request, UUID.randomUUID()));
     }
 }

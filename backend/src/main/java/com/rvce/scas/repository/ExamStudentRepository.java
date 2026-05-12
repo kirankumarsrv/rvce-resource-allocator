@@ -37,6 +37,9 @@ public interface ExamStudentRepository extends JpaRepository<ExamStudent, UUID> 
 
     List<ExamStudent> findByExamIdOrderByCreatedAtAsc(UUID examId);
 
+    @Query("SELECT DISTINCT es.examId FROM ExamStudent es WHERE es.studentId = :studentId")
+    List<UUID> findExamIdsByStudentId(@Param("studentId") UUID studentId);
+
     long countByExamId(UUID examId);
 
     @Query("SELECT COUNT(es) FROM ExamStudent es WHERE es.examId = :examId AND es.studentId NOT IN (SELECT DISTINCT seat.studentId FROM ExamSeat seat WHERE seat.examSession.examId = :examId)")

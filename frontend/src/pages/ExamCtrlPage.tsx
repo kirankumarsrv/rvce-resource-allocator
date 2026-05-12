@@ -54,10 +54,11 @@ const ExamCtrlPage = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Exam Control Portal</h1>
+          <h1 data-test-id="exam-control-heading" className="text-3xl font-bold text-gray-800">Exam Control Portal</h1>
           <p className="text-gray-600 mt-1">Manage exam seating arrangements</p>
         </div>
         <button
+          data-test-id="create-exam-button"
           onClick={() => navigate('/create-exam')}
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition"
         >

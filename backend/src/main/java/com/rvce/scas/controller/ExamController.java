@@ -7,6 +7,8 @@ import com.rvce.scas.dto.response.ExamStudentUploadResultDto;
 import com.rvce.scas.dto.response.RoomAvailabilityDto;
 import com.rvce.scas.dto.response.SeatingDashboardStateDto;
 import com.rvce.scas.dto.response.SeatingSessionDto;
+import com.rvce.scas.dto.response.StudentPublishedExamDto;
+import com.rvce.scas.dto.response.StudentSeatAssignmentDto;
 import com.rvce.scas.security.JwtPrincipal;
 import com.rvce.scas.service.ExamUploadService;
 import com.rvce.scas.service.RoomAvailabilityService;
@@ -165,6 +167,33 @@ public class ExamController {
             Authentication authentication) {
         ExamSessionDto published = seatingDashboardService.publishExam(Objects.requireNonNull(examId), resolveActorId(authentication));
         return ResponseEntity.ok(published);
+    }
+
+    @GetMapping("/student/seating")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<StudentSeatAssignmentDto>> getStudentPublishedSeating(Authentication authentication) {
+        UUID studentId = resolveActorId(authentication);
+        return ResponseEntity.ok(seatingDashboardService.getPublishedSeatsForStudent(studentId));
+    }
+
+    @GetMapping("/student/exams")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<StudentPublishedExamDto>> getStudentPublishedExams(Authentication authentication) {
+        UUID studentId = resolveActorId(authentication);
+        return ResponseEntity.ok(seatingDashboardService.getPublishedExamsForStudent(studentId));
+    }
+
+    @GetMapping("/{examId}/seating/my-seat")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<StudentSeatAssignmentDto> getStudentSeatForExam(
+            @PathVariable UUID examId,
+            Authentication authentication) {
+        UUID studentId = resolveActorId(authentication);
+        StudentSeatAssignmentDto assignment = seatingDashboardService.getPublishedSeatForStudentByExam(
+                Objects.requireNonNull(examId),
+                studentId
+        );
+        return ResponseEntity.ok(assignment);
     }
 
     private UUID resolveActorId(Authentication authentication) {
