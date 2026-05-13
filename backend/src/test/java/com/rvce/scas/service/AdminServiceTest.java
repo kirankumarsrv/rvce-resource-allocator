@@ -146,6 +146,42 @@ class AdminServiceTest {
     }
 
     @Test
+    void createUserRejectsInvalidEmailDomain() {
+        CreateUserRequest request = new CreateUserRequest(
+                "Invalid Domain",
+                "invalid.user@example.com",
+                null,
+                "TEACHER",
+                "CSE"
+        );
+
+        try {
+            adminService.createUser(request);
+            assertTrue(false, "Expected IllegalArgumentException for invalid email domain");
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Email must be a valid @rvce.edu.in address", ex.getMessage());
+        }
+    }
+
+    @Test
+    void createUserRejectsMalformedEmail() {
+        CreateUserRequest request = new CreateUserRequest(
+                "Bad Email",
+                "not-an-email",
+                null,
+                "TEACHER",
+                "CSE"
+        );
+
+        try {
+            adminService.createUser(request);
+            assertTrue(false, "Expected IllegalArgumentException for malformed email");
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Email must be a valid @rvce.edu.in address", ex.getMessage());
+        }
+    }
+
+    @Test
     void resetPasswordReturnsTemporaryPasswordPayload() {
         UUID userId = UUID.randomUUID();
         User user = new User();

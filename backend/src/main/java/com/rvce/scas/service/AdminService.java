@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -47,8 +48,12 @@ public class AdminService {
      * @return UserCreatedDto with new user ID and temp password
      * @throws CsvValidationException if email already exists or role/department invalid
      */
+    private static final Pattern RVCE_EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@rvce\\.edu\\.in$", Pattern.CASE_INSENSITIVE);
+
     @Transactional
     public UserCreatedDto createUser(CreateUserRequest request) {
+        validateCreateUserRequest(request);
+
         // Validate email is unique
         if (userRepository.findByEmailIgnoreCase(request.getEmail()).isPresent()) {
             throw new CsvValidationException("User with email " + request.getEmail() + " already exists");
@@ -111,6 +116,27 @@ public class AdminService {
         userRole.setUser(user);
         userRole.setRole(role);
         userRoleRepository.save(userRole);
+    }
+
+    private void validateCreateUserRequest(CreateUserRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("User creation request cannot be null");
+        }
+        if (request.getName() == null || request.getName().isBlank()) {
+            throw new IllegalArgumentException("User name is required");
+        }
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (!RVCE_EMAIL_PATTERN.matcher(request.getEmail().trim()).matches()) {
+            throw new IllegalArgumentException("Email must be a valid @rvce.edu.in address");
+        }
+        if (request.getRole() == null || request.getRole().isBlank()) {
+            throw new IllegalArgumentException("Role is required");
+        }
+        if (request.getDepartmentCode() == null || request.getDepartmentCode().isBlank()) {
+            throw new IllegalArgumentException("Department code is required");
+        }
     }
 
     /**

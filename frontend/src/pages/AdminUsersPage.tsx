@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { createUser, bulkCreateUsers } from '@/services/adminService'
-import type { CreateUserRequest } from '@/types/admin'
+import type { CreateUserRequest, UserCreatedDto } from '@/types/admin'
+
+const RVCE_EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@rvce\.edu\.in$/i
+
+const isValidRvceEmail = (value: string) => RVCE_EMAIL_REGEX.test(value.trim())
 
 const AdminUsersPage = () => {
   const [name, setName] = useState('')
@@ -8,10 +12,16 @@ const AdminUsersPage = () => {
   const [role, setRole] = useState('TEACHER')
   const [department, setDepartment] = useState('CSE')
   const [bulkUsers, setBulkUsers] = useState<CreateUserRequest[]>([])
+  const [bulkResults, setBulkResults] = useState<UserCreatedDto[]>([])
   const [message, setMessage] = useState<string | null>(null)
 
   const handleCreate = async () => {
     setMessage(null)
+    if (!isValidRvceEmail(email)) {
+      setMessage('Email must be a valid @rvce.edu.in address')
+      return
+    }
+
     const req: CreateUserRequest = {
       name,
       email,
@@ -22,6 +32,7 @@ const AdminUsersPage = () => {
     try {
       const res = await createUser(req)
       setMessage(`Created ${res.email} — temp: ${res.tempPassword}`)
+      setBulkResults([])
       // Clear form
       setName('')
       setEmail('')
@@ -52,9 +63,27 @@ const AdminUsersPage = () => {
       setMessage('No users to create')
       return
     }
+
+    for (let index = 0; index < bulkUsers.length; index += 1) {
+      const user = bulkUsers[index]
+      if (!user.name?.trim()) {
+        setMessage(`User ${index + 1}: name is required`)
+        return
+      }
+      if (!isValidRvceEmail(user.email || '')) {
+        setMessage(`User ${index + 1}: email must be a valid @rvce.edu.in address`)
+        return
+      }
+      if (!user.departmentCode?.trim()) {
+        setMessage(`User ${index + 1}: department code is required`)
+        return
+      }
+    }
+
     try {
       const res = await bulkCreateUsers(bulkUsers)
       setMessage(`Bulk created ${res.length} users`)
+      setBulkResults(res)
       setBulkUsers([])
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Bulk create failed')
@@ -157,6 +186,35 @@ const AdminUsersPage = () => {
         )}
       </section>
 
+      {bulkResults.length > 0 && (
+        <section className="mb-6">
+          <h2 className="font-semibold mb-2">Bulk create results</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2">Name</th>
+                  <th className="border border-gray-300 p-2">Email</th>
+                  <th className="border border-gray-300 p-2">Role</th>
+                  <th className="border border-gray-300 p-2">Department</th>
+                  <th className="border border-gray-300 p-2">Temp password</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bulkResults.map((result) => (
+                  <tr key={result.userId}>
+                    <td className="border border-gray-300 p-2">{result.name}</td>
+                    <td className="border border-gray-300 p-2">{result.email}</td>
+                    <td className="border border-gray-300 p-2">{result.role}</td>
+                    <td className="border border-gray-300 p-2">{result.department}</td>
+                    <td className="border border-gray-300 p-2 font-mono">{result.tempPassword}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
       {message && <div data-test-id="user-mgmt-message" className="mt-4 p-2 bg-gray-100 rounded">{message}</div>}
     </div>
   )

@@ -13,8 +13,8 @@ test.describe('Admin Substitution Flow', () => {
     // Upload timetable with conflicting slots
     await page.goto('/tto/upload');
     const csvContent = `room_id,teacher_id,day_of_week,start_time,end_time,subject,department
-55555555-5555-5555-5555-555555555001,44444444-4444-4444-4444-444444444004,1,09:00:00,10:00:00,Math,CSE
-55555555-5555-5555-5555-555555555001,44444444-4444-4444-4444-444444444018,1,09:00:00,10:00:00,Physics,CSE
+55555555-5555-5555-5555-555555555001,44444444-4444-4444-4444-444444444004,1,10:00:00,11:00:00,Math,CSE
+55555555-5555-5555-5555-555555555001,44444444-4444-4444-4444-444444444018,1,10:00:00,11:00:00,Physics,CSE
 `;
     const tempFile = 'temp_timetable.csv';
     fs.writeFileSync(tempFile, csvContent);

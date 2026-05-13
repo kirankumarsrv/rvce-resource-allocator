@@ -357,4 +357,64 @@ class SubstitutionServiceTest {
             startDate.getDayOfWeek().getValue(), endDate.getDayOfWeek().getValue());
     }
 
+    @Test
+    @DisplayName("SEMESTER scope no-conflict substitution across multiple days")
+    void testSemesterScopeNoConflictAcrossMultipleDays() {
+        TimetableSlot monday = createSlot(1, LocalTime.of(9, 0), LocalTime.of(10, 0), originalTeacherId, "AI");
+        TimetableSlot wednesday = createSlot(3, LocalTime.of(11, 0), LocalTime.of(12, 0), originalTeacherId, "DBMS");
+        TimetableSlot friday = createSlot(5, LocalTime.of(14, 0), LocalTime.of(15, 0), originalTeacherId, "OS");
+        List<TimetableSlot> slots = List.of(monday, wednesday, friday);
+
+        when(slotRepository.findSlotsForTeacherInRange(originalTeacherId,
+            startDate.getDayOfWeek().getValue(), endDate.getDayOfWeek().getValue()))
+            .thenReturn(slots);
+
+        when(slotRepository.existsConflictingSlot(replacementTeacherId, 1, LocalTime.of(9, 0), LocalTime.of(10, 0))).thenReturn(false);
+        when(slotRepository.existsConflictingSlot(replacementTeacherId, 3, LocalTime.of(11, 0), LocalTime.of(12, 0))).thenReturn(false);
+        when(slotRepository.existsConflictingSlot(replacementTeacherId, 5, LocalTime.of(14, 0), LocalTime.of(15, 0))).thenReturn(false);
+
+        when(slotRepository.saveAll(any())).thenReturn(slots);
+
+        SubstituteRequest request = createSubstituteRequest(originalTeacherId, replacementTeacherId,
+            startDate, endDate);
+        request.setScope(SubstituteRequest.SubstitutionScope.SEMESTER);
+
+        SubstitutionResultDto result = substitutionService.substitute(request);
+
+        assertEquals(3, result.getAutoReassigned());
+        assertEquals(0, result.getClashCount());
+        assertTrue(result.getClashes().isEmpty());
+
+        verify(slotRepository, times(1)).saveAll(argThat(list -> {
+            List<?> slotList = (List<?>) list;
+            return slotList.stream()
+                .map(s -> (TimetableSlot) s)
+                .allMatch(s -> replacementTeacherId.equals(s.getTeacher().getUserId()));
+        }));
+    }
+
+    @Test
+    @DisplayName("ONE_DAY scope no-conflict substitution")
+    void testOneDayScopeNoConflictSubstitution() {
+        LocalDate sameDay = startDate;
+        TimetableSlot slot = createSlot(sameDay.getDayOfWeek().getValue(), LocalTime.of(10, 0), LocalTime.of(11, 0), originalTeacherId, "Networks");
+
+        when(slotRepository.findSlotsForTeacherInRange(originalTeacherId,
+            sameDay.getDayOfWeek().getValue(), sameDay.getDayOfWeek().getValue()))
+            .thenReturn(List.of(slot));
+
+        when(slotRepository.existsConflictingSlot(replacementTeacherId, sameDay.getDayOfWeek().getValue(), 
+            LocalTime.of(10, 0), LocalTime.of(11, 0))).thenReturn(false);
+        when(slotRepository.saveAll(any())).thenReturn(List.of(slot));
+
+        SubstituteRequest request = createSubstituteRequest(originalTeacherId, replacementTeacherId,
+            sameDay, sameDay);
+        request.setScope(SubstituteRequest.SubstitutionScope.ONE_DAY);
+
+        SubstitutionResultDto result = substitutionService.substitute(request);
+
+        assertEquals(1, result.getAutoReassigned());
+        assertEquals(0, result.getClashCount());
+    }
+
 }

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -216,7 +217,7 @@ public class TimetableUploadService {
      */
     private int persistSlots(List<CsvRowValidator.CsvRowDto> rows) {
         List<TimetableSlot> slots = new ArrayList<>();
-        UUID activeVersionId = resolveActiveVersionId();
+        ActiveVersionInfo activeVersion = resolveActiveVersionInfo();
         for (CsvRowValidator.CsvRowDto row : rows) {
             UUID roomId = java.util.Objects.requireNonNull(row.getRoomId(), "roomId must not be null during persistence");
             UUID teacherId = java.util.Objects.requireNonNull(row.getTeacherId(), "teacherId must not be null during persistence");
@@ -230,12 +231,17 @@ public class TimetableUploadService {
             TimetableSlot slot = new TimetableSlot();
             slot.setRoom(room);
             slot.setTeacher(teacher);
-            slot.setVersionId(activeVersionId);
+            slot.setVersionId(activeVersion.versionId());
+            slot.setSemester(activeVersion.semester());
             slot.setDayOfWeek(row.getDayOfWeek());
             slot.setStartTime(row.getStartTime());
             slot.setEndTime(row.getEndTime());
+            slot.setPeriodNumber(determinePeriodNumber(row.getStartTime()));
             slot.setSubject(row.getSubject());
+            slot.setSubjectCode(computeSubjectCode(row.getSubject()));
             slot.setDepartment(row.getDepartment());
+            slot.setSection("A");
+            slot.setCreatedAt(LocalDateTime.now());
             slot.setIsActive(true);
             slots.add(slot);
         }
@@ -245,21 +251,43 @@ public class TimetableUploadService {
         return slots.size();
     }
 
-    private UUID resolveActiveVersionId() {
+    private ActiveVersionInfo resolveActiveVersionInfo() {
         try {
-            UUID activeVersionId = jdbcTemplate.queryForObject(
-                    "SELECT version_id FROM timetable_versions WHERE status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1",
-                    UUID.class);
+            ActiveVersionInfo versionInfo = jdbcTemplate.queryForObject(
+                    "SELECT version_id, semester FROM timetable_versions WHERE status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1",
+                    (rs, rowNum) -> new ActiveVersionInfo(
+                            rs.getObject("version_id", UUID.class),
+                            rs.getInt("semester")
+                    )
+            );
 
-            if (activeVersionId == null) {
+            if (versionInfo == null || versionInfo.versionId() == null) {
                 throw new CsvValidationException("No ACTIVE timetable version found. Upload cannot continue.");
             }
 
-            return activeVersionId;
+            return versionInfo;
         } catch (DataAccessException e) {
             throw new CsvValidationException("No ACTIVE timetable version found. Upload cannot continue.", e);
         }
     }
+
+    private int determinePeriodNumber(LocalTime startTime) {
+        int period = startTime.getHour() - 7;
+        if (startTime.getMinute() != 0 || startTime.getSecond() != 0 || period < 1 || period > 8) {
+            throw new IllegalArgumentException("start_time must fall on a valid period boundary between 08:00 and 15:00");
+        }
+        return period;
+    }
+
+    private String computeSubjectCode(String subject) {
+        if (subject == null || subject.isBlank()) {
+            return "UNKNOWN";
+        }
+        String cleaned = subject.trim().replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+        return cleaned.isEmpty() ? "UNKNOWN" : cleaned.substring(0, Math.min(cleaned.length(), 20));
+    }
+
+    public static record ActiveVersionInfo(UUID versionId, int semester) {}
 
     /**
      * Record class for parse results.
