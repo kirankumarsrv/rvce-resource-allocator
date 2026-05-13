@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { createOverride, deleteOverride, getOverrides } from '../services/timetableService'
-import { OverrideDto, OverrideRequest } from '../types/timetable'
+import { createOverride, deleteOverride, getOverrides, getTeachers, getTeacherSchedule } from '../services/timetableService'
+import { OverrideDto, OverrideRequest, SimpleDto, TeacherScheduleDto } from '../types/timetable'
 
 const OverrideManagementPage = () => {
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0])
@@ -10,6 +10,12 @@ const OverrideManagementPage = () => {
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
+  // Slot discovery state
+  const [teachers, setTeachers] = useState<SimpleDto[]>([])
+  const [selectedTeacherId, setSelectedTeacherId] = useState('')
+  const [slots, setSlots] = useState<TeacherScheduleDto[]>([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+
   const [formState, setFormState] = useState<OverrideRequest>({
     slotId: 0,
     date: new Date().toISOString().split('T')[0],
@@ -17,6 +23,19 @@ const OverrideManagementPage = () => {
     reason: '',
   })
   const [isSaving, setIsSaving] = useState(false)
+
+  const fetchTeachers = useCallback(async () => {
+    try {
+      const data = await getTeachers()
+      setTeachers(data)
+    } catch {
+      setTeachers([])
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchTeachers()
+  }, [fetchTeachers])
 
   const fetchOverrides = useCallback(async () => {
     setFetching(true)
@@ -34,12 +53,39 @@ const OverrideManagementPage = () => {
     }
   }, [date, roomId])
 
+  const fetchTeacherSlots = useCallback(async () => {
+    if (!selectedTeacherId) {
+      setSlots([])
+      return
+    }
+    setLoadingSlots(true)
+    try {
+      const dateObj = new Date(formState.date)
+      const dayOfWeek = dateObj.getDay()
+      const data = await getTeacherSchedule(selectedTeacherId, dayOfWeek)
+      setSlots(data)
+    } catch {
+      setSlots([])
+    } finally {
+      setLoadingSlots(false)
+    }
+  }, [selectedTeacherId, formState.date])
+
   useEffect(() => {
     fetchOverrides()
   }, [fetchOverrides])
 
+  useEffect(() => {
+    fetchTeacherSlots()
+  }, [fetchTeacherSlots])
+
   const handleChange = (field: keyof OverrideRequest, value: string | number) => {
-    setFormState((prev) => ({ ...prev, [field]: value }))
+    setFormState((prev: OverrideRequest) => ({ ...prev, [field]: value }))
+  }
+
+  const handleSelectSlot = (slot: TeacherScheduleDto) => {
+    setFormState((prev: OverrideRequest) => ({ ...prev, slotId: slot.slotId }))
+    setMessage(`Selected slot ${slot.slotId} (${slot.subject} in ${slot.roomName})`)
   }
 
   const handleCreateOverride = async () => {
@@ -55,7 +101,7 @@ const OverrideManagementPage = () => {
     try {
       await createOverride(formState)
       setMessage('Override saved successfully.')
-      setFormState((prev) => ({ ...prev, slotId: 0, reason: '' }))
+      setFormState((prev: OverrideRequest) => ({ ...prev, slotId: 0, reason: '' }))
       await fetchOverrides()
     } catch (saveError: unknown) {
       const errorMessage = saveError instanceof Error ? saveError.message : 'Unable to save override'
@@ -82,7 +128,7 @@ const OverrideManagementPage = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Override Management</h1>
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-3">
         <section className="bg-white rounded-xl shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Search Overrides</h2>
           <div className="space-y-4">
@@ -171,6 +217,59 @@ const OverrideManagementPage = () => {
         </section>
 
         <section className="bg-white rounded-xl shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Discover Slots</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Teacher</label>
+              <select
+                value={selectedTeacherId}
+                onChange={(e) => setSelectedTeacherId(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              >
+                <option value="">Select a teacher…</option>
+                {teachers.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.text}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Date (for day of week)</label>
+              <input
+                type="date"
+                value={formState.date}
+                onChange={(e) => handleChange('date', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Available Slots</label>
+              {loadingSlots && <p className="text-gray-600">Loading slots…</p>}
+              {slots.length === 0 && !loadingSlots && (
+                <p className="text-gray-600">No slots found for this teacher on the selected day.</p>
+              )}
+              <div className="space-y-2">
+                {slots.map((slot) => (
+                  <button
+                    key={slot.slotId}
+                    onClick={() => handleSelectSlot(slot)}
+                    className={`w-full text-left p-3 rounded-lg border transition ${
+                      formState.slotId === slot.slotId
+                        ? 'bg-blue-50 border-blue-500'
+                        : 'bg-gray-50 border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    <div className="font-semibold text-sm">{slot.subject}</div>
+                    <div className="text-xs text-gray-600">{slot.roomName} ({slot.roomBuilding}) • {slot.dayOfWeek} • {slot.startTime} - {slot.endTime}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-xl shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Create Override</h2>
           <div className="space-y-4">
             <div>
@@ -199,7 +298,8 @@ const OverrideManagementPage = () => {
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               >
                 <option value="CANCELLED">CANCELLED</option>
-                <option value="OCCUPIED">OCCUPIED</option>
+                <option value="CLAIMED">CLAIMED</option>
+                <option value="EXTRA_CLASS">EXTRA_CLASS</option>
               </select>
             </div>
             <div>

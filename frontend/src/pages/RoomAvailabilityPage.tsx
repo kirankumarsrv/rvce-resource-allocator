@@ -1,29 +1,27 @@
 /**
- * RoomAvailabilityPage Component - T-105: Room Availability Frontend
+ * RoomAvailabilityPage Component - Room Availability Display (Read-Only)
  *
- * Main page for room availability search and booking functionality.
- * Provides filters for date, time, capacity, and building, with auto-refresh.
- * Displays available rooms in a responsive grid with booking capabilities.
+ * Main page for room availability search functionality.
+ * Displays available rooms in a responsive grid with filter options.
+ * This is a read-only informational page.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAvailableRooms } from '../services/timetableService';
-import { RoomAvailabilityDto, RoomAvailabilityQuery } from '../types/timetable';
+import { RoomAvailabilityQuery } from '../types/timetable';
 import RoomCard from '../components/RoomCard';
 
 interface RoomAvailabilityPageProps {
-  /** User role to determine booking permissions */
+  /** User role (for context, but no role-based restrictions) */
   userRole?: 'TEACHER' | 'TTO' | 'ADMIN' | 'STUDENT' | 'DEPT_COORD';
 }
 
 /**
- * Main page component for room availability search and booking
- * Features React Query for data fetching with auto-refresh every 60 seconds
+ * Read-only room availability display component
+ * Shows available rooms based on search filters with auto-refresh
  */
-const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
-  userRole = 'TEACHER'
-}) => {
+const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = () => {
   // Form state for search filters
   const [date, setDate] = useState(() => {
     const today = new Date();
@@ -33,12 +31,6 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
   const [endTime, setEndTime] = useState('10:00');
   const [minCapacity, setMinCapacity] = useState<number | undefined>();
   const [building, setBuilding] = useState<string>('');
-
-  // Success/error state for booking feedback
-  const [bookingMessage, setBookingMessage] = useState<{
-    type: 'success' | 'error';
-    message: string;
-  } | null>(null);
 
   // Available buildings for filter dropdown
   const availableBuildings = [
@@ -55,8 +47,7 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
   const {
     data: rooms = [],
     isLoading,
-    error,
-    refetch
+    error
   } = useQuery({
     queryKey: ['available-rooms', date, startTime, endTime, minCapacity, building],
     queryFn: () => {
@@ -73,49 +64,12 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
-  // Clear booking messages after 5 seconds
-  useEffect(() => {
-    if (bookingMessage) {
-      const timer = setTimeout(() => setBookingMessage(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [bookingMessage]);
-
-  /**
-   * Handles successful room booking
-   * Shows success message and refreshes the room list
-   */
-  const handleBookSuccess = (room: RoomAvailabilityDto) => {
-    setBookingMessage({
-      type: 'success',
-      message: `Successfully booked ${room.name} for today!`
-    });
-    // Refresh the room list to reflect the booking
-    refetch();
-  };
-
-  /**
-   * Handles booking errors
-   * Shows error message to user
-   */
-  const handleBookError = (error: string) => {
-    setBookingMessage({
-      type: 'error',
-      message: `Booking failed: ${error}`
-    });
-  };
-
   /**
    * Validates time range before search
    */
   const isValidTimeRange = () => {
     return startTime < endTime;
   };
-
-  /**
-   * Determines if user can book rooms (teachers only)
-   */
-  const canBookRooms = userRole === 'TEACHER';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,7 +80,7 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
             Room Availability
           </h1>
           <p className="text-gray-600">
-            Find and book available rooms for your classes and meetings
+            Search and view available rooms (read-only information)
           </p>
         </div>
 
@@ -216,17 +170,6 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
           )}
         </div>
 
-        {/* Booking Status Message */}
-        {bookingMessage && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            bookingMessage.type === 'success'
-              ? 'bg-green-100 border border-green-400 text-green-700'
-              : 'bg-red-100 border border-red-400 text-red-700'
-          }`}>
-            {bookingMessage.message}
-          </div>
-        )}
-
         {/* Results Section */}
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-xl font-semibold">
@@ -276,9 +219,6 @@ const RoomAvailabilityPage: React.FC<RoomAvailabilityPageProps> = ({
               <RoomCard
                 key={room.id}
                 room={room}
-                isTeacher={canBookRooms}
-                onBookSuccess={handleBookSuccess}
-                onBookError={handleBookError}
               />
             ))}
           </div>

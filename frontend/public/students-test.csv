@@ -1,0 +1,13 @@
+usn,name,branch_code,needs_front_row
+1RV22CS001,Aarav Sharma,CSE,false
+1RV22CS002,Diya Rao,CSE,true
+1RV22IS003,Nikhil Verma,ISE,false
+1RV22IS004,Meera Iyer,ISE,false
+1RV22EC005,Rahul Nair,ECE,true
+1RV22EC006,Sneha Patil,ECE,false
+1RV22ME007,Arjun Gupta,MECH,false
+1RV22ME008,Kavya Reddy,MECH,false
+1RV22CV009,Pranav Kulkarni,CIVIL,true
+1RV22CV010,Ishita Jain,CIVIL,false
+1RV22EE011,Aditya Menon,EEE,false
+1RV22EE012,Ananya Das,EEE,true

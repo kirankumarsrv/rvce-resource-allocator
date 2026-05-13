@@ -2,6 +2,7 @@ package com.rvce.scas.service.timetable;
 
 import com.rvce.scas.dto.response.UploadResultDto;
 import com.rvce.scas.entity.Room;
+import com.rvce.scas.entity.TimetableSlot;
 import com.rvce.scas.event.TimetableUploadedEvent;
 import com.rvce.scas.exception.CsvValidationException;
 import com.rvce.scas.repository.RoomRepository;
@@ -13,13 +14,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -51,19 +56,23 @@ class TimetableUploadServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private JdbcTemplate jdbcTemplate;
+
     private UUID teacherId;
 
     @BeforeEach
     void setUp() {
         teacherId = UUID.randomUUID();
         csvValidator = new CsvRowValidator(roomRepository, userRepository, slotRepository);
-        uploadService = new TimetableUploadService(csvValidator, slotRepository, roomRepository, userRepository, eventPublisher);
+        uploadService = new TimetableUploadService(csvValidator, slotRepository, roomRepository, userRepository, jdbcTemplate, eventPublisher);
     }
 
     @Test
     @DisplayName("Valid CSV upload should persist one slot and publish event")
     void testValidCsvUpload() {
         UUID roomId = UUID.randomUUID();
+           UUID versionId = UUID.randomUUID();
         String csvContent = "room_id,teacher_id,day_of_week,start_time,end_time,subject,department\n" +
                 roomId + "," + teacherId + ",1,09:00,10:00,Maths,CSE\n";
         var file = new MockMultipartFile("file", "timetable.csv", "text/csv", csvContent.getBytes(StandardCharsets.UTF_8));
@@ -74,6 +83,8 @@ class TimetableUploadServiceTest {
         when(userRepository.findById(teacherId)).thenReturn(Optional.of(new com.rvce.scas.entity.User()));
         when(slotRepository.existsRoomTimeConflict(roomId, 1, LocalTime.of(9, 0), LocalTime.of(10, 0))).thenReturn(false);
         when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class)))
+                .thenReturn(new TimetableUploadService.ActiveVersionInfo(versionId, 5));
 
         UploadResultDto result = uploadService.upload(file);
 
@@ -81,7 +92,18 @@ class TimetableUploadServiceTest {
         assertEquals(1, result.getInsertedCount());
         assertEquals(0, result.getErrorCount());
         assertTrue(result.getErrors().isEmpty());
-        verify(slotRepository, times(1)).saveAll(anyList());
+
+        ArgumentCaptor<List<TimetableSlot>> slotCaptor = ArgumentCaptor.forClass(List.class);
+        verify(slotRepository, times(1)).saveAll(slotCaptor.capture());
+        List<TimetableSlot> savedSlots = slotCaptor.getValue();
+        assertEquals(1, savedSlots.size());
+        TimetableSlot savedSlot = savedSlots.get(0);
+        assertEquals("A", savedSlot.getSection());
+        assertEquals(5, savedSlot.getSemester());
+        assertEquals(2, savedSlot.getPeriodNumber());
+        assertEquals("MATHS", savedSlot.getSubjectCode());
+        assertNotNull(savedSlot.getCreatedAt());
+
         verify(eventPublisher, times(1)).publishEvent(isA(TimetableUploadedEvent.class));
     }
 
@@ -123,7 +145,12 @@ class TimetableUploadServiceTest {
 
         CsvValidationException exception = assertThrows(CsvValidationException.class, () -> uploadService.upload(file));
 
-        assertTrue(exception.getMessage().contains("Validation failed"));
+        assertTrue(
+            exception.getMessage().contains("Row 2") &&
+            exception.getMessage().contains("room_id") &&
+            exception.getMessage().contains("Invalid UUID"),
+            "Error should indicate malformed header or field mapping failure"
+        );
         verify(slotRepository, never()).saveAll(anyList());
         verify(eventPublisher, never()).publishEvent(any());
     }

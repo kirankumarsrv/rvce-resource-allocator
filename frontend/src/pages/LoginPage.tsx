@@ -62,6 +62,7 @@ const LoginPage = () => {
               id="email"
               name="email"
               type="email"
+              data-test-id="login-email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
@@ -78,6 +79,7 @@ const LoginPage = () => {
               id="password"
               name="password"
               type="password"
+              data-test-id="login-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
@@ -86,10 +88,25 @@ const LoginPage = () => {
             />
           </div>
 
-          {error ? <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
+          {error ? (
+            <div data-test-id="login-error" className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {error}
+            </div>
+          ) : null}
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => navigate('/auth/forgot-password')}
+              className="text-sm text-slate-600 hover:text-slate-800 underline"
+            >
+              Forgot password?
+            </button>
+          </div>
 
           <button
             type="submit"
+            data-test-id="login-submit"
             disabled={isSubmitting}
             className="mt-3 w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >

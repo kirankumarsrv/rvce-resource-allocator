@@ -1,7 +1,11 @@
 package com.rvce.scas.hardening;
 
 import com.rvce.scas.dto.ErrorResponseDto;
+import com.rvce.scas.dto.response.UploadResultDto;
+import com.rvce.scas.exception.CsvValidationException;
+import com.rvce.scas.dto.response.ExamStudentUploadResultDto;
 import com.rvce.scas.exception.AccountLockedException;
+import com.rvce.scas.exception.ExamStudentCsvValidationException;
 import com.rvce.scas.exception.InvalidTokenException;
 import com.rvce.scas.exception.SlotAlreadyClaimedException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -86,6 +90,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponseDto> handleTypeMismatch(
             MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        Class<?> requiredType = ex.getRequiredType();
         return ResponseEntity.badRequest().body(base(
                 request,
                 400,
@@ -94,7 +99,7 @@ public class GlobalExceptionHandler {
                 String.format("Request parameter '%s' has invalid value '%s'. Expected type: %s.",
                         ex.getName(),
                         ex.getValue(),
-                        ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown"
+                        requiredType != null ? requiredType.getSimpleName() : "unknown"
                 )
         ));
     }
@@ -184,6 +189,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(base(request, 403, "Forbidden", "INSUFFICIENT_PERMISSIONS", "You do not have permission to perform this action."));
     }
+
+    /**
+     * Handles row-level CSV validation failures during student upload.
+     *
+     * @param ex the CSV validation exception
+     * @param request the current HTTP request
+     * @return a 400 response with the upload summary payload
+     */
+    @ExceptionHandler(ExamStudentCsvValidationException.class)
+    public ResponseEntity<ExamStudentUploadResultDto> handleExamStudentCsvValidation(
+            ExamStudentCsvValidationException ex, HttpServletRequest request) {
+        log.warn("Student CSV upload validation failed path={} totalRows={} inserted={} skipped={} errors={}",
+                request.getRequestURI(),
+                ex.getResult().getTotalRows(),
+                ex.getResult().getInserted(),
+                ex.getResult().getSkipped(),
+                ex.getResult().getErrors() != null ? ex.getResult().getErrors().size() : 0);
+        return ResponseEntity.badRequest().body(ex.getResult());
+    }
+
+        @ExceptionHandler(CsvValidationException.class)
+        public ResponseEntity<UploadResultDto> handleTimetableCsvValidation(
+                        CsvValidationException ex, HttpServletRequest request) {
+                log.warn("Timetable CSV upload validation failed path={} message={}", request.getRequestURI(), ex.getMessage());
+
+                UploadResultDto result = new UploadResultDto();
+                result.setInsertedCount(0);
+                java.util.List<String> errors = ex.getErrors();
+                if (errors == null || errors.isEmpty()) {
+                    errors = java.util.List.of(ex.getMessage());
+                }
+                result.setErrorCount(errors.size());
+                result.setErrors(errors);
+                return ResponseEntity.badRequest().body(result);
+        }
 
     /**
      * Handles business logic validation errors (e.g., missing required parameters, invalid time ranges).

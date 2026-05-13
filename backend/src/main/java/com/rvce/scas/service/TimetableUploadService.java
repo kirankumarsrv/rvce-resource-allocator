@@ -16,11 +16,15 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +60,7 @@ public class TimetableUploadService {
     private final TimetableSlotRepository slotRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final JdbcTemplate jdbcTemplate;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -69,7 +74,7 @@ public class TimetableUploadService {
      * @throws CsvValidationException if any row fails validation (triggers rollback)
      */
     @Transactional
-    public UploadResultDto upload(MultipartFile file) {
+    public UploadResultDto upload(@NonNull MultipartFile file) {
         log.info("Starting timetable upload for file: {}", file.getOriginalFilename());
 
         List<CsvRowValidator.CsvRowDto> validRows;
@@ -82,7 +87,7 @@ public class TimetableUploadService {
 
             if (!errors.isEmpty()) {
                 log.warn("CSV validation failed with {} errors", errors.size());
-                throw new CsvValidationException("Validation failed: " + String.join("; ", errors));
+                throw new CsvValidationException(errors);
             }
 
             if (validRows.isEmpty()) {
@@ -104,6 +109,8 @@ public class TimetableUploadService {
             log.info("Timetable upload completed successfully: {} slots inserted", insertedCount);
             return resultDto;
 
+        } catch (CsvValidationException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Timetable upload failed", e);
             throw new CsvValidationException("Upload failed: " + e.getMessage());
@@ -122,7 +129,10 @@ public class TimetableUploadService {
         List<String> errors = new ArrayList<>();
 
         try (CSVParser parser = CSVFormat.DEFAULT
-                .withFirstRecordAsHeader()
+                .builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .build()
                 .parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             int rowNumber = 1; // Start after header
@@ -138,7 +148,7 @@ public class TimetableUploadService {
             }
 
         } catch (Exception e) {
-            errors.add("CSV parsing error: " + e.getMessage());
+            errors.add("Validation failed: CSV parsing error: " + e.getMessage());
         }
 
         return new ParseResult(validRows, errors);
@@ -146,17 +156,54 @@ public class TimetableUploadService {
 
     /**
      * Parses a single CSV record into a CsvRowDto.
+     * Provides detailed error messages for field parsing failures.
      *
      * @param record the CSV record
      * @return the parsed row DTO
+     * @throws IllegalArgumentException if any field fails to parse
      */
     private CsvRowValidator.CsvRowDto parseRecord(CSVRecord record) {
         CsvRowValidator.CsvRowDto row = new CsvRowValidator.CsvRowDto();
-        row.setRoomId(UUID.fromString(record.get("room_id")));
-        row.setTeacherId(UUID.fromString(record.get("teacher_id")));
-        row.setDayOfWeek(Integer.parseInt(record.get("day_of_week")));
-        row.setStartTime(LocalTime.parse(record.get("start_time")));
-        row.setEndTime(LocalTime.parse(record.get("end_time")));
+        
+        try {
+            String roomIdStr = record.get("room_id");
+            row.setRoomId(UUID.fromString(roomIdStr));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("room_id: Invalid UUID format - " + record.get("room_id"), e);
+        }
+        
+        try {
+            String teacherIdStr = record.get("teacher_id");
+            row.setTeacherId(UUID.fromString(teacherIdStr));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("teacher_id: Invalid UUID format - " + record.get("teacher_id"), e);
+        }
+        
+        try {
+            String dayStr = record.get("day_of_week");
+            int day = Integer.parseInt(dayStr);
+            if (day < 0 || day > 6) {
+                throw new IllegalArgumentException("day_of_week must be between 0-6 (Monday-Sunday)");
+            }
+            row.setDayOfWeek(day);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("day_of_week: Invalid integer - " + record.get("day_of_week"), e);
+        }
+        
+        try {
+            String startTimeStr = record.get("start_time");
+            row.setStartTime(LocalTime.parse(startTimeStr));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("start_time: Invalid time format (expected HH:mm:ss) - " + record.get("start_time"), e);
+        }
+        
+        try {
+            String endTimeStr = record.get("end_time");
+            row.setEndTime(LocalTime.parse(endTimeStr));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("end_time: Invalid time format (expected HH:mm:ss) - " + record.get("end_time"), e);
+        }
+        
         row.setSubject(record.get("subject"));
         row.setDepartment(record.get("department"));
         return row;
@@ -170,21 +217,31 @@ public class TimetableUploadService {
      */
     private int persistSlots(List<CsvRowValidator.CsvRowDto> rows) {
         List<TimetableSlot> slots = new ArrayList<>();
+        ActiveVersionInfo activeVersion = resolveActiveVersionInfo();
         for (CsvRowValidator.CsvRowDto row : rows) {
-            Room room = roomRepository.findById(row.getRoomId())
-                    .orElseThrow(() -> new CsvValidationException("Room not found during persistence: " + row.getRoomId()));
+            UUID roomId = java.util.Objects.requireNonNull(row.getRoomId(), "roomId must not be null during persistence");
+            UUID teacherId = java.util.Objects.requireNonNull(row.getTeacherId(), "teacherId must not be null during persistence");
 
-            User teacher = userRepository.findById(row.getTeacherId())
-                    .orElseThrow(() -> new CsvValidationException("Teacher not found during persistence: " + row.getTeacherId()));
+            Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new CsvValidationException("Room not found during persistence: " + roomId));
+
+            User teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new CsvValidationException("Teacher not found during persistence: " + teacherId));
 
             TimetableSlot slot = new TimetableSlot();
             slot.setRoom(room);
             slot.setTeacher(teacher);
+            slot.setVersionId(activeVersion.versionId());
+            slot.setSemester(activeVersion.semester());
             slot.setDayOfWeek(row.getDayOfWeek());
             slot.setStartTime(row.getStartTime());
             slot.setEndTime(row.getEndTime());
+            slot.setPeriodNumber(determinePeriodNumber(row.getStartTime()));
             slot.setSubject(row.getSubject());
+            slot.setSubjectCode(computeSubjectCode(row.getSubject()));
             slot.setDepartment(row.getDepartment());
+            slot.setSection("A");
+            slot.setCreatedAt(LocalDateTime.now());
             slot.setIsActive(true);
             slots.add(slot);
         }
@@ -193,6 +250,44 @@ public class TimetableUploadService {
         log.debug("Persisted {} timetable slots", slots.size());
         return slots.size();
     }
+
+    private ActiveVersionInfo resolveActiveVersionInfo() {
+        try {
+            ActiveVersionInfo versionInfo = jdbcTemplate.queryForObject(
+                    "SELECT version_id, semester FROM timetable_versions WHERE status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1",
+                    (rs, rowNum) -> new ActiveVersionInfo(
+                            rs.getObject("version_id", UUID.class),
+                            rs.getInt("semester")
+                    )
+            );
+
+            if (versionInfo == null || versionInfo.versionId() == null) {
+                throw new CsvValidationException("No ACTIVE timetable version found. Upload cannot continue.");
+            }
+
+            return versionInfo;
+        } catch (DataAccessException e) {
+            throw new CsvValidationException("No ACTIVE timetable version found. Upload cannot continue.", e);
+        }
+    }
+
+    private int determinePeriodNumber(LocalTime startTime) {
+        int period = startTime.getHour() - 7;
+        if (startTime.getMinute() != 0 || startTime.getSecond() != 0 || period < 1 || period > 8) {
+            throw new IllegalArgumentException("start_time must fall on a valid period boundary between 08:00 and 15:00");
+        }
+        return period;
+    }
+
+    private String computeSubjectCode(String subject) {
+        if (subject == null || subject.isBlank()) {
+            return "UNKNOWN";
+        }
+        String cleaned = subject.trim().replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+        return cleaned.isEmpty() ? "UNKNOWN" : cleaned.substring(0, Math.min(cleaned.length(), 20));
+    }
+
+    public static record ActiveVersionInfo(UUID versionId, int semester) {}
 
     /**
      * Record class for parse results.

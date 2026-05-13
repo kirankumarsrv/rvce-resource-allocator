@@ -15,7 +15,9 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
   try {
     const payload = token.split('.')[1]
-    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+    const decoded = atob(padded)
     return JSON.parse(decoded)
   } catch {
     return null

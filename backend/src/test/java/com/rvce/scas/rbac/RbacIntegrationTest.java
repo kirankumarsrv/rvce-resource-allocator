@@ -1,9 +1,12 @@
 package com.rvce.scas.rbac;
 
 import com.rvce.scas.dto.response.UploadResultDto;
+import com.rvce.scas.dto.response.ExamSessionDto;
+import com.rvce.scas.security.JwtPrincipal;
 import com.rvce.scas.security.JwtTokenProvider;
 import com.rvce.scas.security.UserDetailsServiceImpl;
 import com.rvce.scas.service.AuthService;
+import com.rvce.scas.service.SeatingDashboardService;
 import com.rvce.scas.service.TimetableUploadService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,14 +16,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -48,6 +57,9 @@ class RbacIntegrationTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private SeatingDashboardService seatingDashboardService;
 
     @MockitoBean
     private TimetableUploadService uploadService;
@@ -106,9 +118,27 @@ class RbacIntegrationTest {
      */
     @Test
     @DisplayName("EXAM_CONTROLLER can publish seating plan -> 200")
-    @WithMockUser(authorities = {"ROLE_EXAM_CONTROLLER", "EXAM_PUBLISH", "EXAM_WRITE"})
     void examController_canPublish() throws Exception {
-        mockMvc.perform(post("/api/exam/99999999-9999-9999-9999-999999999001/publish"))
+        JwtPrincipal principal = new JwtPrincipal(
+                UUID.randomUUID(),
+                "exam-controller@rvce.edu.in",
+                List.of(
+                        new SimpleGrantedAuthority("ROLE_EXAM_CONTROLLER"),
+                        new SimpleGrantedAuthority("EXAM_PUBLISH"),
+                        new SimpleGrantedAuthority("EXAM_WRITE")
+                )
+        );
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+
+        ExamSessionDto publishedExam = new ExamSessionDto();
+        publishedExam.setExamId(UUID.fromString("99999999-9999-9999-9999-999999999001"));
+        when(seatingDashboardService.publishExam(any(UUID.class), any(UUID.class)))
+                .thenReturn(publishedExam);
+
+        mockMvc.perform(post("/api/exam/99999999-9999-9999-9999-999999999001/publish")
+                        .with(authentication(authenticationToken)))
                 .andExpect(status().isOk());
     }
 

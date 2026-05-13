@@ -66,6 +66,7 @@ class RoomAvailabilityServiceTest {
         room1.setCapacity(60);
         room1.setBuilding("Block A");
         room1.setFloorNumber(1);
+        room1.setRoomType("EXAM_HALL");
 
         room2 = new Room();
         room2.setId(UUID.randomUUID());
@@ -73,6 +74,7 @@ class RoomAvailabilityServiceTest {
         room2.setCapacity(50);
         room2.setBuilding("Block B");
         room2.setFloorNumber(1);
+        room2.setRoomType("EXAM_HALL");
 
         room3 = new Room();
         room3.setId(UUID.randomUUID());
@@ -80,6 +82,7 @@ class RoomAvailabilityServiceTest {
         room3.setCapacity(40);
         room3.setBuilding("Block A");
         room3.setFloorNumber(2);
+        room3.setRoomType("EXAM_HALL");
 
         // Setup DTOs
         dto1 = new RoomAvailabilityDto();

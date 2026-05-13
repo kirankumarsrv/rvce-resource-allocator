@@ -4,7 +4,7 @@
 
 import type { LoginRequest, LoginResponse } from '@/types/auth'
 
-const API_BASE = 'http://localhost:8080/api/auth'
+const API_BASE = '/api/auth'
 const ACCESS_TOKEN_KEY = 'accessToken'
 const REFRESH_TOKEN_KEY = 'refreshToken'
 
@@ -39,7 +39,10 @@ export const refreshAccessToken = async (): Promise<LoginResponse> => {
   }
 
   // Extract userId from current access token (assuming JWT structure)
-  const payload = JSON.parse(atob(accessToken.split('.')[1]))
+  const payloadPart = accessToken.split('.')[1]
+  const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+  const payload = JSON.parse(atob(padded))
   const userId = payload.sub
 
   const response = await fetch(`${API_BASE}/refresh`, {

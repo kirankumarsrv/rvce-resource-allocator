@@ -53,7 +53,7 @@ export interface WeeklySchedule {
 
 /**
  * DTO for room availability queries (T-102).
- * Represents a room that is available for booking.
+ * Represents a room that is available for the selected time slot.
  */
 export interface RoomAvailabilityDto {
   /** Unique identifier of the room */
@@ -62,6 +62,8 @@ export interface RoomAvailabilityDto {
   name: string;
   /** Maximum capacity of the room */
   capacity: number;
+  /** Room type, such as CLASSROOM or EXAM_HALL */
+  roomType: string;
   /** Building where the room is located */
   building: string;
   /** Floor number of the room */
@@ -89,13 +91,18 @@ export interface RoomAvailabilityQuery {
  */
 export interface UploadResultDto {
   /** Number of rows successfully imported */
-  successCount: number;
+  insertedCount: number;
   /** Number of rows that failed validation */
   errorCount: number;
   /** Optional list of validation or parsing errors. */
   errors?: string[];
   /** Optional summary message returned by the backend. */
   message?: string;
+}
+
+export interface SimpleDto {
+  id: string;
+  text: string;
 }
 
 export interface SubstituteRequest {
@@ -112,36 +119,19 @@ export interface SubstitutionResultDto {
   message?: string;
 }
 
-/**
- * DTO for creating room booking overrides (T-104)
- */
 export interface OverrideRequest {
-  /** ID of the timetable slot to override */
   slotId: number;
-  /** Date of the override */
   date: string;
-  /** Status of the override (CANCELLED or OCCUPIED) */
-  status: 'CANCELLED' | 'OCCUPIED';
-  /** Optional reason for the override */
-  reason?: string;
+  status: 'CANCELLED' | 'ACTIVE';
+  reason: string;
 }
 
-/**
- * Response DTO for override operations
- */
 export interface OverrideDto {
-  /** Unique identifier of the override */
-  id: number;
-  /** ID of the slot being overridden */
+  id: string;
   slotId: number;
-  /** Date of the override */
   date: string;
-  /** Status of the override */
-  status: 'CANCELLED' | 'OCCUPIED';
-  /** Reason for the override */
-  reason?: string;
-  /** User who created the override */
-  createdBy: string;
-  /** Timestamp when the override was created */
+  status: 'CANCELLED' | 'ACTIVE';
+  reason: string;
   createdAt: string;
+  createdBy?: string;
 }

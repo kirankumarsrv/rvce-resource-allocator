@@ -2,14 +2,18 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 
 import AdminPage from '@/pages/AdminPage'
 import ExamCtrlPage from '@/pages/ExamCtrlPage'
+import CreateExamPage from '@/pages/CreateExamPage'
+import { SeatingDashboard } from '@/pages/SeatingDashboardPage'
 import LoginPage from '@/pages/LoginPage'
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
+import ResetPasswordPage from '@/pages/ResetPasswordPage'
 import StudentPage from '@/pages/StudentPage'
 import TeacherPage from '@/pages/TeacherPage'
 import TTOPage from '@/pages/TTOPage'
 import UploadTimetablePage from '@/pages/UploadTimetablePage'
 import SubstitutePage from '@/pages/SubstitutePage'
-import OverrideManagementPage from '@/pages/OverrideManagementPage'
 import RoomAvailabilityPage from '@/pages/RoomAvailabilityPage'
+import AdminUsersPage from '@/pages/AdminUsersPage'
 import UnauthorizedPage from '@/pages/UnauthorizedPage'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 import { useAuth } from '@/context/AuthContext'
@@ -62,6 +66,8 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
         <Route
@@ -88,14 +94,7 @@ function App() {
             </RequireRole>
           }
         />
-        <Route
-          path="/teacher/overrides"
-          element={
-            <RequireRole allowedRoles={['ROLE_TEACHER']}>
-              {withLayout(<OverrideManagementPage />)}
-            </RequireRole>
-          }
-        />
+
         <Route
           path="/tto"
           element={
@@ -107,7 +106,7 @@ function App() {
         <Route
           path="/tto/upload"
           element={
-            <RequireRole allowedRoles={['ROLE_TTO']}>
+            <RequireRole allowedRoles={['ROLE_TTO', 'ROLE_ADMIN']}>
               {withLayout(<UploadTimetablePage />)}
             </RequireRole>
           }
@@ -117,14 +116,6 @@ function App() {
           element={
             <RequireRole allowedRoles={['ROLE_TTO']}>
               {withLayout(<SubstitutePage />)}
-            </RequireRole>
-          }
-        />
-        <Route
-          path="/tto/overrides"
-          element={
-            <RequireRole allowedRoles={['ROLE_TTO']}>
-              {withLayout(<OverrideManagementPage />)}
             </RequireRole>
           }
         />
@@ -144,19 +135,28 @@ function App() {
             </RequireRole>
           }
         />
+
         <Route
-          path="/admin/overrides"
+          path="/create-exam"
           element={
-            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
-              {withLayout(<OverrideManagementPage />)}
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
+              {withLayout(<CreateExamPage />)}
             </RequireRole>
           }
         />
         <Route
           path="/exam-ctrl"
           element={
-            <RequireRole allowedRoles={['ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
               {withLayout(<ExamCtrlPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/exam-ctrl/:examId"
+          element={
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_EXAM_CONTROLLER', 'ROLE_DEPT_COORD']}>
+              {withLayout(<SeatingDashboard />)}
             </RequireRole>
           }
         />
@@ -173,6 +173,14 @@ function App() {
           element={
             <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
               {withLayout(<AdminPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
+              {withLayout(<AdminUsersPage />)}
             </RequireRole>
           }
         />

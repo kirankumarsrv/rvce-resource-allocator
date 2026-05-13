@@ -11,14 +11,15 @@ import {
   RoomAvailabilityDto,
   RoomAvailabilityQuery,
   UploadResultDto,
+  SimpleDto,
   SubstituteRequest,
   SubstitutionResultDto,
-  OverrideRequest,
   OverrideDto,
+  OverrideRequest,
 } from '../types/timetable'
 import { authenticatedFetch } from '@/services/authService'
 
-const API_BASE = 'http://localhost:8080/api/timetable'
+const API_BASE = '/api/timetable'
 
 /**
  * Get teacher's schedule for a specific day of week
@@ -84,7 +85,7 @@ export const getTimetableAnalytics = async (): Promise<TimetableAnalyticsDto> =>
 };
 
 /**
- * Get available rooms for booking (T-102)
+ * Get available rooms for the selected time slot (T-102)
  * Queries the availability query engine with optional filters
  */
 export const getAvailableRooms = async (
@@ -114,10 +115,32 @@ export const uploadTimetable = async (file: File): Promise<UploadResultDto> => {
   })
 
   if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText || 'Failed to upload timetable')
+    let message = 'Failed to upload timetable'
+    try {
+      const payload = await response.json()
+      if (Array.isArray(payload?.errors) && payload.errors.length > 0) {
+        message = payload.errors.join('; ')
+      } else if (typeof payload?.message === 'string' && payload.message.trim()) {
+        message = payload.message.trim()
+      } else if (typeof payload?.error === 'string' && payload.error.trim()) {
+        message = payload.error.trim()
+      }
+    } catch {
+      const errorText = await response.text()
+      if (errorText) {
+        message = errorText
+      }
+    }
+    throw new Error(message)
   }
 
+  return response.json()
+};
+
+export const getTeachers = async (): Promise<SimpleDto[]> => {
+  const response = await authenticatedFetch(`${API_BASE}/teachers`)
+
+  if (!response.ok) throw new Error('Failed to fetch teachers')
   return response.json()
 };
 
@@ -140,74 +163,27 @@ export const substituteTeacher = async (
   return response.json()
 };
 
-export const getOverrides = async (
-  date: string,
-  roomId?: string
-): Promise<OverrideDto[]> => {
-  const params = new URLSearchParams({ date })
-  if (roomId) params.append('roomId', roomId)
-
-  const response = await authenticatedFetch(`${API_BASE}/overrides?${params.toString()}`)
-
-  if (!response.ok) throw new Error('Failed to fetch overrides')
-  return response.json()
+export const getOverrides = async (date: string, roomId?: string): Promise<OverrideDto[]> => {
+  const params = new URLSearchParams({ date });
+  if (roomId) params.append('roomId', roomId);
+  const response = await authenticatedFetch(`${API_BASE}/overrides?${params.toString()}`);
+  if (!response.ok) throw new Error('Failed to fetch overrides');
+  return response.json();
 };
 
-export const createOverride = async (
-  request: OverrideRequest
-): Promise<OverrideDto> => {
-  const response = await authenticatedFetch(`${API_BASE}/override`, {
+export const createOverride = async (request: OverrideRequest): Promise<OverrideDto> => {
+  const response = await authenticatedFetch(`${API_BASE}/overrides`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText || 'Failed to create override')
-  }
-
-  return response.json()
+  });
+  if (!response.ok) throw new Error('Failed to create override');
+  return response.json();
 };
 
-export const deleteOverride = async (overrideId: string): Promise<void> => {
-  const response = await authenticatedFetch(`${API_BASE}/override/${overrideId}`, {
+export const deleteOverride = async (id: string): Promise<void> => {
+  const response = await authenticatedFetch(`${API_BASE}/overrides/${id}`, {
     method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText || 'Failed to delete override')
-  }
-};
-
-/**
- * Book a room for today by creating an override (T-104)
- * Teachers can book available rooms for immediate use
- */
-export const bookRoomForToday = async (
-  slotId: number,
-  reason?: string
-): Promise<OverrideDto> => {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-
-  const request: OverrideRequest = {
-    slotId,
-    date: today,
-    status: 'OCCUPIED',
-    reason: reason || 'Booked for today',
-  };
-
-  const response = await authenticatedFetch(`${API_BASE}/override`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  })
-
-  if (!response.ok) throw new Error('Failed to book room')
-  return response.json()
+  });
+  if (!response.ok) throw new Error('Failed to delete override');
 };

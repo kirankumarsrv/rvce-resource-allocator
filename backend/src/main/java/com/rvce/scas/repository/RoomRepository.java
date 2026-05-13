@@ -11,8 +11,8 @@ import java.util.List;
 
 /**
  * <h3>Purpose</h3>
- * Repository for querying available rooms based on timetable and override exclusions.
- * Implements the double-exclusion JPQL query for T-102 availability engine.
+ * Repository for querying available rooms based on timetable exclusions.
+ * Implements the JPQL query for T-102 availability engine.
  *
  * <h3>Key Responsibilities</h3>
  * <ul>
@@ -21,7 +21,7 @@ import java.util.List;
  * </ul>
  *
  * <h3>Dependencies</h3>
- * Depends on Room, TimetableSlot, DayOverride entities.
+ * Depends on Room and TimetableSlot entities.
  *
  * <h3>Transaction Behaviour</h3>
  * Read-only queries for availability checks.
@@ -33,15 +33,14 @@ import java.util.List;
 public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
 
     /**
-     * Finds rooms that are NOT occupied by timetable slots or day overrides on the given date/time.
-     * This is the core double-exclusion query for T-102.
+     * Finds rooms that are NOT occupied by timetable slots on the given date/time.
+     * This is the core query for T-102 availability checks.
      *
-     * <p>The query excludes rooms that have:
-     * 1. A timetable slot on the same day_of_week and overlapping time
-     * 2. A day override with OCCUPIED status on the exact date
-     * (CANCELLED overrides make the room available, so they are not excluded)</p>
+     * <p>The query excludes rooms that have a timetable slot on the same day_of_week 
+     * and overlapping time window.</p>
      *
      * @param date the date to check availability for
+     * @param dayOfWeek the day of week (1-7)
      * @param startTime start of the time window
      * @param endTime end of the time window
      * @param minCapacity minimum room capacity (optional filter)
@@ -55,11 +54,6 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
             AND ts.dayOfWeek = :dayOfWeek
             AND ts.startTime < :endTime
             AND ts.endTime > :startTime
-        )
-        AND r.id NOT IN (
-            SELECT do.slot.room.id FROM DayOverride do
-            WHERE do.date = :date
-            AND do.status = 'OCCUPIED'
         )
         AND (:minCapacity IS NULL OR r.capacity >= :minCapacity)
         """)
@@ -79,11 +73,6 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
             AND ts.dayOfWeek = :dayOfWeek
             AND ts.startTime < :endTime
             AND ts.endTime > :startTime
-        )
-        AND r.id NOT IN (
-            SELECT do.slot.room.id FROM DayOverride do
-            WHERE do.date = :date
-            AND do.status = 'OCCUPIED'
         )
         AND (:minCapacity IS NULL OR r.capacity >= :minCapacity)
         AND r.building = :building

@@ -53,6 +53,14 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
           <path d="M12 18v4l4-4-4-4v3c-4.42 0-8-1.79-8-4v-1" />
         </svg>
       ),
+      users: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
       override: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -64,6 +72,14 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
           <path d="M3 21V8a2 2 0 012-2h14a2 2 0 012 2v13" />
           <path d="M16 3v4" />
           <path d="M8 3v4" />
+        </svg>
+      ),
+      reservation: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M8 3v4" />
+          <path d="M16 3v4" />
+          <path d="M3 11h18" />
         </svg>
       ),
       exam: (
@@ -89,21 +105,19 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
       addLink({ label: 'TTO Dashboard', path: '/tto', icon: icons.dashboard })
       addLink({ label: 'Upload Timetable', path: '/tto/upload', icon: icons.upload })
       addLink({ label: 'Substitute Teacher', path: '/tto/substitute', icon: icons.substitute })
-      addLink({ label: 'Override Management', path: '/tto/overrides', icon: icons.override })
       addLink({ label: 'Room Availability', path: '/tto/rooms', icon: icons.room })
     }
 
     if (hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPER_ADMIN')) {
       addLink({ label: 'Admin Dashboard', path: '/admin', icon: icons.dashboard })
+      addLink({ label: 'User Management', path: '/admin/users', icon: icons.users })
       addLink({ label: 'Substitute Teacher', path: '/admin/substitute', icon: icons.substitute })
-      addLink({ label: 'Override Management', path: '/admin/overrides', icon: icons.override })
       addLink({ label: 'Room Availability', path: '/tto/rooms', icon: icons.room })
     }
 
     if (hasRole('ROLE_TEACHER')) {
       addLink({ label: 'Teacher Dashboard', path: '/teacher', icon: icons.dashboard })
       addLink({ label: 'Room Availability', path: '/teacher/rooms', icon: icons.room })
-      addLink({ label: 'Override Management', path: '/teacher/overrides', icon: icons.override })
     }
 
     if (hasRole('ROLE_EXAM_CONTROLLER') || hasRole('ROLE_DEPT_COORD')) {
@@ -149,6 +163,7 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
             )}
             <button
               type="button"
+              data-test-id="logout-button"
               onClick={handleLogout}
               disabled={isLoggingOut}
               className="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
@@ -196,6 +211,7 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
                 return (
                   <Link
                     key={item.path}
+                    data-test-id={`nav-${item.path.replace(/[^a-z0-9]/gi, '-')}`}
                     to={item.path}
                     onClick={() => setIsSidebarOpen(false)}
                     className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${

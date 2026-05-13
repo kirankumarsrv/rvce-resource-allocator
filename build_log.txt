@@ -1,0 +1,93 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 608B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 498B 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/gradle:8-jdk17
+#3 DONE 1.3s
+
+#4 [internal] load metadata for docker.io/library/eclipse-temurin:17-jre-alpine
+#4 DONE 1.3s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 76B 0.0s done
+#5 DONE 0.1s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [stage-1 1/3] FROM docker.io/library/eclipse-temurin:17-jre-alpine@sha256:b0ae54a36f82e04dc6c45e40ca5c55762e20b9a0858ee457faf557d440a9b571
+#7 resolve docker.io/library/eclipse-temurin:17-jre-alpine@sha256:b0ae54a36f82e04dc6c45e40ca5c55762e20b9a0858ee457faf557d440a9b571 0.1s done
+#7 DONE 0.1s
+
+#8 [builder 1/5] FROM docker.io/library/gradle:8-jdk17@sha256:8a814e7f3e2d8a368b24c9971a3d6054d689a0f4cbf998a03af31cb50fd5753e
+#8 resolve docker.io/library/gradle:8-jdk17@sha256:8a814e7f3e2d8a368b24c9971a3d6054d689a0f4cbf998a03af31cb50fd5753e
+#8 resolve docker.io/library/gradle:8-jdk17@sha256:8a814e7f3e2d8a368b24c9971a3d6054d689a0f4cbf998a03af31cb50fd5753e 0.1s done
+#8 DONE 0.1s
+
+#6 [internal] load build context
+#6 transferring context: 31.18kB 0.2s done
+#6 DONE 0.3s
+
+#9 [builder 2/5] WORKDIR /app
+#9 CACHED
+
+#10 [builder 3/5] COPY . .
+#10 CACHED
+
+#11 [builder 4/5] RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+#11 CACHED
+
+#12 [builder 5/5] RUN gradle clean build -x test --no-daemon
+#12 1.555 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.5/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+#12 3.154 Daemon will be stopped at the end of the build 
+#12 179.7 > Task :clean UP-TO-DATE
+#12 209.5 > Task :compileJava
+#12 259.3 > Task :processResources
+#12 259.3 > Task :classes
+#12 259.3 > Task :resolveMainClassName
+#12 277.0 > Task :bootJar
+#12 277.0 > Task :jar
+#12 277.0 > Task :assemble
+#12 277.0 > Task :check
+#12 277.0 > Task :build
+#12 277.1 
+#12 277.1 BUILD SUCCESSFUL in 4m 36s
+#12 277.1 6 actionable tasks: 5 executed, 1 up-to-date
+#12 DONE 282.0s
+
+#13 [stage-1 2/3] WORKDIR /app
+#13 CACHED
+
+#14 [stage-1 3/3] COPY --from=builder /app/build/libs/*.jar app.jar
+#14 DONE 3.8s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 9.5s done
+#15 exporting manifest sha256:cadf8b3e0101af6685f4779d983083be6b733099f6373a3fd8cb6035142aa4a0
+#15 exporting manifest sha256:cadf8b3e0101af6685f4779d983083be6b733099f6373a3fd8cb6035142aa4a0 0.2s done
+#15 exporting config sha256:5a10f3094e9f814b547e2bc01de207decd46413946bda8b1ccb73aa5e1914422
+#15 exporting config sha256:5a10f3094e9f814b547e2bc01de207decd46413946bda8b1ccb73aa5e1914422 0.1s done
+#15 exporting attestation manifest sha256:aa8989914efefea8d45f277e45217f73dfdfd9546146c7af7becac9f3018707e
+#15 exporting attestation manifest sha256:aa8989914efefea8d45f277e45217f73dfdfd9546146c7af7becac9f3018707e 0.3s done
+#15 exporting manifest list sha256:0aec0f3d8c8c018ab826f8f9a7b46aa6a5403e93286959268a27d67edd8a04c3
+#15 exporting manifest list sha256:0aec0f3d8c8c018ab826f8f9a7b46aa6a5403e93286959268a27d67edd8a04c3 0.2s done
+#15 naming to docker.io/library/rvce-resource-allocator-backend:latest
+#15 naming to docker.io/library/rvce-resource-allocator-backend:latest 0.0s done
+#15 unpacking to docker.io/library/rvce-resource-allocator-backend:latest
+#15 unpacking to docker.io/library/rvce-resource-allocator-backend:latest 5.7s done
+#15 DONE 16.3s
+
+#16 resolving provenance for metadata file
+#16 DONE 0.1s
+ rvce-resource-allocator-backend  Built
+ Network rvce-resource-allocator_default  Creating
+ Network rvce-resource-allocator_default  Created
+ Container rvce-resource-allocator-postgres-1  Creating
+ Container rvce-resource-allocator-redis-1  Creating
+ Container rvce-resource-allocator-postgres-1  Error response from daemon: Conflict. The container name "/rvce-resource-allocator-postgres-1" is already in use by container "10c233e0a2e027ee8cfbd0f960f25fefc01b0b190909408a0cfc56d2da223568". You have to remove (or rename) that container to be able to reuse that name.
+Error response from daemon: Conflict. The container name "/rvce-resource-allocator-postgres-1" is already in use by container "10c233e0a2e027ee8cfbd0f960f25fefc01b0b190909408a0cfc56d2da223568". You have to remove (or rename) that container to be able to reuse that name.

@@ -69,21 +69,6 @@ const TTOPage = () => {
         </Link>
 
         <Link
-          to="/tto/overrides"
-          className="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
-        >
-          <div className="flex items-center">
-            <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7M4 6h16M4 18h16" />
-            </svg>
-            <div>
-              <h3 className="font-semibold">Manage Overrides</h3>
-              <p className="text-sm opacity-90">Cancel or book slots</p>
-            </div>
-          </div>
-        </Link>
-
-        <Link
           to="/tto/rooms"
           className="bg-slate-600 hover:bg-slate-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
         >
@@ -92,8 +77,8 @@ const TTOPage = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 6h18M3 14h18M3 18h18" />
             </svg>
             <div>
-              <h3 className="font-semibold">Manage Room Availability</h3>
-              <p className="text-sm opacity-90">View and manage room bookings</p>
+              <h3 className="font-semibold">View Room Availability</h3>
+              <p className="text-sm opacity-90">Inspect which rooms are free for the selected slot</p>
             </div>
           </div>
         </Link>

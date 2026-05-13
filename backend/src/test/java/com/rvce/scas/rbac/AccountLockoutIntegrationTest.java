@@ -150,6 +150,7 @@ public class AccountLockoutIntegrationTest {
         if (userRepository.findByEmailIgnoreCase(TEST_EMAIL).isEmpty()) {
             User user = new User();
             user.setEmail(TEST_EMAIL);
+            user.setName("Lockout Test User");
             user.setPasswordHash(passwordEncoder.encode(TEST_PASSWORD));
             user.setActive(true);
             userRepository.save(user);

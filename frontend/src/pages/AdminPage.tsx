@@ -35,16 +35,18 @@ const AdminPage = () => {
         </Link>
 
         <Link
-          to="/admin/overrides"
-          className="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
+          to="/admin/users"
+          className="bg-slate-800 hover:bg-slate-900 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
         >
           <div className="flex items-center">
             <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7M4 6h16M4 18h16" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M23 21v-2a4 4 0 0 0-3-3.87" />
             </svg>
             <div>
-              <h3 className="font-semibold">Manage Overrides</h3>
-              <p className="text-sm opacity-90">Create or delete day overrides</p>
+              <h3 className="font-semibold">Admin Users</h3>
+              <p className="text-sm opacity-90">Create single or bulk users</p>
             </div>
           </div>
         </Link>
