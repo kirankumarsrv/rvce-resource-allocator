@@ -48,57 +48,69 @@ const SeatingViewPage = () => {
     )
   }
 
+  const hallsWithAssignments = seatingState.halls.map((hall) => {
+    const assignments = seatingState.assignedSeats
+      .filter((seat) => seat.hallId === hall.hallId && (seat.usn || seat.studentName))
+      .sort((a, b) => {
+        if (a.benchRow !== b.benchRow) return a.benchRow - b.benchRow
+        if (a.benchCol !== b.benchCol) return a.benchCol - b.benchCol
+        return a.benchSeatIndex - b.benchSeatIndex
+      })
+
+    return { hall, assignments }
+  })
+
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Seating Arrangement</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Seating Assignment List</h1>
           <p className="text-slate-600">Exam ID: {seatingState.examId}</p>
         </div>
 
         <div className="space-y-6">
-          {seatingState.hallGrids.map((hallGrid) => (
-            <div key={hallGrid.hallId} className="rounded-xl border border-slate-200 bg-white p-6">
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold text-slate-900">
-                  {hallGrid.roomDisplayName || hallGrid.roomName}
-                </h2>
-                <p className="text-sm text-slate-600">
-                  {hallGrid.benchRows} rows × {hallGrid.benchCols} columns
-                </p>
+          {hallsWithAssignments.map(({ hall, assignments }) => (
+            <div key={hall.hallId} className="rounded-xl border border-slate-200 bg-white p-6">
+              <div className="mb-4 flex items-start justify-between gap-4 sm:items-center">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">
+                    {hall.roomDisplayName || hall.roomName}
+                  </h2>
+                  <p className="text-sm text-slate-600">
+                    {assignments.length}/{hall.totalCapacity} students assigned
+                  </p>
+                </div>
+                <div className="text-sm text-slate-600">
+                  {hall.invigilatorName ? `Invigilator: ${hall.invigilatorName}` : 'No invigilator assigned'}
+                </div>
               </div>
 
-              <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${hallGrid.benchCols}, minmax(0, 1fr))` }}>
-                {hallGrid.grid.flatMap((row, rowIndex) =>
-                  row.map((cell, colIndex) => (
+              {assignments.length > 0 ? (
+                <div className="space-y-3">
+                  {assignments.map((seat) => (
                     <div
-                      key={`${hallGrid.hallId}-${rowIndex}-${colIndex}`}
-                      className={`rounded-2xl border p-3 text-xs font-medium ${
-                        cell.excluded
-                          ? 'border-rose-200 bg-rose-50 text-rose-700'
-                          : 'border-slate-200 bg-slate-50 text-slate-800'
-                      }`}
+                      key={seat.seatId}
+                      className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="text-slate-700">{cell.label}</span>
-                        <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                          {cell.occupiedCount}/{cell.seatCapacity}
-                        </span>
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900">
+                          {seat.studentName || seat.usn || 'Unknown student'}
+                        </div>
+                        <div className="text-xs text-slate-600">
+                          {seat.usn ?? 'No USN'} · {seat.branchCode ?? 'Unknown branch'}
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        {cell.seats.map((seat) => (
-                          <div
-                            key={seat.seatId}
-                            className={`rounded-xl px-2 py-1 ${seat.usn ? 'bg-blue-50 text-blue-900' : 'bg-white text-slate-500'}`}
-                          >
-                            {seat.usn || 'empty'}
-                          </div>
-                        ))}
+                      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Bench {seat.benchNumber} · Seat {seat.benchSeatIndex + 1}
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
+                  No student assignments are available for this hall yet.
+                </div>
+              )}
             </div>
           ))}
         </div>

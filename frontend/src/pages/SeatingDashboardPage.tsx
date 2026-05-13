@@ -4,7 +4,7 @@
  * Handles: load state, seat placement, auto-save, bulk save, publish
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { DragEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
@@ -31,7 +31,6 @@ import {
   addExamHall,
 } from '@/services/examService'
 import { StudentPool } from '@/components/StudentPool'
-import { ClassroomGrid } from '@/components/ClassroomGrid'
 import { AddHallModal } from '@/components/AddHallModal'
 import { AllocationRuleCard, type AllocationRuleId } from '@/components/AllocationRuleCard'
 import { useDashboardStore } from '@/store/seatingStore'
@@ -46,12 +45,9 @@ export const SeatingDashboard = () => {
     selectedStudent,
     setSelectedStudent,
     pendingAssignments,
-    addPendingAssignment,
     addPendingAssignments,
-    removePendingAssignment,
     clearPendingAssignments,
     removedAssignments,
-    addRemovedAssignment,
     clearRemovedAssignments,
     isDirty,
     activeHallId,
@@ -246,62 +242,8 @@ export const SeatingDashboard = () => {
     (seat) => !removedAssignments.has(positionKey(seat))
   )
 
-  const handleSeatClick = useCallback(
-    (seat: SeatDto, student: UnassignedStudentDto | null) => {
-      const seatPosition = positionKey(seat)
-      const isCurrentlyAssigned = Boolean(seat.studentId || seat.usn)
-
-      if (!student) {
-        if (!isCurrentlyAssigned) {
-          return
-        }
-
-        removePendingAssignment(seat.seatId)
-        addRemovedAssignment(seatPosition)
-        setSelectedStudent(null)
-        setSaveMessage('✓ Student removed from seat')
-        setTimeout(() => setSaveMessage(null), 3500)
-        return
-      }
-
-      if (!student.studentId) {
-        setSaveMessage(
-          '✗ Cannot assign a student without a linked user account. Please link the student first.'
-        )
-        setTimeout(() => setSaveMessage(null), 5000)
-        return
-      }
-
-      const studentKey = student.studentId
-      const alreadyAssigned = Array.from(pendingAssignments.values()).some((s) => {
-        return s.studentId === studentKey || s.usn === student.usn
-      }) || assignedSeats.some((s) => s.studentId === studentKey)
-
-      if (alreadyAssigned && seat.studentId !== studentKey) {
-        setSaveMessage(
-          '✗ Student already assigned to another seat. Remove them first.'
-        )
-        setTimeout(() => setSaveMessage(null), 4000)
-        return
-      }
-
-      if (isCurrentlyAssigned) {
-        addRemovedAssignment(seatPosition)
-      }
-
-      const assignment: SeatDto = {
-        ...seat,
-        studentId: student.studentId,
-        usn: student.usn,
-        studentName: student.studentName,
-        branchCode: student.branchCode,
-        isManualOverride: true,
-      }
-
-      addPendingAssignment(assignment)
-      setSelectedStudent(null)
-    },
-    [addPendingAssignment, addRemovedAssignment, assignedSeats, pendingAssignments, removePendingAssignment, setSelectedStudent]
+  const assignedSeatsForCurrentHall = currentAssignedSeats.filter(
+    (seat) => seat.hallId === displayHall?.hallId
   )
 
   const allocationRules: Array<{
@@ -828,22 +770,55 @@ export const SeatingDashboard = () => {
         </div>
 
         {/* Bottom: Classroom Grid */}
-        {displayHallGrid ? (
-          <div className="w-full">
-            <ClassroomGrid
-              hallGrid={displayHallGrid}
-              assignedSeats={assignedSeats}
-              selectedStudent={selectedStudent}
-              pendingAssignments={pendingAssignments}
-              removedAssignments={removedAssignments}
-              onSeatClick={handleSeatClick}
-            />
+        <div className="w-full">
+          <div className="rounded-xl border border-slate-200 bg-white p-6">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  {displayHall?.roomDisplayName || displayHall?.roomName || 'Selected hall'}
+                </h2>
+                <p className="text-sm text-slate-600">
+                  {displayHall?.benchRows ?? 0} rows × {displayHall?.benchCols ?? 0} columns · Assigned {assignedSeatsForCurrentHall.length}/{displayHall?.totalCapacity ?? 0}
+                </p>
+              </div>
+              <div className="text-sm text-slate-600">
+                {displayHall?.invigilatorName ? `Invigilator: ${displayHall.invigilatorName}` : 'No invigilator assigned'}
+              </div>
+            </div>
+
+            {assignedSeatsForCurrentHall.length > 0 ? (
+              <div className="space-y-3">
+                {assignedSeatsForCurrentHall
+                  .slice()
+                  .sort((a, b) => {
+                    if (a.benchRow !== b.benchRow) return a.benchRow - b.benchRow
+                    if (a.benchCol !== b.benchCol) return a.benchCol - b.benchCol
+                    return a.benchSeatIndex - b.benchSeatIndex
+                  })
+                  .map((seat) => (
+                    <div
+                      key={`${seat.hallId}-${seat.benchRow}-${seat.benchCol}-${seat.benchSeatIndex}`}
+                      className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900">{seat.studentName ?? seat.usn ?? 'Unknown student'}</div>
+                        <div className="text-xs text-slate-600">
+                          {seat.usn ?? 'No USN'} · {seat.branchCode ?? 'Unknown branch'}
+                        </div>
+                      </div>
+                      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Bench {seat.benchNumber} · Seat {seat.benchSeatIndex + 1}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
+                No student assignments are available for this hall yet.
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="w-full rounded-lg border border-gray-300 bg-white p-6 text-gray-600">
-            No hall layout available for the selected room.
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Footer: Action buttons */}

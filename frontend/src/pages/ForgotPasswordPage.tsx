@@ -82,7 +82,7 @@ const ForgotPasswordPage = () => {
             {isSubmitting ? 'Sending...' : 'Send Reset Link'}
           </button>
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <button
               type="button"
               onClick={() => navigate('/login')}
@@ -90,6 +90,9 @@ const ForgotPasswordPage = () => {
             >
               Back to Login
             </button>
+            <p className="text-xs text-slate-500">
+              Check your email for the password reset link. The link will expire in 24 hours.
+            </p>
           </div>
         </form>
       </div>
