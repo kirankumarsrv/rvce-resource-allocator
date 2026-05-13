@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
 import { getStudentPublishedExams } from '@/services/examService'
@@ -21,6 +22,7 @@ const formatTime = (value: string) => {
 }
 
 const StudentPage = () => {
+  const navigate = useNavigate()
   const { data, isLoading, isError, error } = useQuery<StudentPublishedExamDto[]>({
     queryKey: ['student-published-exams'],
     queryFn: getStudentPublishedExams,
@@ -55,7 +57,11 @@ const StudentPage = () => {
 
         <div className="grid gap-4 md:grid-cols-2">
           {publishedExams.map((exam) => (
-            <article key={exam.examId} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <article
+              key={exam.examId}
+              className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
+              onClick={() => navigate(`/exam/${exam.examId}/seating`)}
+            >
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900">{exam.examName}</h2>
                 <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -74,7 +80,10 @@ const StudentPage = () => {
                   <span className="font-medium">Hall:</span> {exam.hallName ?? 'Pending assignment'}
                 </p>
                 <p>
-                  <span className="font-medium">Bench:</span> {exam.benchNumber ?? 'Pending assignment'}
+                  <span className="font-medium">Seat:</span>{' '}
+                  {exam.benchNumber
+                    ? `${exam.benchNumber} (row ${exam.benchRow ?? '?'} col ${exam.benchCol ?? '?'} seat ${exam.benchSeatIndex ?? '?'})`
+                    : 'Pending assignment'}
                 </p>
               </div>
             </article>

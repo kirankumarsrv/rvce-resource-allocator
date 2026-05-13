@@ -125,7 +125,7 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
       addLink({ label: 'Room Availability', path: '/dept-coord/rooms', icon: icons.room })
     }
 
-    if (hasRole('ROLE_STUDENT')) {
+    if (hasRole('ROLE_STUDENT') && !hasRole('ROLE_TEACHER')) {
       addLink({ label: 'Student Dashboard', path: '/student', icon: icons.student })
     }
 

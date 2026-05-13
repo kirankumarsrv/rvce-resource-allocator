@@ -156,6 +156,7 @@ public class TimetableController {
      * @return list of scheduled slots for that teacher on that day
      */
     @GetMapping("/teacher/{teacherId}/schedule")
+    @PreAuthorize("hasAnyRole('TEACHER','TTO','ADMIN','SUPER_ADMIN')")
     @Operation(summary = "Get teacher schedule", description = "Retrieve schedule for a teacher on a specific day")
     public ResponseEntity<List<TeacherScheduleDto>> getTeacherSchedule(
             @PathVariable UUID teacherId,
@@ -172,6 +173,7 @@ public class TimetableController {
      * @return map of day-of-week to scheduled slots
      */
     @GetMapping("/teacher/{teacherId}/schedule/weekly")
+    @PreAuthorize("hasAnyRole('TEACHER','TTO','ADMIN','SUPER_ADMIN')")
     @Operation(summary = "Get teacher weekly schedule", description = "Retrieve full week schedule for a teacher")
     public ResponseEntity<Map<Integer, List<TeacherScheduleDto>>> getTeacherWeeklySchedule(
             @PathVariable UUID teacherId) {

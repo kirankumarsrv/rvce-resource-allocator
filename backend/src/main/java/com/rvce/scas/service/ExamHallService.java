@@ -80,6 +80,10 @@ public class ExamHallService {
         // Validate and resolve invigilator (mandatory)
         User invigilator = validateAndResolveInvigilator(request.getInvigilatorId());
 
+        if (examHallRepository.existsByExamSession_ExamIdAndInvigilator_UserId(examId, invigilator.getUserId())) {
+            throw new ExamHallConflictException("Invigilator " + invigilator.getName() + " is already assigned to another hall for this exam.");
+        }
+
         ExamHall hall = new ExamHall();
         hall.setExamSession(examSession);
         hall.setRoom(room);

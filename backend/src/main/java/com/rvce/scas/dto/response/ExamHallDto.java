@@ -21,5 +21,6 @@ public class ExamHallDto {
     private Integer benchRows;
     private Integer benchCols;
     private UUID invigilatorId;
+    private String invigilatorName;
     private Integer sortOrder;
 }

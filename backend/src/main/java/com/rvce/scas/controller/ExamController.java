@@ -9,6 +9,7 @@ import com.rvce.scas.dto.response.SeatingDashboardStateDto;
 import com.rvce.scas.dto.response.SeatingSessionDto;
 import com.rvce.scas.dto.response.StudentPublishedExamDto;
 import com.rvce.scas.dto.response.StudentSeatAssignmentDto;
+import com.rvce.scas.dto.response.TeacherAssignedExamDto;
 import com.rvce.scas.security.JwtPrincipal;
 import com.rvce.scas.service.ExamUploadService;
 import com.rvce.scas.service.RoomAvailabilityService;
@@ -194,6 +195,21 @@ public class ExamController {
                 studentId
         );
         return ResponseEntity.ok(assignment);
+    }
+
+    @GetMapping("/teacher/exams")
+    @PreAuthorize("hasRole('TEACHER') or hasAnyAuthority('EXAM_READ', 'NOTIFICATIONS_READ')")
+    public ResponseEntity<List<TeacherAssignedExamDto>> getTeacherAssignedExams(Authentication authentication) {
+        UUID teacherId = resolveActorId(authentication);
+        return ResponseEntity.ok(seatingDashboardService.getAssignedExamsForTeacher(teacherId));
+    }
+
+    @GetMapping("/{examId}/seating/view")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('TEACHER')")
+    public ResponseEntity<SeatingDashboardStateDto> viewSeating(@PathVariable UUID examId, Authentication authentication) {
+        UUID userId = resolveActorId(authentication);
+        SeatingDashboardStateDto state = seatingDashboardService.getSeatingStateForViewing(examId, userId);
+        return ResponseEntity.ok(state);
     }
 
     private UUID resolveActorId(Authentication authentication) {

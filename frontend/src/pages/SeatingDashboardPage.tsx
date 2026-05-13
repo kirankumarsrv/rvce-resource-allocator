@@ -685,6 +685,11 @@ export const SeatingDashboard = () => {
           <div className="text-sm text-gray-600 mt-1">
             Last modified: {lastModified}
           </div>
+          {displayHall?.invigilatorName ? (
+            <div className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700 border border-blue-100">
+              <span className="font-semibold">Hall Invigilator:</span> {displayHall.invigilatorName}
+            </div>
+          ) : null}
         </div>
 
         {/* Stats */}
@@ -762,7 +767,14 @@ export const SeatingDashboard = () => {
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
             }`}
           >
-            {hall.roomName || 'Unknown room'}
+            <div className="flex items-center gap-2">
+              <span>{hall.roomName || 'Unknown room'}</span>
+              {hall.invigilatorName ? (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-600">
+                  {hall.invigilatorName}
+                </span>
+              ) : null}
+            </div>
             <span className="ml-2 text-xs">
               {(hallAssignedCount.get(hall.hallId) ?? 0)}/{hall.totalCapacity ?? 0}
             </span>

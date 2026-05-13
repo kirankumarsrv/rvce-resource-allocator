@@ -27,7 +27,7 @@ const ForgotPasswordPage = () => {
       setEmail('')
 
       // Redirect to login after 3 seconds
-      setTimeout(() => navigate('/auth/login'), 3000)
+      setTimeout(() => navigate('/login'), 3000)
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to process password reset request'
       setErrorMessage(errorMsg)
@@ -85,7 +85,7 @@ const ForgotPasswordPage = () => {
           <div className="text-center">
             <button
               type="button"
-              onClick={() => navigate('/auth/login')}
+              onClick={() => navigate('/login')}
               className="text-blue-600 hover:text-blue-700 text-sm"
             >
               Back to Login

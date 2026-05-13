@@ -1,6 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getTeacherAssignedExams } from '@/services/examService';
+import type { TeacherAssignedExamDto } from '@/types/exam';
 import { TeacherScheduleDisplay } from '../components/TeacherScheduleDisplay';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * Teacher Portal Page
@@ -11,8 +15,16 @@ import { TeacherScheduleDisplay } from '../components/TeacherScheduleDisplay';
  * - Other teacher-specific features
  */
 const TeacherPage = () => {
-  const [teacherId, setTeacherId] = useState<string>('');
+  const navigate = useNavigate()
+  const auth = useAuth();
+  const [teacherId, setTeacherId] = useState<string>(auth.user?.userId ?? '');
   const [showSchedule, setShowSchedule] = useState(false);
+
+  const { data: assignedExams, isLoading: examsLoading, isError: examsError, error: examsErrorMsg } = useQuery<TeacherAssignedExamDto[]>({
+    queryKey: ['teacher-assigned-exams'],
+    queryFn: getTeacherAssignedExams,
+    refetchInterval: 20000,
+  });
 
   const handleViewSchedule = () => {
     if (teacherId.trim()) {
@@ -20,10 +32,78 @@ const TeacherPage = () => {
     }
   };
 
+  const formatDate = (value: string) => {
+    try {
+      return new Date(value).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+    } catch {
+      return value;
+    }
+  };
+
+  const formatTime = (value: string) => {
+    return value?.slice(0, 5) ?? value;
+  };
+
   return (
     <div className="p-6">
       <div className="mb-8">
         <h1 data-test-id="teacher-dashboard-heading" className="text-3xl font-bold mb-4">Teacher Portal</h1>
+        {auth.user?.userId ? (
+          <p className="text-sm text-slate-600 mb-4">
+            Your Teacher UUID: <span className="font-semibold text-slate-900">{auth.user.userId}</span>
+          </p>
+        ) : null}
+
+        {/* Assigned Exams Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Assigned Exams (Invigilation)</h2>
+          {examsLoading ? (
+            <div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-600">Loading assigned exams...</div>
+          ) : examsError ? (
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
+              {(examsErrorMsg as Error)?.message ?? 'Unable to load assigned exams'}
+            </div>
+          ) : !assignedExams || assignedExams.length === 0 ? (
+            <div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-700">
+              No assigned exams yet.
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {assignedExams.map((exam) => (
+                <article
+                  key={exam.examId}
+                  className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
+                  onClick={() => navigate(`/exam/${exam.examId}/seating`)}
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-slate-900">{exam.examName}</h3>
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      {exam.status}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-sm text-slate-700">
+                    <p>
+                      <span className="font-medium">Subject:</span> {exam.subjectCode} - {exam.subjectName}
+                    </p>
+                    <p>
+                      <span className="font-medium">Exam:</span> {formatDate(exam.examDate)} | {formatTime(exam.startTime)} - {formatTime(exam.endTime)}
+                    </p>
+                    <p>
+                      <span className="font-medium">Hall:</span> {exam.hallName ?? 'Pending assignment'}
+                    </p>
+                    <p>
+                      <span className="font-medium">Room:</span> {exam.roomName ?? 'Pending assignment'}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Quick Actions Navigation */}
         <div className="grid grid-cols-1 gap-4 mb-6">

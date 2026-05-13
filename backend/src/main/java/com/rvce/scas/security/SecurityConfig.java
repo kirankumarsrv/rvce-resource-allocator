@@ -79,6 +79,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/refresh",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password",
                                 "/actuator/health",
                                 "/actuator/info",
                                 "/v3/api-docs/**",
@@ -87,10 +89,13 @@ public class SecurityConfig {
                                 "/api/exam/*/rooms/available"
                         ).permitAll()
                         .requestMatchers("/api/auth/logout", "/api/auth/logout-all").authenticated()
-                        .requestMatchers("/api/exam/*/seating/my-seat", "/api/exam/student/seating").hasRole("STUDENT")
+                        .requestMatchers("/api/exam/*/seating/my-seat", "/api/exam/student/seating", "/api/exam/student/**").hasRole("STUDENT")
+                        .requestMatchers("/api/exam/*/seating/view").hasAnyRole("STUDENT", "TEACHER")
+                        .requestMatchers("/api/exam/teacher/**").hasRole("TEACHER")
                         .requestMatchers("/api/exam/**").hasAnyRole("DEPT_COORD", "ADMIN", "TTO", "EXAM_CONTROLLER")
                         .requestMatchers("/api/timetable/available").hasAnyRole("TEACHER", "TTO", "DEPT_COORD", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/timetable/teachers").hasAnyRole("TTO", "ADMIN", "SUPER_ADMIN", "DEPT_COORD", "EXAM_CONTROLLER")
+                        .requestMatchers("/api/timetable/teacher/**").hasAnyRole("TEACHER", "TTO", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/timetable/reservations", "/api/timetable/reservations/**")
                         .hasAnyRole("TEACHER", "TTO", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/timetable/overrides", "/api/timetable/override", "/api/timetable/override/**")

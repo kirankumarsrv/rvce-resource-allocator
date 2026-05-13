@@ -5,10 +5,11 @@ import com.rvce.scas.dto.request.SeatPlacementRequest;
 import com.rvce.scas.dto.response.ExamHallDto;
 import com.rvce.scas.dto.response.ExamSeatDto;
 import com.rvce.scas.dto.response.HallGridDto;
-import com.rvce.scas.dto.response.StudentPublishedExamDto;
 import com.rvce.scas.dto.response.SeatingDashboardStateDto;
 import com.rvce.scas.dto.response.SeatingSessionDto;
+import com.rvce.scas.dto.response.StudentPublishedExamDto;
 import com.rvce.scas.dto.response.StudentSeatAssignmentDto;
+import com.rvce.scas.dto.response.TeacherAssignedExamDto;
 import com.rvce.scas.dto.response.UnassignedStudentDto;
 import com.rvce.scas.entity.ExamHall;
 import com.rvce.scas.entity.ExamSeat;
@@ -413,6 +414,78 @@ public class SeatingDashboardService {
         ExamSeat seat = examSeatRepository.findPublishedSeatByExamAndStudent(examId, studentId)
                 .orElseThrow(() -> new IllegalArgumentException("No published seating assignment found for this student and exam."));
         return toStudentSeatAssignment(seat);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TeacherAssignedExamDto> getAssignedExamsForTeacher(UUID teacherId) {
+        List<ExamHall> halls = examHallRepository.findByInvigilator_UserId(teacherId);
+        if (halls.isEmpty()) {
+            return List.of();
+        }
+
+        List<ExamSession> examSessions = halls.stream()
+                .map(ExamHall::getExamSession)
+                .filter(examSession -> examSession.getStatus() == ExamSession.ExamStatus.PUBLISHED)
+                .distinct()
+                .sorted(Comparator.comparing(ExamSession::getExamDate)
+                        .thenComparing(ExamSession::getStartTime)
+                        .thenComparing(ExamSession::getName))
+                .toList();
+
+        List<TeacherAssignedExamDto> response = new ArrayList<>(examSessions.size());
+        for (ExamSession examSession : examSessions) {
+            TeacherAssignedExamDto dto = new TeacherAssignedExamDto();
+            dto.setExamId(examSession.getExamId());
+            dto.setExamName(examSession.getName());
+            dto.setSubjectCode(examSession.getSubjectCode());
+            dto.setSubjectName(examSession.getSubjectName());
+            dto.setExamDate(examSession.getExamDate());
+            dto.setStartTime(examSession.getStartTime());
+            dto.setEndTime(examSession.getEndTime());
+            dto.setStatus(examSession.getStatus().name());
+            dto.setPublishedAt(examSession.getPublishedAt());
+
+            // Find the hall assigned to this teacher for this exam
+            halls.stream()
+                    .filter(hall -> hall.getExamSession().getExamId().equals(examSession.getExamId()))
+                    .findFirst()
+                    .ifPresent(hall -> {
+                        dto.setHallId(hall.getHallId());
+                        dto.setHallName(hall.getRoom().getDisplayName());
+                        dto.setRoomName(hall.getRoom().getName());
+                    });
+
+            response.add(dto);
+        }
+
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public SeatingDashboardStateDto getSeatingStateForViewing(UUID examId, UUID userId) {
+        ExamSession examSession = examSessionRepository.findById(examId)
+                .orElseThrow(() -> new ExamSessionNotFoundException("Exam session not found"));
+
+        if (examSession.getStatus() != ExamSession.ExamStatus.PUBLISHED) {
+            throw new IllegalArgumentException("Exam seating is not yet published");
+        }
+
+        // Check authorization
+        boolean isAuthorized = false;
+        // Check if user is a student in this exam
+        if (examStudentRepository.existsByExamIdAndStudentId(examId, userId)) {
+            isAuthorized = true;
+        }
+        // Check if user is a teacher invigilating this exam
+        if (!isAuthorized && examHallRepository.existsByExamSession_ExamIdAndInvigilator_UserId(examId, userId)) {
+            isAuthorized = true;
+        }
+
+        if (!isAuthorized) {
+            throw new IllegalArgumentException("You are not authorized to view this exam's seating");
+        }
+
+        return loadState(examId);
     }
 
     private StudentSeatAssignmentDto toStudentSeatAssignment(ExamSeat seat) {

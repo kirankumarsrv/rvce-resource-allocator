@@ -20,5 +20,9 @@ public interface ExamHallRepository extends JpaRepository<ExamHall, UUID> {
 
     boolean existsByExamSession_ExamIdAndRoom_Id(UUID examId, UUID roomId);
 
+    boolean existsByExamSession_ExamIdAndInvigilator_UserId(UUID examId, UUID invigilatorId);
+
+    List<ExamHall> findByInvigilator_UserId(UUID invigilatorId);
+
     long countByExamSession_ExamId(UUID examId);
 }

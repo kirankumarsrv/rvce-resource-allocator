@@ -162,6 +162,13 @@ public class GlobalExceptionHandler {
                 .body(base(request, 409, "Conflict", "SLOT_ALREADY_CLAIMED", ex.getMessage()));
     }
 
+    @ExceptionHandler(com.rvce.scas.exception.ExamHallConflictException.class)
+    public ResponseEntity<ErrorResponseDto> handleExamHallConflict(
+            com.rvce.scas.exception.ExamHallConflictException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(base(request, 409, "Conflict", "EXAM_HALL_CONFLICT", ex.getMessage()));
+    }
+
     /**
      * Handles database-level uniqueness and foreign-key violations.
      *

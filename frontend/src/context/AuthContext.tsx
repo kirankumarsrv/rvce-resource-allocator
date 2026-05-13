@@ -30,6 +30,7 @@ const parseUserFromToken = (token: string): AuthUser | null => {
 
   const email = typeof payload.email === 'string' ? payload.email : ''
   const rawRoles = payload.roles
+  const userId = typeof payload.sub === 'string' ? payload.sub : undefined
   const roles = Array.isArray(rawRoles)
     ? rawRoles.filter((role): role is string => typeof role === 'string')
     : typeof rawRoles === 'string'
@@ -37,6 +38,7 @@ const parseUserFromToken = (token: string): AuthUser | null => {
     : []
 
   return {
+    userId,
     email,
     roles,
   }
