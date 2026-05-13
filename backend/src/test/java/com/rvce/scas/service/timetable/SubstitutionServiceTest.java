@@ -58,8 +58,8 @@ class SubstitutionServiceTest {
         originalTeacherId = UUID.randomUUID();
         replacementTeacherId = UUID.randomUUID();
         otherTeacherId = UUID.randomUUID();
-        startDate = LocalDate.now();
-        endDate = LocalDate.now().plusDays(7);
+        startDate = LocalDate.of(2026, 5, 18);
+        endDate = LocalDate.of(2026, 5, 20);
 
         // Setup test room
         testRoom = new Room();
@@ -391,6 +391,38 @@ class SubstitutionServiceTest {
                 .map(s -> (TimetableSlot) s)
                 .allMatch(s -> replacementTeacherId.equals(s.getTeacher().getUserId()));
         }));
+    }
+
+    @Test
+    @DisplayName("Semester scope clash expands across matching dates in the range")
+    void testSemesterScopeRecurringClashesExpandByDate() {
+        TimetableSlot mondaySlot = createSlot(1, LocalTime.of(10, 0), LocalTime.of(11, 0), originalTeacherId, "Math");
+
+        LocalDate rangeStart = LocalDate.of(2026, 5, 18);
+        LocalDate rangeEnd = LocalDate.of(2026, 6, 1);
+
+        when(slotRepository.findSlotsForTeacherInRange(originalTeacherId,
+            rangeStart.getDayOfWeek().getValue(), rangeEnd.getDayOfWeek().getValue()))
+            .thenReturn(List.of(mondaySlot));
+
+        when(slotRepository.existsConflictingSlot(replacementTeacherId, 1,
+            LocalTime.of(10, 0), LocalTime.of(11, 0)))
+            .thenReturn(true);
+
+        SubstituteRequest request = createSubstituteRequest(originalTeacherId, replacementTeacherId,
+            rangeStart, rangeEnd);
+        request.setScope(SubstituteRequest.SubstitutionScope.SEMESTER);
+
+        SubstitutionResultDto result = substitutionService.substitute(request);
+
+        assertEquals(0, result.getAutoReassigned());
+        assertEquals(3, result.getClashCount());
+        assertEquals(3, result.getClashes().size());
+        assertEquals(List.of(
+            LocalDate.of(2026, 5, 18),
+            LocalDate.of(2026, 5, 25),
+            LocalDate.of(2026, 6, 1)
+        ), result.getClashes().stream().map(ClashDetail::getDate).toList());
     }
 
     @Test

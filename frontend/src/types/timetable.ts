@@ -113,9 +113,18 @@ export interface SubstituteRequest {
   scope: 'ONE_DAY' | 'SEMESTER';
 }
 
+export interface ClashDetail {
+  date: string;
+  startTime: string;
+  endTime: string;
+  roomName: string;
+  conflictReason: string;
+}
+
 export interface SubstitutionResultDto {
-  reassignedCount: number;
-  clashes: string[];
+  autoReassigned: number;
+  clashCount: number;
+  clashes: ClashDetail[];
   message?: string;
 }
 

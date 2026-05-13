@@ -170,21 +170,21 @@ public class ExamController {
     }
 
     @GetMapping("/student/seating")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasRole('STUDENT') or hasAnyAuthority('EXAM_READ', 'NOTIFICATIONS_READ')")
     public ResponseEntity<List<StudentSeatAssignmentDto>> getStudentPublishedSeating(Authentication authentication) {
         UUID studentId = resolveActorId(authentication);
         return ResponseEntity.ok(seatingDashboardService.getPublishedSeatsForStudent(studentId));
     }
 
     @GetMapping("/student/exams")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasRole('STUDENT') or hasAnyAuthority('EXAM_READ', 'NOTIFICATIONS_READ')")
     public ResponseEntity<List<StudentPublishedExamDto>> getStudentPublishedExams(Authentication authentication) {
         UUID studentId = resolveActorId(authentication);
         return ResponseEntity.ok(seatingDashboardService.getPublishedExamsForStudent(studentId));
     }
 
     @GetMapping("/{examId}/seating/my-seat")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasRole('STUDENT') or hasAnyAuthority('EXAM_READ', 'NOTIFICATIONS_READ')")
     public ResponseEntity<StudentSeatAssignmentDto> getStudentSeatForExam(
             @PathVariable UUID examId,
             Authentication authentication) {
