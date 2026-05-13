@@ -90,6 +90,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/exam/*/seating/my-seat", "/api/exam/student/seating").hasRole("STUDENT")
                         .requestMatchers("/api/exam/**").hasAnyRole("DEPT_COORD", "ADMIN", "TTO", "EXAM_CONTROLLER")
                         .requestMatchers("/api/timetable/available").hasAnyRole("TEACHER", "TTO", "DEPT_COORD", "ADMIN", "SUPER_ADMIN")
+                        .requestMatchers("/api/timetable/teachers").hasAnyRole("TTO", "ADMIN", "SUPER_ADMIN", "DEPT_COORD", "EXAM_CONTROLLER")
                         .requestMatchers("/api/timetable/reservations", "/api/timetable/reservations/**")
                         .hasAnyRole("TEACHER", "TTO", "ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/timetable/overrides", "/api/timetable/override", "/api/timetable/override/**")

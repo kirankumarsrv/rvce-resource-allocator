@@ -176,7 +176,11 @@ public class DevDataInitializer {
                         "09:00"
                 );
 
-                System.out.println("✓ Dev seed: substitution conflict slot inserted (id=9999)");
+                jdbcTemplate.execute(
+                        "SELECT setval(pg_get_serial_sequence('timetable_slots', 'slot_id'), COALESCE((SELECT MAX(slot_id) FROM timetable_slots), 1), true)"
+                );
+
+                System.out.println("✓ Dev seed: substitution conflict slot inserted (id=9999) and timetable slot sequence synced");
             } catch (Exception e) {
                 System.out.println("Dev seed substitution conflict skipped: " + e.getMessage());
             }

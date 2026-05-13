@@ -2,6 +2,7 @@ package com.rvce.scas.rbac;
 
 import com.rvce.scas.dto.response.UploadResultDto;
 import com.rvce.scas.dto.response.ExamSessionDto;
+import com.rvce.scas.repository.UserRepository;
 import com.rvce.scas.security.JwtPrincipal;
 import com.rvce.scas.security.JwtTokenProvider;
 import com.rvce.scas.security.UserDetailsServiceImpl;
@@ -68,6 +69,9 @@ class RbacIntegrationTest {
     private UserDetailsServiceImpl userDetailsService;
 
     @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
 
     /**
@@ -75,6 +79,16 @@ class RbacIntegrationTest {
      *
      * @throws Exception if MockMvc cannot perform the request
      */
+    @Test
+    @DisplayName("DEPT_COORD can list teachers -> 200")
+    @WithMockUser(username = "dept-coord@rvce.edu.in", authorities = {"ROLE_DEPT_COORD"})
+    void deptCoord_canListTeachers() throws Exception {
+        when(userRepository.findAllByRoleName("TEACHER")).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/timetable/teachers"))
+                .andExpect(status().isOk());
+    }
+
     @Test
     @DisplayName("TTO can upload timetable -> 200")
     @WithMockUser(username = "tto@rvce.edu.in", authorities = {"ROLE_TTO", "TIMETABLE_WRITE", "TIMETABLE_READ"})
