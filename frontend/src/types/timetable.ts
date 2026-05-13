@@ -20,6 +20,8 @@ export interface RoomScheduleDto {
   startTime: string;
   endTime: string;
   teacherId: string;
+  teacherName: string;
+  teacherEmail: string;
   subject: string;
   department: string;
   isActive: boolean;
