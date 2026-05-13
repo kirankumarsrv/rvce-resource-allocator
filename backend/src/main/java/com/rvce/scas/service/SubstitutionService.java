@@ -141,6 +141,15 @@ public class SubstitutionService {
                 && !req.getStartDate().equals(req.getEndDate())) {
             throw new IllegalArgumentException("ONE_DAY scope requires identical start and end dates");
         }
+        
+        // EC-7: Validate replacement teacher exists and is active
+        User replacementTeacher = userRepository.findById(req.getReplacementTeacherId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Replacement teacher not found: " + req.getReplacementTeacherId()));
+        
+        if (!replacementTeacher.isActive()) {
+            throw new IllegalArgumentException("Replacement teacher is inactive and cannot be assigned");
+        }
     }
 
     /**
@@ -228,6 +237,7 @@ public class SubstitutionService {
         detail.setStartTime(slot.getStartTime());
         detail.setEndTime(slot.getEndTime());
         detail.setRoomName(slot.getRoom().getName());
+        detail.setSubject(slot.getSubject()); // EC-17: Include subject in clash detail
         detail.setConflictReason("Replacement teacher has conflicting slot");
         return detail;
     }
