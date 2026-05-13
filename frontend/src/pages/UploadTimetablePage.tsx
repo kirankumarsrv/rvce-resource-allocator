@@ -67,7 +67,7 @@ const UploadTimetablePage = () => {
           )}
 
           {uploadResult && (
-            <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-700">
+            <div data-test-id="upload-result" className="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-700">
               <p className="font-semibold">Upload completed successfully</p>
               <p>Success count: {uploadResult.insertedCount}</p>
               <p>Error count: {uploadResult.errorCount}</p>

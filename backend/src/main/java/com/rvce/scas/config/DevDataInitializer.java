@@ -151,4 +151,35 @@ public class DevDataInitializer {
                 java.util.UUID.fromString(teacherRoleId),
                 java.util.UUID.fromString(grantedBy));
     }
+
+    @Bean
+    public CommandLineRunner seedSubstitutionConflict(JdbcTemplate jdbcTemplate) {
+        return args -> {
+            try {
+                // Seed an additional timetable slot for a replacement teacher to create a predictable clash
+                // This uses existing seeded version '66666666-6666-6666-6666-666666666001' and room A201
+                String sql = "INSERT INTO timetable_slots (slot_id, version_id, room_id, teacher_id, department, subject_code, subject_name, section, semester, day_of_week, period_number, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING";
+
+                jdbcTemplate.update(sql,
+                        9999, // slot_id unique in dev seed context
+                        java.util.UUID.fromString("66666666-6666-6666-6666-666666666001"),
+                        java.util.UUID.fromString("55555555-5555-5555-5555-555500000003"), // A201
+                        java.util.UUID.fromString("44444444-4444-4444-4444-444444444018"), // replacement teacher seeded above
+                        "Computer Science & Engineering",
+                        "ZZTST",
+                        "Substitution Conflict Test",
+                        "A",
+                        5,
+                        1,
+                        1,
+                        "08:00",
+                        "09:00"
+                );
+
+                System.out.println("✓ Dev seed: substitution conflict slot inserted (id=9999)");
+            } catch (Exception e) {
+                System.out.println("Dev seed substitution conflict skipped: " + e.getMessage());
+            }
+        };
+    }
 }

@@ -120,7 +120,7 @@ CREATE TABLE roles (
     -- DECISION: CHECK constraint documents valid values at DB level.
     -- Spring RBAC also enforces this, but DB is the last line of defence.
     CONSTRAINT chk_role_name CHECK (
-        name IN ('STUDENT','TEACHER','TTO','DEPT_COORD','ADMIN')
+        name IN ('STUDENT','TEACHER','TTO','DEPT_COORD','ADMIN','EXAM_CONTROLLER','SUPER_ADMIN')
     )
 );
 

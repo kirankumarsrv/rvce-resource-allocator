@@ -6,7 +6,7 @@
  *
  * @packageDocumentation
  */
-import { Page, test } from '@playwright/test';
+import { Page, expect, test } from '@playwright/test';
 
 /**
  * Base URL for API calls in tests.
@@ -28,13 +28,39 @@ export const API_BASE_URL = 'http://localhost:8080/api';
 export async function login(page: Page, username: string, password: string) {
   await test.step(`Login with user ${username}`, async () => {
     console.log(`Login start: ${username}`);
-    await page.goto('/');
-    console.log('Login page loaded');
-    await page.fill('input[data-test-id="login-email"]', username);
-    await page.fill('input[data-test-id="login-password"]', password);
-    await page.click('button[data-test-id="login-submit"]');
-    await page.waitForURL(/.*\/(teacher|student|admin|exam-ctrl|tto)/);
-    console.log(`Login successful: ${username}`);
+    const loginError = page.locator('[data-test-id="login-error"]');
+    let lastErrorMessage = 'Login failed';
+
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      await page.goto('/login');
+      console.log(`Login page loaded (attempt ${attempt})`);
+
+      await page.fill('input[data-test-id="login-email"]', username);
+      await page.fill('input[data-test-id="login-password"]', password);
+      await page.click('button[data-test-id="login-submit"]');
+
+      try {
+        await expect(page).toHaveURL(/.*\/(teacher|student|admin|exam-ctrl|tto)(\/|$)/, {
+          timeout: 15000,
+        });
+        console.log(`Login successful: ${username}`);
+        return;
+      } catch {
+        if (await loginError.isVisible({ timeout: 1000 }).catch(() => false)) {
+          lastErrorMessage = (await loginError.textContent())?.trim() || lastErrorMessage;
+          console.warn(`Login failed on attempt ${attempt}: ${lastErrorMessage}`);
+        } else {
+          lastErrorMessage = `No redirect after login attempt ${attempt}`;
+          console.warn(lastErrorMessage);
+        }
+
+        if (attempt < 2) {
+          await page.waitForTimeout(2000);
+        }
+      }
+    }
+
+    throw new Error(`Login failed for ${username}: ${lastErrorMessage}`);
   });
 }
 

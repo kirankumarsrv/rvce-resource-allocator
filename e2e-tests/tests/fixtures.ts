@@ -14,22 +14,31 @@ export const test = base.extend<{
   resetBackend: async ({ page }, use) => {
     // Reset function that can be called in tests
     const resetBackend = async () => {
-      try {
-        // Call backend reset endpoint if available
-        const response = await page.request.post(`${API_BASE_URL}/test/reset`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+      // This project does not expose a reliable unauthenticated reset API in docker.
+      // Instead, wait until backend is healthy so login requests do not race startup.
+      const healthUrl = API_BASE_URL.replace('/api', '/actuator/health');
+      const maxAttempts = 20;
 
-        if (response.status() === 200) {
-          console.log('Backend reset successful');
-        } else {
-          console.warn(`Backend reset returned status ${response.status()}`);
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        try {
+          const response = await page.request.get(healthUrl, {
+            timeout: 5000,
+          });
+
+          if (response.ok()) {
+            console.log('Backend health check passed');
+            return;
+          }
+
+          console.warn(`Backend health check status ${response.status()} (attempt ${attempt}/${maxAttempts})`);
+        } catch (error) {
+          console.warn(`Backend health check failed (attempt ${attempt}/${maxAttempts})`, error);
         }
-      } catch (error) {
-        console.warn('Backend reset failed, continuing with test:', error);
+
+        await page.waitForTimeout(1000);
       }
+
+      throw new Error('Backend was not healthy before test execution');
     };
 
     await use(resetBackend);

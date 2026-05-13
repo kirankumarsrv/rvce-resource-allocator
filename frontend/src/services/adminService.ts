@@ -67,3 +67,23 @@ export async function resetPassword(
 
   return response.json()
 }
+
+/**
+ * Bulk create users via admin API
+ */
+export async function bulkCreateUsers(requests: CreateUserRequest[]): Promise<UserCreatedDto[]> {
+  const response = await authenticatedFetch(`${API_BASE}/users/bulk`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requests),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to bulk create users' }))
+    throw new Error(error.message || 'Failed to bulk create users')
+  }
+
+  return response.json()
+}

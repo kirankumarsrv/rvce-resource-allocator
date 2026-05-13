@@ -4,8 +4,12 @@ FROM gradle:8-jdk17 AS builder
 WORKDIR /app
 COPY . .
 
-# Update certificates to avoid TLS handshake issues
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# Update certificates and retry apt-get to handle network issues
+RUN set -ex; \
+    for i in {1..3}; do \
+        apt-get update && apt-get install -y ca-certificates && break || sleep 5; \
+    done; \
+    rm -rf /var/lib/apt/lists/*
 
 RUN gradle clean build -x test --no-daemon
 

@@ -2,3 +2,8 @@ build/
 .gradle/
 .git/
 node_modules/
+bin/
+BOOT-INF/
+META-INF/
+org/
+tmpjar/

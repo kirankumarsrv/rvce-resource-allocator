@@ -53,6 +53,14 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
           <path d="M12 18v4l4-4-4-4v3c-4.42 0-8-1.79-8-4v-1" />
         </svg>
       ),
+      users: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
       override: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -102,6 +110,7 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
 
     if (hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPER_ADMIN')) {
       addLink({ label: 'Admin Dashboard', path: '/admin', icon: icons.dashboard })
+      addLink({ label: 'User Management', path: '/admin/users', icon: icons.users })
       addLink({ label: 'Substitute Teacher', path: '/admin/substitute', icon: icons.substitute })
       addLink({ label: 'Room Availability', path: '/tto/rooms', icon: icons.room })
     }

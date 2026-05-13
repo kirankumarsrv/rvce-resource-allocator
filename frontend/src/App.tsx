@@ -13,6 +13,7 @@ import TTOPage from '@/pages/TTOPage'
 import UploadTimetablePage from '@/pages/UploadTimetablePage'
 import SubstitutePage from '@/pages/SubstitutePage'
 import RoomAvailabilityPage from '@/pages/RoomAvailabilityPage'
+import AdminUsersPage from '@/pages/AdminUsersPage'
 import UnauthorizedPage from '@/pages/UnauthorizedPage'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 import { useAuth } from '@/context/AuthContext'
@@ -105,7 +106,7 @@ function App() {
         <Route
           path="/tto/upload"
           element={
-            <RequireRole allowedRoles={['ROLE_TTO']}>
+            <RequireRole allowedRoles={['ROLE_TTO', 'ROLE_ADMIN']}>
               {withLayout(<UploadTimetablePage />)}
             </RequireRole>
           }
@@ -172,6 +173,14 @@ function App() {
           element={
             <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
               {withLayout(<AdminPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
+              {withLayout(<AdminUsersPage />)}
             </RequireRole>
           }
         />

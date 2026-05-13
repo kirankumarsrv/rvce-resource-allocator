@@ -39,7 +39,10 @@ export const refreshAccessToken = async (): Promise<LoginResponse> => {
   }
 
   // Extract userId from current access token (assuming JWT structure)
-  const payload = JSON.parse(atob(accessToken.split('.')[1]))
+  const payloadPart = accessToken.split('.')[1]
+  const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+  const payload = JSON.parse(atob(padded))
   const userId = payload.sub
 
   const response = await fetch(`${API_BASE}/refresh`, {

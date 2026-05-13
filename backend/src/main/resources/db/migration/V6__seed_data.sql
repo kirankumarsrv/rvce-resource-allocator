@@ -36,7 +36,21 @@ INSERT INTO departments (department_id, name, code) VALUES
     ('11111111-1111-1111-1111-111111111099', 'Administration',                          'ADMIN')
 ON CONFLICT (code) DO NOTHING;
 
+-- ─── ROOMS ───────────────────────────────────────────────────
+INSERT INTO rooms (room_id, name, display_name, room_type, capacity, floor_number, block, building, dept_owner_id, is_active) VALUES
+    ('55555555-5555-5555-5555-555555555001', 'A101', 'Classroom A101', 'CLASSROOM', 60, 1, 'A', 'Main Block', '11111111-1111-1111-1111-111111111001', true)
+ON CONFLICT (name) DO NOTHING;
+
 -- ─── ROLES ───────────────────────────────────────────────────
+-- Ensure DB constraint includes newer roles (safe when upgrading older DBs)
+ALTER TABLE roles
+    DROP CONSTRAINT IF EXISTS chk_role_name;
+
+ALTER TABLE roles
+    ADD CONSTRAINT chk_role_name CHECK (
+        name IN ('STUDENT','TEACHER','TTO','DEPT_COORD','ADMIN','EXAM_CONTROLLER','SUPER_ADMIN')
+    );
+
 INSERT INTO roles (role_id, name, description) VALUES
     ('22222222-2222-2222-2222-222222222001', 'STUDENT',       'Read-only: timetable view, exam seat view, notifications'),
     ('22222222-2222-2222-2222-222222222002', 'TEACHER',       'Cancel own classes, claim free slots, verify occupancy'),
