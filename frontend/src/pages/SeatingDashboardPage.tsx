@@ -31,6 +31,7 @@ import {
   addExamHall,
 } from '@/services/examService'
 import { StudentPool } from '@/components/StudentPool'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import { AddHallModal } from '@/components/AddHallModal'
 import { AllocationRuleCard, type AllocationRuleId } from '@/components/AllocationRuleCard'
 import { useDashboardStore } from '@/store/seatingStore'
@@ -735,19 +736,21 @@ export const SeatingDashboard = () => {
       <div className="flex flex-col gap-4">
         {/* Top: Student Pool */}
         <div className="w-full">
-          <StudentPool
-            unassignedStudents={unassignedStudents}
-            onStudentSelect={setSelectedStudent}
-            onStudentDeselect={() => setSelectedStudent(null)}
-            selectedStudent={selectedStudent}
-            pendingAssignments={pendingAssignments}
-            onStudentDragStart={handleStudentDragStart}
-            isQuickAssignPending={quickAssignMutation.isPending}
-            onQuickAssign={() => {
-              setSaveMessage('✗ Quick assign is not available yet.')
-              setTimeout(() => setSaveMessage(null), 3000)
-            }}
-          />
+          <ErrorBoundary>
+            <StudentPool
+              unassignedStudents={unassignedStudents}
+              onStudentSelect={setSelectedStudent}
+              onStudentDeselect={() => setSelectedStudent(null)}
+              selectedStudent={selectedStudent}
+              pendingAssignments={pendingAssignments}
+              onStudentDragStart={handleStudentDragStart}
+              isQuickAssignPending={quickAssignMutation.isPending}
+              onQuickAssign={() => {
+                setSaveMessage('✗ Quick assign is not available yet.')
+                setTimeout(() => setSaveMessage(null), 3000)
+              }}
+            />
+          </ErrorBoundary>
         </div>
 
         {/* Middle: Allocation Rules */}
