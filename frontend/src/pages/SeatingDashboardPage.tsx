@@ -4,7 +4,7 @@
  * Handles: load state, seat placement, auto-save, bulk save, publish
  */
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import type { DragEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
@@ -31,6 +31,7 @@ import {
   addExamHall,
 } from '@/services/examService'
 import { StudentPool } from '@/components/StudentPool'
+import { ClassroomGrid } from '@/components/ClassroomGrid'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { AddHallModal } from '@/components/AddHallModal'
 import { AllocationRuleCard, type AllocationRuleId } from '@/components/AllocationRuleCard'
@@ -46,9 +47,12 @@ export const SeatingDashboard = () => {
     selectedStudent,
     setSelectedStudent,
     pendingAssignments,
+    addPendingAssignment,
     addPendingAssignments,
+    removePendingAssignment,
     clearPendingAssignments,
     removedAssignments,
+    addRemovedAssignment,
     clearRemovedAssignments,
     isDirty,
     activeHallId,
@@ -243,8 +247,62 @@ export const SeatingDashboard = () => {
     (seat) => !removedAssignments.has(positionKey(seat))
   )
 
-  const assignedSeatsForCurrentHall = currentAssignedSeats.filter(
-    (seat) => seat.hallId === displayHall?.hallId
+  const handleSeatClick = useCallback(
+    (seat: SeatDto, student: UnassignedStudentDto | null) => {
+      const seatPosition = positionKey(seat)
+      const isCurrentlyAssigned = Boolean(seat.studentId || seat.usn)
+
+      if (!student) {
+        if (!isCurrentlyAssigned) {
+          return
+        }
+
+        removePendingAssignment(seat.seatId)
+        addRemovedAssignment(seatPosition)
+        setSelectedStudent(null)
+        setSaveMessage('✓ Student removed from seat')
+        setTimeout(() => setSaveMessage(null), 3500)
+        return
+      }
+
+      if (!student.studentId) {
+        setSaveMessage(
+          '✗ Cannot assign a student without a linked user account. Please link the student first.'
+        )
+        setTimeout(() => setSaveMessage(null), 5000)
+        return
+      }
+
+      const studentKey = student.studentId
+      const alreadyAssigned = Array.from(pendingAssignments.values()).some((s) => {
+        return s.studentId === studentKey || s.usn === student.usn
+      }) || assignedSeats.some((s) => s.studentId === studentKey)
+
+      if (alreadyAssigned && seat.studentId !== studentKey) {
+        setSaveMessage(
+          '✗ Student already assigned to another seat. Remove them first.'
+        )
+        setTimeout(() => setSaveMessage(null), 4000)
+        return
+      }
+
+      if (isCurrentlyAssigned) {
+        addRemovedAssignment(seatPosition)
+      }
+
+      const assignment: SeatDto = {
+        ...seat,
+        studentId: student.studentId,
+        usn: student.usn,
+        studentName: student.studentName,
+        branchCode: student.branchCode,
+        isManualOverride: true,
+      }
+
+      addPendingAssignment(assignment)
+      setSelectedStudent(null)
+    },
+    [addPendingAssignment, addRemovedAssignment, assignedSeats, pendingAssignments, removePendingAssignment, setSelectedStudent]
   )
 
   const allocationRules: Array<{
@@ -524,8 +582,6 @@ export const SeatingDashboard = () => {
       </div>
     )
 
-  const hallDtos: ExamHallDto[] = dashboardState.halls ?? []
-  const hallGrids: HallGridDto[] = dashboardState.hallGrids ?? []
   const unassignedStudents = dashboardState.unassignedStudents ?? []
   const totalStudents = Number.isFinite(dashboardState.totalCount)
     ? dashboardState.totalCount
@@ -541,6 +597,8 @@ export const SeatingDashboard = () => {
     ? new Date(examSession.createdAt).toLocaleString()
     : 'Unknown'
 
+  const hallDtos: ExamHallDto[] = dashboardState.halls ?? []
+  const hallGrids: HallGridDto[] = dashboardState.hallGrids ?? []
   const hallGridsById = new Map(hallGrids.map((grid) => [grid.hallId, grid]))
   const currentHall = hallDtos.find((h) => h.hallId === activeHallId)
   const displayHall = currentHall || hallDtos[0] || null
@@ -733,10 +791,25 @@ export const SeatingDashboard = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col gap-4">
-        {/* Top: Student Pool */}
-        <div className="w-full">
-          <ErrorBoundary>
+      <ErrorBoundary>
+        <div className="flex flex-col gap-4 lg:flex-row">
+          {/* Left: Allocation Rules + Student Pool */}
+          <div className="flex flex-col gap-4 w-full max-w-xs">
+            <div>
+              <div className="text-sm font-semibold text-gray-800">Allocation rules</div>
+              <p className="text-xs text-gray-500 mt-1">
+                Drag a student card onto a rule card to assign them automatically.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              {allocationRules.map((rule) => (
+                <AllocationRuleCard
+                  key={rule.id}
+                  rule={rule}
+                  onRuleDrop={handleRuleDrop}
+                />
+              ))}
+            </div>
             <StudentPool
               unassignedStudents={unassignedStudents}
               onStudentSelect={setSelectedStudent}
@@ -750,79 +823,27 @@ export const SeatingDashboard = () => {
                 setTimeout(() => setSaveMessage(null), 3000)
               }}
             />
-          </ErrorBoundary>
-        </div>
-
-        {/* Middle: Allocation Rules */}
-        <div className="w-full">
-          <div className="mb-2">
-            <div className="text-sm font-semibold text-gray-800">Allocation rules</div>
-            <p className="text-xs text-gray-500 mt-1">
-              Drag a student card onto a rule card to assign them automatically.
-            </p>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {allocationRules.map((rule) => (
-              <AllocationRuleCard
-                key={rule.id}
-                rule={rule}
-                onRuleDrop={handleRuleDrop}
+
+          {/* Right: Classroom Grid */}
+          {displayHallGrid ? (
+            <div className="flex-1">
+              <ClassroomGrid
+                hallGrid={displayHallGrid}
+                assignedSeats={assignedSeats}
+                selectedStudent={selectedStudent}
+                pendingAssignments={pendingAssignments}
+                removedAssignments={removedAssignments}
+                onSeatClick={handleSeatClick}
               />
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom: Classroom Grid */}
-        <div className="w-full">
-          <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">
-                  {displayHall?.roomDisplayName || displayHall?.roomName || 'Selected hall'}
-                </h2>
-                <p className="text-sm text-slate-600">
-                  {displayHall?.benchRows ?? 0} rows × {displayHall?.benchCols ?? 0} columns · Assigned {assignedSeatsForCurrentHall.length}/{displayHall?.totalCapacity ?? 0}
-                </p>
-              </div>
-              <div className="text-sm text-slate-600">
-                {displayHall?.invigilatorName ? `Invigilator: ${displayHall.invigilatorName}` : 'No invigilator assigned'}
-              </div>
             </div>
-
-            {assignedSeatsForCurrentHall.length > 0 ? (
-              <div className="space-y-3">
-                {assignedSeatsForCurrentHall
-                  .slice()
-                  .sort((a, b) => {
-                    if (a.benchRow !== b.benchRow) return a.benchRow - b.benchRow
-                    if (a.benchCol !== b.benchCol) return a.benchCol - b.benchCol
-                    return a.benchSeatIndex - b.benchSeatIndex
-                  })
-                  .map((seat) => (
-                    <div
-                      key={`${seat.hallId}-${seat.benchRow}-${seat.benchCol}-${seat.benchSeatIndex}`}
-                      className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">{seat.studentName ?? seat.usn ?? 'Unknown student'}</div>
-                        <div className="text-xs text-slate-600">
-                          {seat.usn ?? 'No USN'} · {seat.branchCode ?? 'Unknown branch'}
-                        </div>
-                      </div>
-                      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                        Bench {seat.benchNumber} · Seat {seat.benchSeatIndex + 1}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
-                No student assignments are available for this hall yet.
-              </div>
-            )}
-          </div>
+          ) : (
+            <div className="flex-1 rounded-lg border border-gray-300 bg-white p-6 text-gray-600">
+              No hall layout available for the selected room.
+            </div>
+          )}
         </div>
-      </div>
+      </ErrorBoundary>
 
       {/* Footer: Action buttons */}
       <div className="flex justify-end gap-2 bg-white p-4 rounded-lg shadow">

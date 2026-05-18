@@ -40,13 +40,29 @@ export const AllocationRuleCard = ({ rule, onRuleDrop }: AllocationRuleCardProps
     const studentPayload = event.dataTransfer.getData('application/student')
     const groupPayload = event.dataTransfer.getData('application/student-group')
     const payload = studentPayload || groupPayload
-    if (!payload) return
+    if (!payload) {
+      if (studentPayload || groupPayload) {
+        // It is possible for the dataTransfer payload not to be valid JSON.
+        // eslint-disable-next-line no-console
+        console.warn('AllocationRuleCard drop had payload but no usable JSON', {
+          ruleId: rule.id,
+          studentPayload,
+          groupPayload,
+        })
+      }
+      return
+    }
 
     try {
       const parsed = JSON.parse(payload) as UnassignedStudentDto | StudentGroupDto
       onRuleDrop(rule.id, parsed)
-    } catch {
-      // ignore invalid payload
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('AllocationRuleCard failed to parse drop payload', {
+        ruleId: rule.id,
+        payload,
+        error,
+      })
     }
   }
 
