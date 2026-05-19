@@ -471,6 +471,8 @@ export const SeatingDashboard = () => {
       return
     }
 
+    const hallMap = new Map(hallDtos.map((hall) => [hall.hallId, hall]))
+
     const rows = Array.from(assignmentMap.values()).sort((a, b) => {
       if (a.hallId !== b.hallId) return a.hallId.localeCompare(b.hallId)
       if (a.benchRow !== b.benchRow) return a.benchRow - b.benchRow
@@ -485,17 +487,26 @@ export const SeatingDashboard = () => {
     }
 
     const csv = [
-      ['Hall', 'Bench', 'Seat', 'USN', 'Student Name', 'Branch'].join(','),
-      ...rows.map((seat) =>
-        [
+      ['Hall ID', 'Hall Name', 'Room Display Name', 'Building', 'Floor', 'Bench', 'Seat', 'USN', 'Student Name', 'Branch'].join(','),
+      ...rows.map((seat) => {
+        const hall = hallMap.get(seat.hallId)
+        const hallName = hall?.roomName || ''
+        const roomDisplayName = hall?.roomDisplayName || ''
+        const building = hall?.building || ''
+        const floor = hall?.floor ?? ''
+        return [
           seat.hallId,
+          hallName,
+          roomDisplayName,
+          building,
+          floor,
           seat.benchNumber,
           seat.benchSeatIndex + 1,
           seat.usn,
           seat.studentName,
           seat.branchCode,
         ].map(quote).join(',')
-      ),
+      }),
     ].join('\n')
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -790,26 +801,33 @@ export const SeatingDashboard = () => {
         </button>
       </div>
 
-      {/* Main content */}
+      {/* Allocation Rules Section - Horizontal Layout */}
       <ErrorBoundary>
-        <div className="flex flex-col gap-4 lg:flex-row">
-          {/* Left: Allocation Rules + Student Pool */}
-          <div className="flex flex-col gap-4 w-full max-w-xs">
-            <div>
-              <div className="text-sm font-semibold text-gray-800">Allocation rules</div>
-              <p className="text-xs text-gray-500 mt-1">
-                Drag a student card onto a rule card to assign them automatically.
-              </p>
-            </div>
-            <div className="grid gap-3">
-              {allocationRules.map((rule) => (
+        <div>
+          <div className="mb-4">
+            <div className="text-sm font-semibold text-gray-800">Allocation rules</div>
+            <p className="text-xs text-gray-500 mt-1">
+              Drag a student card onto a rule card to assign them automatically.
+            </p>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 mb-6 rounded-lg bg-white p-3 shadow-sm">
+            {allocationRules.map((rule) => (
+              <div key={rule.id} className="flex-shrink-0 w-48">
                 <AllocationRuleCard
-                  key={rule.id}
                   rule={rule}
                   onRuleDrop={handleRuleDrop}
                 />
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </ErrorBoundary>
+
+      {/* Main content - Student Pool + Classroom Grid */}
+      <ErrorBoundary>
+        <div className="flex flex-col gap-4 lg:flex-row">
+          {/* Left: Student Pool */}
+          <div className="w-full lg:w-96 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-500px)]">
             <StudentPool
               unassignedStudents={unassignedStudents}
               onStudentSelect={setSelectedStudent}
@@ -827,7 +845,7 @@ export const SeatingDashboard = () => {
 
           {/* Right: Classroom Grid */}
           {displayHallGrid ? (
-            <div className="flex-1">
+            <div className="flex-1 overflow-auto max-h-[calc(100vh-500px)]">
               <ClassroomGrid
                 hallGrid={displayHallGrid}
                 assignedSeats={assignedSeats}

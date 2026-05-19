@@ -15,6 +15,8 @@ public class ExamHallDto {
     private UUID roomId;
     private String roomName;
     private String roomDisplayName;
+    private String building;
+    private Integer floor;
     private Integer twoSeaterCount;
     private Integer threeSeaterCount;
     private Integer totalCapacity;

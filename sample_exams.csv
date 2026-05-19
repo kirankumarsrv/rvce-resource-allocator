@@ -1,0 +1,7 @@
+subject_code,subject_name,exam_name,start_time,end_time,date,semester,section
+21CS51,Design and Analysis of Algorithms,DAA Exam,10:00,12:00,2026-12-15,5,A
+21CS52,Database Management Systems,DBMS Exam,14:00,16:00,2026-12-16,5,A
+21CS53,Operating Systems,OS Exam,10:00,12:00,2026-12-17,5,A
+21CS54,Computer Networks,CN Exam,14:00,16:00,2026-12-18,5,A
+21CS55,Software Engineering,SE Exam,10:00,12:00,2026-12-19,5,A
+21CS56,Web Technologies,WT Exam,14:00,16:00,2026-12-20,5,A

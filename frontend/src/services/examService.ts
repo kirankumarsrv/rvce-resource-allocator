@@ -55,6 +55,31 @@ export const createExamSession = async (
 }
 
 /**
+ * Batch create multiple exam sessions from an array
+ * Useful for bulk import from CSV
+ */
+export const batchCreateExamSessions = async (
+  examsData: CreateExamSessionRequest[]
+): Promise<{ created: ExamSessionDto[]; failed: Array<{ exam: CreateExamSessionRequest; error: string }> }> => {
+  const created: ExamSessionDto[] = []
+  const failed: Array<{ exam: CreateExamSessionRequest; error: string }> = []
+
+  for (const examData of examsData) {
+    try {
+      const exam = await createExamSession(examData)
+      created.push(exam)
+    } catch (error) {
+      failed.push({
+        exam: examData,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  return { created, failed }
+}
+
+/**
  * Search departments for autocomplete
  */
 export const searchDepartments = async (q = ''): Promise<{ id: string; text: string }[]> => {

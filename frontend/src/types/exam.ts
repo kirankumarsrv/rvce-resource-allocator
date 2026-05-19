@@ -36,6 +36,8 @@ export interface ExamHallDto {
   roomId: string
   roomName: string
   roomDisplayName: string
+  building?: string | null
+  floor?: number | null
   twoSeaterCount: number
   threeSeaterCount: number
   totalCapacity: number

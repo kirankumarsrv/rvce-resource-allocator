@@ -35,7 +35,6 @@ export const StudentPool = ({
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
   const [filterBranch, setFilterBranch] = useState<string | null>(null)
-  const [filterAccessibility, setFilterAccessibility] = useState(false)
   const [groupsToShow, setGroupsToShow] = useState(50)
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export const StudentPool = ({
 
       return matchesSearch && matchesBranch
     })
-  }, [unassignedStudents, debouncedSearch, filterBranch, filterAccessibility, assignedStudentKeys])
+  }, [unassignedStudents, debouncedSearch, filterBranch, assignedStudentKeys])
 
   const groupedStudents = useMemo(() => {
     const groups = new Map<string, StudentGroupDto>()
@@ -141,23 +140,6 @@ export const StudentPool = ({
               </option>
             ))}
           </select>
-        </div>
-
-        {/* Accessibility filter */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="accessibility"
-            checked={filterAccessibility}
-            onChange={(e) => setFilterAccessibility(e.target.checked)}
-            className="w-4 h-4 border-gray-300 rounded"
-          />
-          <label
-            htmlFor="accessibility"
-            className="text-xs font-semibold text-gray-700 cursor-pointer"
-          >
-            Front row only
-          </label>
         </div>
 
         <button
