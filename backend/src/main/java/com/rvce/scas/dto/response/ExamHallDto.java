@@ -15,11 +15,14 @@ public class ExamHallDto {
     private UUID roomId;
     private String roomName;
     private String roomDisplayName;
+    private String building;
+    private Integer floor;
     private Integer twoSeaterCount;
     private Integer threeSeaterCount;
     private Integer totalCapacity;
     private Integer benchRows;
     private Integer benchCols;
     private UUID invigilatorId;
+    private String invigilatorName;
     private Integer sortOrder;
 }

@@ -27,6 +27,7 @@ describe('Allocation Rules Engine', () => {
       benchRows: 2,
       benchCols: 2,
       invigilatorId: null,
+      invigilatorName: null,
     })
 
     const createHallGrid = (): HallGridDto => ({

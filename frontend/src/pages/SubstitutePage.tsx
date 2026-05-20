@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getTeachers, substituteTeacher } from '../services/timetableService'
-import { SimpleDto, SubstituteRequest, SubstitutionResultDto } from '../types/timetable'
+import { ClashDetail, SimpleDto, SubstituteRequest, SubstitutionResultDto } from '../types/timetable'
 
 const SubstitutePage = () => {
   const [formState, setFormState] = useState<SubstituteRequest>({
@@ -19,6 +19,16 @@ const SubstitutePage = () => {
     queryKey: ['teachers'],
     queryFn: getTeachers,
   })
+
+  const formatClash = (clash: ClashDetail) => {
+    const date = new Date(clash.date).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+
+    return `${date} • ${clash.startTime.slice(0, 5)}-${clash.endTime.slice(0, 5)} • ${clash.roomName}${clash.conflictReason ? ` • ${clash.conflictReason}` : ''}`
+  }
 
   const handleChange = (field: keyof SubstituteRequest, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }))
@@ -162,12 +172,12 @@ const SubstitutePage = () => {
           <div data-test-id="substitution-summary" className="mt-6 rounded-xl bg-green-50 border border-green-200 p-5">
             <h2 className="text-lg font-semibold text-green-700">Substitution Summary</h2>
             <div className="mt-3 text-sm text-slate-700">
-              <p>Reassigned slots: {result.reassignedCount}</p>
-              <p>Clashes detected: {result.clashes.length}</p>
+              <p>Reassigned slots: {result.autoReassigned}</p>
+              <p>Clashes detected: {result.clashCount}</p>
               {result.clashes.length > 0 && (
                 <ul data-test-id="substitution-clash-list" className="mt-3 list-disc list-inside space-y-1">
                   {result.clashes.map((clash, idx) => (
-                    <li key={idx}>{clash}</li>
+                    <li key={`${clash.date}-${clash.startTime}-${idx}`}>{formatClash(clash)}</li>
                   ))}
                 </ul>
               )}

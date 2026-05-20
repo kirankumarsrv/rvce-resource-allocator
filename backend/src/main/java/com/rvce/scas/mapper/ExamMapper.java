@@ -26,7 +26,10 @@ public interface ExamMapper {
     @Mapping(target = "roomId", source = "room.id")
     @Mapping(target = "roomName", source = "room.name")
     @Mapping(target = "roomDisplayName", source = "room.displayName")
+    @Mapping(target = "building", source = "room.building")
+    @Mapping(target = "floor", source = "room.floorNumber")
     @Mapping(target = "invigilatorId", source = "invigilator.userId")
+    @Mapping(target = "invigilatorName", source = "invigilator.name")
     ExamHallDto toDto(ExamHall examHall);
 
     @Mapping(target = "examId", source = "examSession.examId")

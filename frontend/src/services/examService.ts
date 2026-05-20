@@ -14,6 +14,7 @@ import type {
   ExamHallConfigRequest,
   StudentPublishedExamDto,
   StudentSeatAssignmentDto,
+  TeacherAssignedExamDto,
 } from '@/types/exam'
 import type { RoomAvailabilityDto } from '@/types/timetable'
 
@@ -51,6 +52,31 @@ export const createExamSession = async (
     throw new Error(details ? `${statusLine}: ${details}` : statusLine)
   }
   return response.json()
+}
+
+/**
+ * Batch create multiple exam sessions from an array
+ * Useful for bulk import from CSV
+ */
+export const batchCreateExamSessions = async (
+  examsData: CreateExamSessionRequest[]
+): Promise<{ created: ExamSessionDto[]; failed: Array<{ exam: CreateExamSessionRequest; error: string }> }> => {
+  const created: ExamSessionDto[] = []
+  const failed: Array<{ exam: CreateExamSessionRequest; error: string }> = []
+
+  for (const examData of examsData) {
+    try {
+      const exam = await createExamSession(examData)
+      created.push(exam)
+    } catch (error) {
+      failed.push({
+        exam: examData,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  return { created, failed }
 }
 
 /**
@@ -343,6 +369,46 @@ export const getStudentPublishedExams = async (): Promise<StudentPublishedExamDt
   const response = await authenticatedFetch(`${API_BASE}/student/exams`)
   if (!response.ok) {
     let message = 'Failed to fetch published exams'
+    try {
+      const payload = await response.json()
+      if (payload?.message) {
+        message = payload.message
+      }
+    } catch {
+      // keep fallback
+    }
+    throw new Error(message)
+  }
+  return response.json()
+}
+
+/**
+ * Teacher-facing assigned exams as invigilator.
+ */
+export const getTeacherAssignedExams = async (): Promise<TeacherAssignedExamDto[]> => {
+  const response = await authenticatedFetch(`${API_BASE}/teacher/exams`)
+  if (!response.ok) {
+    let message = 'Failed to fetch assigned exams'
+    try {
+      const payload = await response.json()
+      if (payload?.message) {
+        message = payload.message
+      }
+    } catch {
+      // keep fallback
+    }
+    throw new Error(message)
+  }
+  return response.json()
+}
+
+/**
+ * View seating arrangement for a specific exam.
+ */
+export const viewSeating = async (examId: string): Promise<SeatingDashboardStateDto> => {
+  const response = await authenticatedFetch(`${API_BASE}/${examId}/seating/view`)
+  if (!response.ok) {
+    let message = 'Failed to fetch seating arrangement'
     try {
       const payload = await response.json()
       if (payload?.message) {

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
  *   - spring.mail.port
  *   - spring.mail.username
  *   - spring.mail.password
- *   - spring.mail.from (optional, defaults to spring.mail.username)
+ *   - spring.mail.from (optional, defaults to noreply@rvce.edu.in)
  */
 @Slf4j
 @Service
@@ -23,9 +24,12 @@ import org.springframework.stereotype.Service;
 public class ProductionEmailService implements EmailService {
 
     private final JavaMailSender mailSender;
+    private final String fromAddress;
 
-    public ProductionEmailService(JavaMailSender mailSender) {
+    public ProductionEmailService(JavaMailSender mailSender,
+                                  @Value("${spring.mail.from:noreply@rvce.edu.in}") String fromAddress) {
         this.mailSender = mailSender;
+        this.fromAddress = fromAddress;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class ProductionEmailService implements EmailService {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email);
-            message.setFrom("noreply@rvce.edu.in");
+            message.setFrom(fromAddress);
             message.setSubject("Password Reset Request - RVCE SCAS");
             message.setText(buildPasswordResetEmailBody(name, resetLink));
 

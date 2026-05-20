@@ -15,6 +15,7 @@ import SubstitutePage from '@/pages/SubstitutePage'
 import RoomAvailabilityPage from '@/pages/RoomAvailabilityPage'
 import AdminUsersPage from '@/pages/AdminUsersPage'
 import UnauthorizedPage from '@/pages/UnauthorizedPage'
+import SeatingViewPage from '@/pages/SeatingViewPage'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 import { useAuth } from '@/context/AuthContext'
 
@@ -66,6 +67,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
@@ -75,6 +77,14 @@ function App() {
           element={
             <RequireRole allowedRoles={['ROLE_STUDENT']}>
               {withLayout(<StudentPage />)}
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/exam/:examId/seating"
+          element={
+            <RequireRole allowedRoles={['ROLE_STUDENT', 'ROLE_TEACHER']}>
+              {withLayout(<SeatingViewPage />)}
             </RequireRole>
           }
         />

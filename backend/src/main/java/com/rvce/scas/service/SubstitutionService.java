@@ -141,6 +141,15 @@ public class SubstitutionService {
                 && !req.getStartDate().equals(req.getEndDate())) {
             throw new IllegalArgumentException("ONE_DAY scope requires identical start and end dates");
         }
+        
+        // EC-7: Validate replacement teacher exists and is active
+        User replacementTeacher = userRepository.findById(req.getReplacementTeacherId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Replacement teacher not found: " + req.getReplacementTeacherId()));
+        
+        if (!replacementTeacher.isActive()) {
+            throw new IllegalArgumentException("Replacement teacher is inactive and cannot be assigned");
+        }
     }
 
     /**
@@ -163,7 +172,7 @@ public class SubstitutionService {
             );
 
             if (hasConflict) {
-                clashes.add(buildClashDetail(slot, req));
+                clashes.addAll(buildClashDetailsForRange(slot, req));
             }
         }
 
@@ -207,11 +216,28 @@ public class SubstitutionService {
      * @return the clash detail
      */
     private ClashDetail buildClashDetail(TimetableSlot slot, SubstituteRequest req) {
+        return buildClashDetail(slot, req, findFirstMatchingDate(slot, req.getStartDate(), req.getEndDate()));
+    }
+
+    private List<ClashDetail> buildClashDetailsForRange(TimetableSlot slot, SubstituteRequest req) {
+        List<ClashDetail> details = new ArrayList<>();
+        LocalDate current = req.getStartDate();
+        while (!current.isAfter(req.getEndDate())) {
+            if (current.getDayOfWeek().getValue() == slot.getDayOfWeek()) {
+                details.add(buildClashDetail(slot, req, current));
+            }
+            current = current.plusDays(1);
+        }
+        return details;
+    }
+
+    private ClashDetail buildClashDetail(TimetableSlot slot, SubstituteRequest req, LocalDate clashDate) {
         ClashDetail detail = new ClashDetail();
-        detail.setDate(findFirstMatchingDate(slot, req.getStartDate(), req.getEndDate()));
+        detail.setDate(clashDate);
         detail.setStartTime(slot.getStartTime());
         detail.setEndTime(slot.getEndTime());
         detail.setRoomName(slot.getRoom().getName());
+        detail.setSubject(slot.getSubject()); // EC-17: Include subject in clash detail
         detail.setConflictReason("Replacement teacher has conflicting slot");
         return detail;
     }

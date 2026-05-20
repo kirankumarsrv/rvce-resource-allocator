@@ -606,3 +606,8 @@ BEGIN
 
     RAISE NOTICE 'Seed verification passed: % rooms, % users, % roles', v_room_count, v_user_count, v_role_count;
 END $$;
+
+SELECT setval(
+    pg_get_serial_sequence('timetable_slots', 'slot_id'),
+    COALESCE((SELECT MAX(slot_id) FROM timetable_slots), 1)
+);

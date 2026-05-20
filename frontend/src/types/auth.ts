@@ -11,6 +11,7 @@ export interface LoginResponse {
 }
 
 export interface AuthUser {
+  userId?: string
   email: string
   roles: string[]
 }

@@ -35,6 +35,11 @@ public class ClashDetail {
     private String roomName;
 
     /**
+     * Subject being taught in the clashing slot.
+     */
+    private String subject;
+
+    /**
      * Description of the conflict reason.
      */
     private String conflictReason;

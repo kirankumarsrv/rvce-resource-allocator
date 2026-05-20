@@ -3,7 +3,7 @@
  * Lists unassigned students with search, filter, and multi-select
  */
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { DragEvent } from 'react'
 import type { StudentGroupDto, UnassignedStudentDto, SeatDto } from '@/types/exam'
 import { Search, Trash2 } from 'lucide-react'
@@ -33,8 +33,14 @@ export const StudentPool = ({
   isQuickAssignPending = false,
 }: StudentPoolProps) => {
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
   const [filterBranch, setFilterBranch] = useState<string | null>(null)
-  const [filterAccessibility, setFilterAccessibility] = useState(false)
+  const [groupsToShow, setGroupsToShow] = useState(50)
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm), 250)
+    return () => clearTimeout(t)
+  }, [searchTerm])
 
   const branches = useMemo(() => {
     return [...new Set(unassignedStudents.map((s) => s.branchCode))].sort()
@@ -48,22 +54,19 @@ export const StudentPool = ({
   }, [pendingAssignments])
 
   const filteredStudents = useMemo(() => {
+    const q = debouncedSearch.toLowerCase()
     return unassignedStudents.filter((student) => {
       const studentKey = student.studentId ?? student.entryId ?? student.usn
-      // Skip students already assigned
-      if (assignedStudentKeys.has(studentKey)) {
-        return false
-      }
+      if (assignedStudentKeys.has(studentKey)) return false
 
       const matchesSearch =
-        student.usn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.studentName.toLowerCase().includes(searchTerm.toLowerCase())
+        student.usn.toLowerCase().includes(q) || student.studentName.toLowerCase().includes(q)
 
       const matchesBranch = !filterBranch || student.branchCode === filterBranch
 
       return matchesSearch && matchesBranch
     })
-  }, [unassignedStudents, searchTerm, filterBranch, filterAccessibility, assignedStudentKeys])
+  }, [unassignedStudents, debouncedSearch, filterBranch, assignedStudentKeys])
 
   const groupedStudents = useMemo(() => {
     const groups = new Map<string, StudentGroupDto>()
@@ -139,23 +142,6 @@ export const StudentPool = ({
           </select>
         </div>
 
-        {/* Accessibility filter */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="accessibility"
-            checked={filterAccessibility}
-            onChange={(e) => setFilterAccessibility(e.target.checked)}
-            className="w-4 h-4 border-gray-300 rounded"
-          />
-          <label
-            htmlFor="accessibility"
-            className="text-xs font-semibold text-gray-700 cursor-pointer"
-          >
-            Front row only
-          </label>
-        </div>
-
         <button
           type="button"
           onClick={() => onQuickAssign(filteredStudents.filter((student) => student.studentId))}
@@ -173,60 +159,88 @@ export const StudentPool = ({
             No students match filters
           </div>
         ) : (
-          groupedStudents.map((group) => {
-            const groupStudentIds = new Set(group.students.map((student) => student.entryId))
-            const isSelected = selectedStudent ? groupStudentIds.has(selectedStudent.entryId) : false
-            const sampleNames = group.students.slice(0, 3).map((student) => student.studentName)
-            const validStudents = group.students.filter((student) => student.studentId)
-            const hasNoAccount = validStudents.length === 0
-            const bgColor = branchColorMap[group.students[0].branchCode] || 'bg-gray-100'
+          <>
+            {groupedStudents.slice(0, groupsToShow).map((group) => {
+              const groupStudentIds = new Set(group.students.map((student) => student.entryId))
+              const isSelected = selectedStudent ? groupStudentIds.has(selectedStudent.entryId) : false
+              const sampleNames = group.students.slice(0, 3).map((student) => student.studentName)
+              const validStudents = group.students.filter((student) => student.studentId)
+              const hasNoAccount = validStudents.length === 0
+              const bgColor = branchColorMap[group.students[0].branchCode] || 'bg-gray-100'
 
-            return (
-              <button
-                key={group.groupId}
-                type="button"
-                draggable={!hasNoAccount}
-                onDragStart={(event) => !hasNoAccount && onStudentDragStart(group, event)}
-                className={
-                  `
-                    w-full text-left p-3 border-2 rounded transition
-                    ${bgColor}
-                    ${hasNoAccount ? 'opacity-70 cursor-not-allowed border-dashed' : 'cursor-pointer'}
-                    ${isSelected ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-200 hover:border-gray-400'}
-                  `
-                }
-                onClick={() => !hasNoAccount && onStudentSelect(group.students[0])}
-                disabled={hasNoAccount}
-                title={
-                  hasNoAccount
-                    ? 'This group has no linked student accounts and cannot be assigned.'
-                    : 'Drag this group to a rule card to assign a matching seat.'
-                }
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <div className="text-xs font-bold text-gray-800 truncate">
-                      {group.label}
+              return (
+                <button
+                  key={group.groupId}
+                  type="button"
+                  draggable={!hasNoAccount}
+                  onDragStart={(event) => {
+                    if (hasNoAccount) return
+                    // Trim the payload to only include minimal student fields to avoid huge dataTransfer payloads
+                    const trimmedGroup: StudentGroupDto = {
+                      groupId: group.groupId,
+                      label: group.label,
+                      students: group.students.map((s) => ({
+                        studentId: s.studentId,
+                        usn: s.usn,
+                        studentName: s.studentName,
+                        branchCode: s.branchCode,
+                        entryId: s.entryId,
+                      } as unknown as UnassignedStudentDto)),
+                    }
+                    onStudentDragStart(trimmedGroup, event)
+                  }}
+                  className={
+                    `
+                      w-full text-left p-3 border-2 rounded transition
+                      ${bgColor}
+                      ${hasNoAccount ? 'opacity-70 cursor-not-allowed border-dashed' : 'cursor-pointer'}
+                      ${isSelected ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-200 hover:border-gray-400'}
+                    `
+                  }
+                  onClick={() => !hasNoAccount && onStudentSelect(group.students[0])}
+                  disabled={hasNoAccount}
+                  title={
+                    hasNoAccount
+                      ? 'This group has no linked student accounts and cannot be assigned.'
+                      : 'Drag this group to a rule card to assign a matching seat.'
+                  }
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <div className="text-xs font-bold text-gray-800 truncate">
+                        {group.label}
+                      </div>
+                      <div className="text-[11px] text-gray-600 mt-1">
+                        {group.students.length} student{group.students.length > 1 ? 's' : ''}
+                      </div>
                     </div>
-                    <div className="text-[11px] text-gray-600 mt-1">
-                      {group.students.length} student{group.students.length > 1 ? 's' : ''}
+                    <div className="text-[10px] rounded-full bg-white/80 px-2 py-1 font-semibold text-slate-700 border border-slate-200">
+                      Group
                     </div>
                   </div>
-                  <div className="text-[10px] rounded-full bg-white/80 px-2 py-1 font-semibold text-slate-700 border border-slate-200">
-                    Group
+                  <div className="mt-2 text-[11px] text-slate-700">
+                    {sampleNames.join(', ')}{group.students.length > 3 ? ` +${group.students.length - 3} more` : ''}
                   </div>
-                </div>
-                <div className="mt-2 text-[11px] text-slate-700">
-                  {sampleNames.join(', ')}{group.students.length > 3 ? ` +${group.students.length - 3} more` : ''}
-                </div>
-                {validStudents.length < group.students.length && (
-                  <div className="mt-2 inline-flex rounded-full bg-yellow-100 px-2 py-1 text-[10px] text-yellow-800 font-semibold">
-                    {group.students.length - validStudents.length} unlinked
-                  </div>
-                )}
-              </button>
-            )
-          })
+                  {validStudents.length < group.students.length && (
+                    <div className="mt-2 inline-flex rounded-full bg-yellow-100 px-2 py-1 text-[10px] text-yellow-800 font-semibold">
+                      {group.students.length - validStudents.length} unlinked
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+
+            {groupedStudents.length > groupsToShow && (
+              <div className="p-2 text-center">
+                <button
+                  onClick={() => setGroupsToShow((n) => n + 50)}
+                  className="px-3 py-1 rounded bg-white border border-gray-200 text-xs hover:bg-gray-50"
+                >
+                  Show more ({groupedStudents.length - groupsToShow} more)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 

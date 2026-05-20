@@ -27,7 +27,7 @@ const ForgotPasswordPage = () => {
       setEmail('')
 
       // Redirect to login after 3 seconds
-      setTimeout(() => navigate('/auth/login'), 3000)
+      setTimeout(() => navigate('/login'), 3000)
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to process password reset request'
       setErrorMessage(errorMsg)
@@ -82,14 +82,17 @@ const ForgotPasswordPage = () => {
             {isSubmitting ? 'Sending...' : 'Send Reset Link'}
           </button>
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <button
               type="button"
-              onClick={() => navigate('/auth/login')}
+              onClick={() => navigate('/login')}
               className="text-blue-600 hover:text-blue-700 text-sm"
             >
               Back to Login
             </button>
+            <p className="text-xs text-slate-500">
+              Check your email for the password reset link. The link will expire in 24 hours.
+            </p>
           </div>
         </form>
       </div>

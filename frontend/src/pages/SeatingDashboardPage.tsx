@@ -4,7 +4,7 @@
  * Handles: load state, seat placement, auto-save, bulk save, publish
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import type { DragEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
@@ -32,6 +32,7 @@ import {
 } from '@/services/examService'
 import { StudentPool } from '@/components/StudentPool'
 import { ClassroomGrid } from '@/components/ClassroomGrid'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import { AddHallModal } from '@/components/AddHallModal'
 import { AllocationRuleCard, type AllocationRuleId } from '@/components/AllocationRuleCard'
 import { useDashboardStore } from '@/store/seatingStore'
@@ -470,6 +471,8 @@ export const SeatingDashboard = () => {
       return
     }
 
+    const hallMap = new Map(hallDtos.map((hall) => [hall.hallId, hall]))
+
     const rows = Array.from(assignmentMap.values()).sort((a, b) => {
       if (a.hallId !== b.hallId) return a.hallId.localeCompare(b.hallId)
       if (a.benchRow !== b.benchRow) return a.benchRow - b.benchRow
@@ -484,17 +487,26 @@ export const SeatingDashboard = () => {
     }
 
     const csv = [
-      ['Hall', 'Bench', 'Seat', 'USN', 'Student Name', 'Branch'].join(','),
-      ...rows.map((seat) =>
-        [
+      ['Hall ID', 'Hall Name', 'Room Display Name', 'Building', 'Floor', 'Bench', 'Seat', 'USN', 'Student Name', 'Branch'].join(','),
+      ...rows.map((seat) => {
+        const hall = hallMap.get(seat.hallId)
+        const hallName = hall?.roomName || ''
+        const roomDisplayName = hall?.roomDisplayName || ''
+        const building = hall?.building || ''
+        const floor = hall?.floor ?? ''
+        return [
           seat.hallId,
+          hallName,
+          roomDisplayName,
+          building,
+          floor,
           seat.benchNumber,
           seat.benchSeatIndex + 1,
           seat.usn,
           seat.studentName,
           seat.branchCode,
         ].map(quote).join(',')
-      ),
+      }),
     ].join('\n')
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -581,8 +593,6 @@ export const SeatingDashboard = () => {
       </div>
     )
 
-  const hallDtos: ExamHallDto[] = dashboardState.halls ?? []
-  const hallGrids: HallGridDto[] = dashboardState.hallGrids ?? []
   const unassignedStudents = dashboardState.unassignedStudents ?? []
   const totalStudents = Number.isFinite(dashboardState.totalCount)
     ? dashboardState.totalCount
@@ -598,6 +608,8 @@ export const SeatingDashboard = () => {
     ? new Date(examSession.createdAt).toLocaleString()
     : 'Unknown'
 
+  const hallDtos: ExamHallDto[] = dashboardState.halls ?? []
+  const hallGrids: HallGridDto[] = dashboardState.hallGrids ?? []
   const hallGridsById = new Map(hallGrids.map((grid) => [grid.hallId, grid]))
   const currentHall = hallDtos.find((h) => h.hallId === activeHallId)
   const displayHall = currentHall || hallDtos[0] || null
@@ -685,6 +697,11 @@ export const SeatingDashboard = () => {
           <div className="text-sm text-gray-600 mt-1">
             Last modified: {lastModified}
           </div>
+          {displayHall?.invigilatorName ? (
+            <div className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700 border border-blue-100">
+              <span className="font-semibold">Hall Invigilator:</span> {displayHall.invigilatorName}
+            </div>
+          ) : null}
         </div>
 
         {/* Stats */}
@@ -762,7 +779,14 @@ export const SeatingDashboard = () => {
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
             }`}
           >
-            {hall.roomName || 'Unknown room'}
+            <div className="flex items-center gap-2">
+              <span>{hall.roomName || 'Unknown room'}</span>
+              {hall.invigilatorName ? (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-600">
+                  {hall.invigilatorName}
+                </span>
+              ) : null}
+            </div>
             <span className="ml-2 text-xs">
               {(hallAssignedCount.get(hall.hallId) ?? 0)}/{hall.totalCapacity ?? 0}
             </span>
@@ -777,62 +801,67 @@ export const SeatingDashboard = () => {
         </button>
       </div>
 
-      {/* Main content */}
-      <div className="flex flex-col gap-4">
-        {/* Top: Student Pool */}
-        <div className="w-full">
-          <StudentPool
-            unassignedStudents={unassignedStudents}
-            onStudentSelect={setSelectedStudent}
-            onStudentDeselect={() => setSelectedStudent(null)}
-            selectedStudent={selectedStudent}
-            pendingAssignments={pendingAssignments}
-            onStudentDragStart={handleStudentDragStart}
-            isQuickAssignPending={quickAssignMutation.isPending}
-            onQuickAssign={() => {
-              setSaveMessage('✗ Quick assign is not available yet.')
-              setTimeout(() => setSaveMessage(null), 3000)
-            }}
-          />
-        </div>
-
-        {/* Middle: Allocation Rules */}
-        <div className="w-full">
-          <div className="mb-2">
+      {/* Allocation Rules Section - Horizontal Layout */}
+      <ErrorBoundary>
+        <div>
+          <div className="mb-4">
             <div className="text-sm font-semibold text-gray-800">Allocation rules</div>
             <p className="text-xs text-gray-500 mt-1">
               Drag a student card onto a rule card to assign them automatically.
             </p>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2">
+          <div className="flex gap-3 overflow-x-auto pb-2 mb-6 rounded-lg bg-white p-3 shadow-sm">
             {allocationRules.map((rule) => (
-              <AllocationRuleCard
-                key={rule.id}
-                rule={rule}
-                onRuleDrop={handleRuleDrop}
-              />
+              <div key={rule.id} className="flex-shrink-0 w-48">
+                <AllocationRuleCard
+                  rule={rule}
+                  onRuleDrop={handleRuleDrop}
+                />
+              </div>
             ))}
           </div>
         </div>
+      </ErrorBoundary>
 
-        {/* Bottom: Classroom Grid */}
-        {displayHallGrid ? (
-          <div className="w-full">
-            <ClassroomGrid
-              hallGrid={displayHallGrid}
-              assignedSeats={assignedSeats}
+      {/* Main content - Student Pool + Classroom Grid */}
+      <ErrorBoundary>
+        <div className="flex flex-col gap-4 lg:flex-row">
+          {/* Left: Student Pool */}
+          <div className="w-full lg:w-96 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-500px)]">
+            <StudentPool
+              unassignedStudents={unassignedStudents}
+              onStudentSelect={setSelectedStudent}
+              onStudentDeselect={() => setSelectedStudent(null)}
               selectedStudent={selectedStudent}
               pendingAssignments={pendingAssignments}
-              removedAssignments={removedAssignments}
-              onSeatClick={handleSeatClick}
+              onStudentDragStart={handleStudentDragStart}
+              isQuickAssignPending={quickAssignMutation.isPending}
+              onQuickAssign={() => {
+                setSaveMessage('✗ Quick assign is not available yet.')
+                setTimeout(() => setSaveMessage(null), 3000)
+              }}
             />
           </div>
-        ) : (
-          <div className="w-full rounded-lg border border-gray-300 bg-white p-6 text-gray-600">
-            No hall layout available for the selected room.
-          </div>
-        )}
-      </div>
+
+          {/* Right: Classroom Grid */}
+          {displayHallGrid ? (
+            <div className="flex-1 overflow-auto max-h-[calc(100vh-500px)]">
+              <ClassroomGrid
+                hallGrid={displayHallGrid}
+                assignedSeats={assignedSeats}
+                selectedStudent={selectedStudent}
+                pendingAssignments={pendingAssignments}
+                removedAssignments={removedAssignments}
+                onSeatClick={handleSeatClick}
+              />
+            </div>
+          ) : (
+            <div className="flex-1 rounded-lg border border-gray-300 bg-white p-6 text-gray-600">
+              No hall layout available for the selected room.
+            </div>
+          )}
+        </div>
+      </ErrorBoundary>
 
       {/* Footer: Action buttons */}
       <div className="flex justify-end gap-2 bg-white p-4 rounded-lg shadow">

@@ -30,6 +30,8 @@ export const AddHallModal = ({
   const [rooms, setRooms] = useState<AvailableRoom[]>([])
   const [teachers, setTeachers] = useState<SimpleDto[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [roomLoadError, setRoomLoadError] = useState<string | null>(null)
+  const [teacherLoadError, setTeacherLoadError] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [roomId, setRoomId] = useState('')
   const [twoSeaterCount, setTwoSeaterCount] = useState(0)
@@ -45,18 +47,15 @@ export const AddHallModal = ({
     setThreeSeaterCount(0)
     setInvigilatorId('')
     setLoadError(null)
+    setRoomLoadError(null)
+    setTeacherLoadError(null)
 
     setIsLoading(true)
 
-    // Load rooms and teachers in parallel
-    Promise.all([
-      listAvailableRooms(examId),
-      getTeachers()
-    ])
-      .then(([availableRooms, teacherList]) => {
+    const loadRooms = listAvailableRooms(examId)
+      .then((availableRooms) => {
         const examHallRooms = availableRooms.filter((room) => room.roomType === 'EXAM_HALL')
         setRooms(examHallRooms)
-        setTeachers(teacherList)
 
         if (examHallRooms.length > 0) {
           setRoomId(examHallRooms[0].id)
@@ -71,11 +70,22 @@ export const AddHallModal = ({
         }
       })
       .catch((err) => {
-        setLoadError(err instanceof Error ? err.message : 'Failed to load rooms or teachers')
+        setRooms([])
+        setRoomLoadError(err instanceof Error ? err.message : 'Failed to load rooms')
       })
-      .finally(() => {
-        setIsLoading(false)
+
+    const loadTeacherList = getTeachers()
+      .then((teacherList) => {
+        setTeachers(teacherList)
       })
+      .catch((err) => {
+        setTeachers([])
+        setTeacherLoadError(err instanceof Error ? err.message : 'Failed to load teachers')
+      })
+
+    Promise.allSettled([loadRooms, loadTeacherList]).finally(() => {
+      setIsLoading(false)
+    })
   }, [isOpen])
 
   // Clear errors when inputs change
@@ -149,12 +159,21 @@ export const AddHallModal = ({
             <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
               <Loader className="animate-spin" size={18} /> Loading rooms and teachers...
             </div>
-          ) : loadError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {loadError}
-            </div>
           ) : (
             <>
+              {(roomLoadError || teacherLoadError) && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 space-y-1">
+                  {roomLoadError ? <p>Rooms: {roomLoadError}</p> : null}
+                  {teacherLoadError ? <p>Teachers: {teacherLoadError}</p> : null}
+                </div>
+              )}
+
+              {loadError ? (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  {loadError}
+                </div>
+              ) : null}
+
               {rooms.length === 0 ? (
                 <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700">
                   No exam hall rooms are available for this exam time. Please ensure at least one room is configured as an exam hall and try again.

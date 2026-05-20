@@ -5,13 +5,14 @@ import { Loader, AlertCircle, Plus, Calendar, Users, Clock, Badge } from 'lucide
 
 import { listExamSessions } from '@/services/examService'
 import type { ExamSessionDto } from '@/types/exam'
+import { BatchUploadExams } from '@/components/BatchUploadExams'
 
 const ExamCtrlPage = () => {
   const navigate = useNavigate()
   const [page, setPage] = useState(0)
   const pageSize = 10
 
-  const { data: sessionsData, isLoading, error } = useQuery({
+  const { data: sessionsData, isLoading, error, refetch } = useQuery({
     queryKey: ['exam-sessions', page],
     queryFn: () => listExamSessions(page, pageSize),
   })
@@ -66,6 +67,14 @@ const ExamCtrlPage = () => {
           Create Exam
         </button>
       </div>
+
+      {/* Batch Upload Section */}
+      <BatchUploadExams
+        onSuccess={() => {
+          setPage(0)
+          refetch()
+        }}
+      />
 
       {/* Exams List */}
       {exams.length === 0 ? (

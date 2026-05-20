@@ -30,6 +30,22 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  mail:
+    # Configure a real SMTP provider for password reset emails.
+    # Example values must be provided through environment variables.
+    host: ${SPRING_MAIL_HOST:}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    protocol: ${SPRING_MAIL_PROTOCOL:smtp}
+    from: ${SPRING_MAIL_FROM:noreply@rvce.edu.in}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_AUTH:true}
+          starttls:
+            enable: ${SPRING_MAIL_STARTTLS_ENABLE:true}
+
   # Redis configuration for token storage and caching
   data:
     redis:

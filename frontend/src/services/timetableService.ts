@@ -140,7 +140,23 @@ export const uploadTimetable = async (file: File): Promise<UploadResultDto> => {
 export const getTeachers = async (): Promise<SimpleDto[]> => {
   const response = await authenticatedFetch(`${API_BASE}/teachers`)
 
-  if (!response.ok) throw new Error('Failed to fetch teachers')
+  if (!response.ok) {
+    let message = 'Failed to fetch teachers'
+    try {
+      const payload = await response.json()
+      if (typeof payload?.message === 'string' && payload.message.trim()) {
+        message = payload.message.trim()
+      } else if (typeof payload?.error === 'string' && payload.error.trim()) {
+        message = payload.error.trim()
+      }
+    } catch {
+      const errorText = await response.text()
+      if (errorText) {
+        message = errorText
+      }
+    }
+    throw new Error(message)
+  }
   return response.json()
 };
 

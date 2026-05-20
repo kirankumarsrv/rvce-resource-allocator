@@ -16,6 +16,14 @@ services:
       SPRING_REDIS_PORT: "6379"
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: "587"
+      SPRING_MAIL_USERNAME: kirankumars13579@gmail.com
+      SPRING_MAIL_PASSWORD: xnyc sovn uour rnnm
+      SPRING_MAIL_PROTOCOL: smtp
+      SPRING_MAIL_FROM: kirankumars13579@gmail.com
+      SPRING_MAIL_AUTH: "true"
+      SPRING_MAIL_STARTTLS_ENABLE: "true"
     depends_on:
       postgres:
         condition: service_healthy

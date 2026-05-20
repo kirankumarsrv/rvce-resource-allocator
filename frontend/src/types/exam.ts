@@ -36,12 +36,15 @@ export interface ExamHallDto {
   roomId: string
   roomName: string
   roomDisplayName: string
+  building?: string | null
+  floor?: number | null
   twoSeaterCount: number
   threeSeaterCount: number
   totalCapacity: number
   benchRows: number
   benchCols: number
   invigilatorId: string | null
+  invigilatorName: string | null
   sortOrder?: number
 }
 
@@ -108,6 +111,21 @@ export interface StudentPublishedExamDto {
   benchRow?: number | null
   benchCol?: number | null
   benchSeatIndex?: number | null
+}
+
+export interface TeacherAssignedExamDto {
+  examId: string
+  examName: string
+  subjectCode: string
+  subjectName: string
+  examDate: string
+  startTime: string
+  endTime: string
+  status: string
+  publishedAt?: string | null
+  hallId?: string | null
+  hallName?: string | null
+  roomName?: string | null
 }
 
 export interface ExamSeatDto {
