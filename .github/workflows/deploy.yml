@@ -11,7 +11,7 @@ jobs:
   check-all-passed:
     name: Verify All CI Workflows Passed
     runs-on: ubuntu-22.04
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     outputs:
       should-deploy: ${{ steps.check.outputs.result }}
     steps:
