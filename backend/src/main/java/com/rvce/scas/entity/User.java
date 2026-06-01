@@ -1,6 +1,8 @@
 package com.rvce.scas.entity;
 
+import com.rvce.scas.config.EncryptedStringConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -68,10 +70,12 @@ public class User {
     @Column(name = "name", nullable = false, length = 150)
     private String name;
 
-    @Column(name = "email", nullable = false, length = 255)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "email", nullable = false, length = 500)
     private String email;
 
-    @Column(name = "usn", length = 20)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "usn", length = 100)
     private String usn;
 
     @Column(name = "password_hash", nullable = false)

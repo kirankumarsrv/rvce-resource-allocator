@@ -16,6 +16,36 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.UncheckedIOException;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.time.Instant;
+import com.rvce.scas.dto.JwksResponse;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -83,40 +113,38 @@ public class JwtTokenProvider {
     public JwtTokenProvider(
             @Value("${scas.jwt.private-key-path:}") String privateKeyPath,
             @Value("${scas.jwt.public-key-path:}") String publicKeyPath,
+            @Value("${scas.jwt.private-key:}") String privateKeyPem,
+            @Value("${scas.jwt.public-key:}") String publicKeyPem,
             @Value("${scas.jwt.access-token-expiry-ms:900000}") long accessTokenExpiryMs,
             @Value("${scas.jwt.refresh-token-expiry-seconds:604800}") long refreshTokenExpirySeconds,
             RedisTemplate<String, String> redisTemplate) throws Exception {
 
-        // FIX: validate key configuration to prevent ephemeral key fallback.
-        // If both paths are blank, a new keypair is generated per startup,
-        // invalidating all tokens across restarts and breaking multi-pod deployments.
-        if ((privateKeyPath == null || privateKeyPath.isBlank()) &&
-            (publicKeyPath == null || publicKeyPath.isBlank())) {
-            log.warn("SECURITY WARNING: both private-key-path and public-key-path are blank. "
-                    + "Generating ephemeral RSA keypair. This will invalidate tokens after restart. "
-                    + "For production, configure scas.jwt.private-key-path and scas.jwt.public-key-path.");
+        boolean hasPemValues = StringUtils.hasText(privateKeyPem) && StringUtils.hasText(publicKeyPem);
+        boolean hasPathValues = StringUtils.hasText(privateKeyPath) && StringUtils.hasText(publicKeyPath);
+
+        if (hasPemValues && hasPathValues) {
+            throw new IllegalArgumentException("Configure either direct PEM values or file paths for JWT keys, not both.");
         }
-        // FIX: ensure both keys come from the same source (both files or both generated).
-        // Mixing one file key and one generated key creates sign/verify mismatch.
-        boolean bothFilesPassed = (privateKeyPath != null && !privateKeyPath.isBlank()) &&
-                                 (publicKeyPath != null && !publicKeyPath.isBlank());
-        boolean bothBlank = (privateKeyPath == null || privateKeyPath.isBlank()) &&
-                           (publicKeyPath == null || publicKeyPath.isBlank());
-        if (!(bothFilesPassed || bothBlank)) {
-            throw new IllegalArgumentException(
-                    "Both private-key-path and public-key-path must be configured, or both must be blank. "
-                    + "Partial configuration creates key mismatch.");
+
+        if (!hasPemValues && !hasPathValues) {
+            log.warn("SECURITY WARNING: JWT private/public key configuration is missing. Generating ephemeral RSA keypair. " +
+                    "This is insecure for production and will invalidate tokens on restart.");
         }
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
-        KeyPair pair = keyPairGenerator.generateKeyPair();
-        this.privateKey = privateKeyPath == null || privateKeyPath.isBlank()
-                ? (PrivateKey) pair.getPrivate()
-                : loadPrivateKey(privateKeyPath);
-        this.publicKey = publicKeyPath == null || publicKeyPath.isBlank()
-                ? (PublicKey) pair.getPublic()
-                : loadPublicKey(publicKeyPath);
+        KeyPair generatedPair = keyPairGenerator.generateKeyPair();
+
+        if (hasPemValues) {
+            this.privateKey = loadPrivateKeyFromContent(privateKeyPem);
+            this.publicKey = loadPublicKeyFromContent(publicKeyPem);
+        } else if (hasPathValues) {
+            this.privateKey = loadPrivateKey(privateKeyPath);
+            this.publicKey = loadPublicKey(publicKeyPath);
+        } else {
+            this.privateKey = generatedPair.getPrivate();
+            this.publicKey = generatedPair.getPublic();
+        }
 
         this.accessTokenExpiryMs = accessTokenExpiryMs;
         this.refreshTokenExpirySeconds = refreshTokenExpirySeconds;
@@ -357,6 +385,66 @@ public class JwtTokenProvider {
         byte[] bytes = Base64.getDecoder().decode(pem);
         X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
         return KeyFactory.getInstance("RSA").generatePublic(spec);
+    }
+
+    private PrivateKey loadPrivateKeyFromContent(String pemContent) throws Exception {
+        String pem = pemContent
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
+        byte[] bytes = Base64.getDecoder().decode(pem);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);
+        return KeyFactory.getInstance("RSA").generatePrivate(spec);
+    }
+
+    private PublicKey loadPublicKeyFromContent(String pemContent) throws Exception {
+        String pem = pemContent
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s", "");
+        byte[] bytes = Base64.getDecoder().decode(pem);
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
+        return KeyFactory.getInstance("RSA").generatePublic(spec);
+    }
+
+    public String getPublicKeyPem() {
+        if (!(publicKey instanceof RSAPublicKey)) {
+            throw new IllegalStateException("Public key is not an RSA public key");
+        }
+        String encoded = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+        return "-----BEGIN PUBLIC KEY-----\n" + chunkBase64(encoded) + "-----END PUBLIC KEY-----\n";
+    }
+
+    public JwksResponse getJwks() {
+        if (!(publicKey instanceof RSAPublicKey)) {
+            throw new IllegalStateException("Public key is not an RSA public key");
+        }
+        RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+        String kid = "current-key";
+        JwksResponse.RsaPublicKey key = JwksResponse.RsaPublicKey.builder()
+                .kid(kid)
+                .kty("RSA")
+                .alg("RS256")
+                .keyUse("sig")
+                .n(base64Url(rsaPublicKey.getModulus()))
+                .e(base64Url(rsaPublicKey.getPublicExponent()))
+                .build();
+        return new JwksResponse(java.util.List.of(key));
+    }
+
+    private String base64Url(BigInteger value) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(value.toByteArray());
+    }
+
+    private String chunkBase64(String base64) {
+        StringBuilder builder = new StringBuilder();
+        int index = 0;
+        while (index < base64.length()) {
+            int end = Math.min(index + 64, base64.length());
+            builder.append(base64, index, end).append("\n");
+            index = end;
+        }
+        return builder.toString();
     }
 
     @Getter
