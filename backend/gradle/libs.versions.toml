@@ -27,6 +27,9 @@ jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
 jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
 jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
 postgresql = { module = "org.postgresql:postgresql" }
+software-amazon-awssdk-secretsmanager = { module = "software.amazon.awssdk:secretsmanager", version = "2.34.0" }
+io-awspring-cloud-spring-cloud-aws-secrets-manager-config = { module = "io.awspring.cloud:spring-cloud-aws-secrets-manager-config", version = "2.4.4" }
+org-bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk15on", version = "1.70" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 spring-security-test = { module = "org.springframework.security:spring-security-test" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }

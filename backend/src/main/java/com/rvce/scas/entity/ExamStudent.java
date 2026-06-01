@@ -1,6 +1,8 @@
 package com.rvce.scas.entity;
 
+import com.rvce.scas.config.EncryptedStringConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,7 +39,8 @@ public class ExamStudent {
     @Column(name = "student_id")
     private UUID studentId;
 
-    @Column(name = "usn", nullable = false, length = 20)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "usn", nullable = false, length = 100)
     private String usn;
 
     @Column(name = "student_name", nullable = false, length = 150)
