@@ -5,21 +5,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import jakarta.annotation.PostConstruct;
-
 @Configuration
 public class EncryptionConfig {
 
-    private EncryptionUtil encryptionUtil;
-
     @Bean
     public EncryptionUtil encryptionUtil(@Value("${scas.encryption.key:}") String base64Key) {
-        this.encryptionUtil = new EncryptionUtil(base64Key);
-        return this.encryptionUtil;
-    }
-
-    @PostConstruct
-    public void registerConverter() {
-        EncryptedStringConverter.setEncryptionUtil(encryptionUtil);
+        EncryptionUtil util = new EncryptionUtil(base64Key);
+        // Register the converter immediately after creating the util
+        EncryptedStringConverter.setEncryptionUtil(util);
+        return util;
     }
 }

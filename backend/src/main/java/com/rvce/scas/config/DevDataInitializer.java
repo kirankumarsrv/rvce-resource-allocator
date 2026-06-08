@@ -4,6 +4,7 @@ import com.rvce.scas.entity.Department;
 import com.rvce.scas.entity.User;
 import com.rvce.scas.repository.DepartmentRepository;
 import com.rvce.scas.repository.UserRepository;
+import com.rvce.scas.security.EmailHashUtil;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,9 +50,22 @@ public class DevDataInitializer {
             String testPassword = "Test@1234";
             String encodedPassword = encoder.encode(testPassword);
 
+            // Clean up any legacy or invalid USN values before JPA loads them.
+            jdbcTemplate.update(
+                    "UPDATE users SET usn = NULL " +
+                    "WHERE usn IS NOT NULL " +
+                    "  AND usn !~ '^[0-9A-Z]{10,13}$' " +
+                    "  AND usn !~ '^[A-Za-z0-9+/=]{24,100}$'"
+            );
+
             for (String email : devEmails) {
                 userRepository.findByEmailIgnoreCase(email).ifPresent(user -> {
                     user.setPasswordHash(encodedPassword);
+                    // Fix any remaining invalid USN values that may have loaded from legacy data.
+                    String usn = user.getUsn();
+                    if (usn != null && !usn.matches("^[0-9A-Z]{10,13}$")) {
+                        user.setUsn(null);
+                    }
                     userRepository.save(user);
                     System.out.println("✓ Dev mode: Reset password for " + email);
                 });
@@ -107,19 +121,21 @@ public class DevDataInitializer {
 
         UUID seededUserId = UUID.fromString(userId);
 
+        String emailHash = EmailHashUtil.hashEmail(email);
         User user = userRepository.findByEmailIgnoreCase(email).orElseGet(() -> {
             Instant now = Instant.now();
             Timestamp nowTs = Timestamp.from(now);
             jdbcTemplate.update(
                     """
                     INSERT INTO users (
-                        user_id, name, email, password_hash,
+                        user_id, name, email, email_hash, password_hash,
                         is_active, failed_login_count, version,
                         department_id, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT (user_id) DO UPDATE SET
                         name = EXCLUDED.name,
                         email = EXCLUDED.email,
+                        email_hash = EXCLUDED.email_hash,
                         password_hash = EXCLUDED.password_hash,
                         is_active = EXCLUDED.is_active,
                         failed_login_count = EXCLUDED.failed_login_count,
@@ -128,6 +144,7 @@ public class DevDataInitializer {
                     seededUserId,
                     name,
                     email,
+                    emailHash,
                     encodedPassword,
                     true,
                     0,

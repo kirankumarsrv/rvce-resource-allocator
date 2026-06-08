@@ -74,6 +74,9 @@ public class User {
     @Column(name = "email", nullable = false, length = 500)
     private String email;
 
+    @Column(name = "email_hash", nullable = false, length = 64)
+    private String emailHash;
+
     @Convert(converter = EncryptedStringConverter.class)
     @Column(name = "usn", length = 100)
     private String usn;
@@ -116,11 +119,21 @@ public class User {
         if (updatedAt == null) {
             updatedAt = now;
         }
+        computeEmailHash();
     }
 
     @PreUpdate
     public void preUpdate() {
         updatedAt = Instant.now();
+        computeEmailHash();
+    }
+
+    private void computeEmailHash() {
+        if (email == null || email.isBlank()) {
+            emailHash = null;
+            return;
+        }
+        emailHash = com.rvce.scas.security.EmailHashUtil.hashEmail(email);
     }
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = jakarta.persistence.CascadeType.MERGE)

@@ -35,6 +35,12 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
         if (encryptionUtil == null) {
             throw new IllegalStateException("EncryptionUtil is not initialized for JPA AttributeConverter");
         }
-        return encryptionUtil.decrypt(dbData);
+        try {
+            return encryptionUtil.decrypt(dbData);
+        } catch (Exception e) {
+            // If decryption fails, assume the data is plain text (legacy data)
+            // This handles migration from unencrypted to encrypted fields
+            return dbData;
+        }
     }
 }

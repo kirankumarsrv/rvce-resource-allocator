@@ -20,6 +20,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -51,6 +52,26 @@ class EncryptionAndJwtCryptoTest {
 
         assertNotEquals(plaintext, dbValue);
         assertEquals(plaintext, entityValue);
+    }
+
+    @Test
+    void decryptReturnsRawPlaintextWhenValueIsNotEncrypted() throws Exception {
+        EncryptionUtil encryptionUtil = new EncryptionUtil(generateAesKeyBase64());
+
+        assertEquals("1RV20CS001", encryptionUtil.decrypt("1RV20CS001"));
+        assertEquals("example@rvce.edu.in", encryptionUtil.decrypt("example@rvce.edu.in"));
+        assertEquals("11111111-1111-1111-1111-111111111001", encryptionUtil.decrypt("11111111-1111-1111-1111-111111111001"));
+    }
+
+    @Test
+    void decryptFailsWhenWrongKeyIsUsedForEncryptedValue() throws Exception {
+        EncryptionUtil encryptionUtil1 = new EncryptionUtil(generateAesKeyBase64());
+        EncryptionUtil encryptionUtil2 = new EncryptionUtil(generateAesKeyBase64());
+
+        String ciphertext = encryptionUtil1.encrypt("student@example.com");
+
+        assertNotEquals(ciphertext, "student@example.com");
+        assertThrows(IllegalStateException.class, () -> encryptionUtil2.decrypt(ciphertext));
     }
 
     @Test
