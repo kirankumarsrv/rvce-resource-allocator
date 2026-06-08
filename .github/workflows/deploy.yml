@@ -186,7 +186,7 @@ jobs:
         run: |
           kubectl apply -f infra/k8s/production-ingress.yaml
           kubectl get ingress -n scas-prod
-          kubectl describe ingress scas-prod-ingress -n scas-prod || true
+          kubectl describe ingress scas-production-ingress -n scas-prod || true
 
       - name: Production smoke test
         run: |
