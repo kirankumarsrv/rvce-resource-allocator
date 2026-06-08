@@ -1,4 +1,7 @@
 name: Deploy to Kubernetes
+permissions:
+  id-token: write
+  contents: read
 
 on:
   workflow_dispatch:
