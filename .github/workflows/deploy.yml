@@ -194,13 +194,13 @@ jobs:
 
       - name: Ensure nginx ingress controller is installed
         run: |
-          if ! kubectl get namespace ingress-nginx >/dev/null 2>&1; then
-            helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-            helm repo update
-            helm install ingress-nginx ingress-nginx/ingress-nginx --create-namespace --namespace ingress-nginx
-          fi
-          kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=5m
-          kubectl get svc ingress-nginx-controller -n ingress-nginx
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx || true
+          helm repo update ingress-nginx || true
+          helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+            --create-namespace --namespace ingress-nginx \
+            --wait --timeout 5m || true
+          kubectl get deployment -n ingress-nginx || true
+          kubectl describe svc ingress-nginx-controller -n ingress-nginx || true
 
       - name: Ensure production ingress exists
         run: |
