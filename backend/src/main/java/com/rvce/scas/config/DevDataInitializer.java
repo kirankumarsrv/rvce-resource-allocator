@@ -25,8 +25,8 @@ import java.util.UUID;
  * This replaces the hardcoded password hash migration (V10) with
  * a runtime initialization that doesn't expose secrets in git.
  */
-@Configuration
-@Profile("dev")
+// @Configuration
+@Profile("!dev")
 public class DevDataInitializer {
 
     @Bean
