@@ -84,6 +84,9 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           NAMESPACE: scas-staging
         run: |
+          kubectl apply -f infra/k8s/staging-backend-deployment.yaml -n ${NAMESPACE}
+          kubectl apply -f infra/k8s/staging-frontend-deployment.yaml -n ${NAMESPACE}
+
           kubectl set image deployment/scas-backend \
             backend="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}" \
             -n ${NAMESPACE}
@@ -196,7 +199,7 @@ jobs:
           AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
         run: aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
 
-      - name: Validate production image tag
+      - name: Deploy to production namespace
         env:
           IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
@@ -207,6 +210,9 @@ jobs:
             exit 1
           fi
           echo "Deploying production images with tag: '${IMAGE_TAG}'"
+
+          kubectl apply -f infra/k8s/production-backend-deployment.yaml -n ${NAMESPACE}
+          kubectl apply -f infra/k8s/production-frontend-deployment.yaml -n ${NAMESPACE}
 
           kubectl set image deployment/scas-backend \
             backend="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}" \
