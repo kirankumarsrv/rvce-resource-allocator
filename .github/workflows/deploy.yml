@@ -98,26 +98,36 @@ jobs:
         run: |
           echo "Checking staging services..."
           kubectl get svc -n scas-staging
-          
-          echo "Waiting for LoadBalancer endpoint..."
-          for i in {1..30}; do
-            LB_IP=$(kubectl get svc scas-backend -n scas-staging -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || \
-                    kubectl get svc scas-backend -n scas-staging -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
-            if [ -n "$LB_IP" ]; then
-              echo "LoadBalancer IP obtained: $LB_IP"
-              break
-            fi
-            echo "Attempt $i: LoadBalancer IP not yet assigned, retrying..."
-            sleep 2
-          done
-          
-          if [ -z "$LB_IP" ]; then
-            echo "LoadBalancer IP not available, using port-forward instead..."
+
+          SERVICE_TYPE=$(kubectl get svc scas-backend -n scas-staging -o jsonpath='{.spec.type}')
+          echo "Service type: $SERVICE_TYPE"
+
+          if [ "$SERVICE_TYPE" != "LoadBalancer" ]; then
+            echo "Service is not LoadBalancer; using port-forward instead..."
             kubectl port-forward svc/scas-backend 8080:80 -n scas-staging &
             sleep 3
             LB_IP="127.0.0.1:8080"
+          else
+            echo "Waiting for LoadBalancer endpoint..."
+            for i in {1..30}; do
+              LB_IP=$(kubectl get svc scas-backend -n scas-staging -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || \
+                      kubectl get svc scas-backend -n scas-staging -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+              if [ -n "$LB_IP" ]; then
+                echo "LoadBalancer IP obtained: $LB_IP"
+                break
+              fi
+              echo "Attempt $i: LoadBalancer IP not yet assigned, retrying..."
+              sleep 2
+            done
+
+            if [ -z "$LB_IP" ]; then
+              echo "LoadBalancer IP not available, using port-forward instead..."
+              kubectl port-forward svc/scas-backend 8080:80 -n scas-staging &
+              sleep 3
+              LB_IP="127.0.0.1:8080"
+            fi
           fi
-          
+
           echo "Backend endpoint: $LB_IP"
           
           HTTP_STATUS=$(curl -sS --retry 3 --retry-delay 2 --retry-connrefused \
@@ -192,26 +202,36 @@ jobs:
         run: |
           echo "Checking production services..."
           kubectl get svc -n scas-prod
-          
-          echo "Waiting for LoadBalancer endpoint..."
-          for i in {1..30}; do
-            LB_IP=$(kubectl get svc scas-backend -n scas-prod -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || \
-                    kubectl get svc scas-backend -n scas-prod -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
-            if [ -n "$LB_IP" ]; then
-              echo "LoadBalancer IP obtained: $LB_IP"
-              break
-            fi
-            echo "Attempt $i: LoadBalancer IP not yet assigned, retrying..."
-            sleep 2
-          done
-          
-          if [ -z "$LB_IP" ]; then
-            echo "LoadBalancer IP not available, using port-forward instead..."
+
+          SERVICE_TYPE=$(kubectl get svc scas-backend -n scas-prod -o jsonpath='{.spec.type}')
+          echo "Service type: $SERVICE_TYPE"
+
+          if [ "$SERVICE_TYPE" != "LoadBalancer" ]; then
+            echo "Service is not LoadBalancer; using port-forward instead..."
             kubectl port-forward svc/scas-backend 8080:80 -n scas-prod &
             sleep 3
             LB_IP="127.0.0.1:8080"
+          else
+            echo "Waiting for LoadBalancer endpoint..."
+            for i in {1..30}; do
+              LB_IP=$(kubectl get svc scas-backend -n scas-prod -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || \
+                      kubectl get svc scas-backend -n scas-prod -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+              if [ -n "$LB_IP" ]; then
+                echo "LoadBalancer IP obtained: $LB_IP"
+                break
+              fi
+              echo "Attempt $i: LoadBalancer IP not yet assigned, retrying..."
+              sleep 2
+            done
+
+            if [ -z "$LB_IP" ]; then
+              echo "LoadBalancer IP not available, using port-forward instead..."
+              kubectl port-forward svc/scas-backend 8080:80 -n scas-prod &
+              sleep 3
+              LB_IP="127.0.0.1:8080"
+            fi
           fi
-          
+
           echo "Backend endpoint: $LB_IP"
           
           HTTP_STATUS=$(curl -sS --retry 3 --retry-delay 2 --retry-connrefused \
