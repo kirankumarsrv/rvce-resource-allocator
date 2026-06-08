@@ -9,7 +9,7 @@ on:
       image_tag:
         description: 'ECR image tag to deploy (for example full commit SHA or latest)'
         required: false
-        default: 'latest'
+        default: ''
   workflow_run:
     workflows: ["Backend CI", "Frontend CI"]
     types: [completed]
@@ -30,14 +30,15 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           INPUT_TAG: ${{ github.event.inputs.image_tag }}
           WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
-          DEFAULT_SHA: ${{ github.sha }}
         run: |
           if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_SHA" ]; then
             TAG="$WORKFLOW_RUN_SHA"
           elif [ -n "$INPUT_TAG" ]; then
             TAG="$INPUT_TAG"
           else
-            TAG="$DEFAULT_SHA"
+            echo "ERROR: image_tag input is required for manual workflow_dispatch."
+            echo "Provide a concrete ECR image tag, such as a commit SHA or latest if it exists."
+            exit 1
           fi
 
           echo "value=$TAG" >> "$GITHUB_OUTPUT"
@@ -72,6 +73,15 @@ jobs:
           AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
         run: |
           aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
+
+      - name: Verify ECR image tags exist for staging
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
+        run: |
+          echo "Verifying ECR images for tag: ${IMAGE_TAG}"
+          aws ecr describe-images --repository-name scas-backend --image-ids imageTag=${IMAGE_TAG}
+          aws ecr describe-images --repository-name scas-frontend --image-ids imageTag=${IMAGE_TAG}
 
       - name: Deploy to staging namespace
         env:
@@ -187,6 +197,15 @@ jobs:
         run: |
           echo "Deployment to staging succeeded: ${{ github.sha }}"
 
+      - name: Gather staging failure diagnostics
+        if: failure()
+        run: |
+          echo "Staging pod diagnostics"
+          kubectl get pods -n scas-staging
+          kubectl describe pods -n scas-staging
+          echo "Recent staging events"
+          kubectl get events -n scas-staging --sort-by='.metadata.creationTimestamp' | tail -n 50 || true
+
       - name: Rollback on failure
         if: failure()
         run: |
@@ -217,6 +236,15 @@ jobs:
         env:
           AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
         run: aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
+
+      - name: Verify ECR image tags exist for production
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
+        run: |
+          echo "Verifying ECR images for tag: ${IMAGE_TAG}"
+          aws ecr describe-images --repository-name scas-backend --image-ids imageTag=${IMAGE_TAG}
+          aws ecr describe-images --repository-name scas-frontend --image-ids imageTag=${IMAGE_TAG}
 
       - name: Blue-Green deploy to production
         env:
@@ -324,6 +352,15 @@ jobs:
         run: |
           kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=0 -n scas-prod
           kubectl get deploy scas-backend scas-frontend -n scas-prod
+
+      - name: Gather production failure diagnostics
+        if: failure()
+        run: |
+          echo "Production pod diagnostics"
+          kubectl get pods -n scas-prod
+          kubectl describe pods -n scas-prod
+          echo "Recent production events"
+          kubectl get events -n scas-prod --sort-by='.metadata.creationTimestamp' | tail -n 50 || true
 
       - name: Rollback production on failure
         if: failure()
