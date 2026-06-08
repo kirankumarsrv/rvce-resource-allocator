@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'ECR image tag to deploy (for example full commit SHA or latest)'
+        description: 'ECR image tag to deploy (for example full commit SHA or latest). Leave empty to deploy the workflow commit SHA.'
         required: false
-        default: 'latest'
+        default: ''
       skip_smoke_test:
         description: 'Skip smoke tests during deployment'
         required: false
