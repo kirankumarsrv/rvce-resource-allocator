@@ -37,14 +37,14 @@ jobs:
           if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_SHA" ]; then
             TAG="$WORKFLOW_RUN_SHA"
           elif [ -n "$INPUT_TAG" ]; then
-            TAG="$INPUT_TAG"
+            TAG="$(printf '%s' "$INPUT_TAG" | xargs)"
           else
             echo "ERROR: image_tag input is required for manual workflow_dispatch."
             exit 1
           fi
 
           echo "value=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Resolved image tag: $TAG"
+          echo "Resolved image tag: '$TAG'"
 
       - name: Check all workflows passed
         id: check
