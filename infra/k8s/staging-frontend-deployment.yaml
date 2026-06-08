@@ -17,10 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: hashicorp/http-echo:0.2.3
-          args:
-            - "-text=staging frontend"
-            - "-listen=:80"
+          image: 869657602774.dkr.ecr.ap-south-1.amazonaws.com/scas-frontend:latest
           ports:
             - containerPort: 80
 ---
@@ -35,4 +32,4 @@ spec:
   ports:
     - port: 80
       targetPort: 80
-  type: ClusterIP
+  type: LoadBalancer

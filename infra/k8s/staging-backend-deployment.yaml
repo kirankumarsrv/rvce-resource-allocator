@@ -17,10 +17,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: hashicorp/http-echo:0.2.3
-          args:
-            - "-text=staging backend"
-            - "-listen=:8080"
+          image: 869657602774.dkr.ecr.ap-south-1.amazonaws.com/scas-backend:latest
           ports:
             - containerPort: 8080
 ---
@@ -35,4 +32,4 @@ spec:
   ports:
     - port: 80
       targetPort: 8080
-  type: ClusterIP
+  type: LoadBalancer
