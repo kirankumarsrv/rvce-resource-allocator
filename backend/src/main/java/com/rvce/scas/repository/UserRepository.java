@@ -1,6 +1,7 @@
 package com.rvce.scas.repository;
 
 import com.rvce.scas.entity.User;
+import com.rvce.scas.security.EmailHashUtil;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -67,7 +68,19 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @param email the user's email address (any case variation accepted)
      * @return Optional containing the User if found, empty Optional otherwise
      */
-    Optional<User> findByEmailIgnoreCase(String email);
+    Optional<User> findByEmailHash(String emailHash);
+
+    @Query(value = "SELECT * FROM users WHERE lower(email) = lower(:email)", nativeQuery = true)
+    Optional<User> findByPlainEmailIgnoreCase(@Param("email") String email);
+
+    default Optional<User> findByEmailIgnoreCase(String email) {
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
+        String emailHash = EmailHashUtil.hashEmail(email);
+        Optional<User> user = findByEmailHash(emailHash);
+        return user.isPresent() ? user : findByPlainEmailIgnoreCase(email);
+    }
 
     /**
      * Finds users by a set of USN values.

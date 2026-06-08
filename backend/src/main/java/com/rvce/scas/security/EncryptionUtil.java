@@ -9,6 +9,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 /**
  * AES-256-GCM encryption utility used for transparent JPA column encryption.
@@ -20,6 +21,8 @@ public class EncryptionUtil {
     private static final int GCM_IV_LENGTH = 12; // 96-bit IV
     private static final int GCM_TAG_LENGTH = 128; // 128-bit tag
     private static final int AES_KEY_SIZE = 256;
+    private static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
+    private static final int MIN_BASE64_LENGTH = 24;
 
     private final SecretKey key;
 
@@ -59,8 +62,19 @@ public class EncryptionUtil {
         if (encryptedBase64 == null || encryptedBase64.isEmpty()) {
             return encryptedBase64;
         }
+
+        boolean looksLikeBase64 = encryptedBase64.length() >= MIN_BASE64_LENGTH
+                && encryptedBase64.length() % 4 == 0
+                && BASE64_PATTERN.matcher(encryptedBase64).matches();
         try {
             byte[] combined = Base64.getDecoder().decode(encryptedBase64);
+            if (combined.length < GCM_IV_LENGTH + 1) {
+                if (looksLikeBase64) {
+                    log.error("Encrypted value looks like base64 but is shorter than a valid AES-GCM payload.");
+                    throw new IllegalStateException("Decryption failed: invalid encrypted payload");
+                }
+                return encryptedBase64;
+            }
             byte[] iv = new byte[GCM_IV_LENGTH];
             System.arraycopy(combined, 0, iv, 0, iv.length);
             byte[] ciphertext = new byte[combined.length - iv.length];
@@ -69,9 +83,20 @@ public class EncryptionUtil {
             GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
             cipher.init(Cipher.DECRYPT_MODE, key, spec);
             return new String(cipher.doFinal(ciphertext));
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
+            if (looksLikeBase64) {
+                log.error("Failed to decrypt base64-like value. This may indicate a bad encryption key or corrupted encrypted data.", e);
+                throw new IllegalStateException("Decryption failed for base64-like value", e);
+            }
+            log.debug("Value is not encrypted data; returning raw plaintext.", e);
+            return encryptedBase64;
         } catch (Exception e) {
-            log.error("Failed to decrypt value", e);
-            throw new IllegalStateException("Decryption failed", e);
+            if (looksLikeBase64) {
+                log.error("Failed to decrypt base64-like value. This may indicate a bad encryption key or corrupted encrypted data.", e);
+                throw new IllegalStateException("Decryption failed for base64-like value", e);
+            }
+            log.debug("Value is not encrypted data; returning raw plaintext.", e);
+            return encryptedBase64;
         }
     }
 
