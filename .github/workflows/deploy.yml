@@ -5,6 +5,11 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'ECR image tag to deploy (for example full commit SHA or latest)'
+        required: false
+        default: 'latest'
   workflow_run:
     workflows: ["Backend CI", "Frontend CI"]
     types: [completed]
@@ -17,7 +22,27 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     outputs:
       should-deploy: ${{ steps.check.outputs.result }}
+      image_tag: ${{ steps.resolve-tag.outputs.value }}
     steps:
+      - name: Resolve image tag
+        id: resolve-tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TAG: ${{ github.event.inputs.image_tag }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          DEFAULT_SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_SHA" ]; then
+            TAG="$WORKFLOW_RUN_SHA"
+          elif [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="$DEFAULT_SHA"
+          fi
+
+          echo "value=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved image tag: $TAG"
+
       - name: Check all workflows passed
         id: check
         run: |
@@ -50,7 +75,7 @@ jobs:
 
       - name: Deploy to staging namespace
         env:
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           NAMESPACE: scas-staging
         run: |
@@ -122,7 +147,7 @@ jobs:
 
       - name: Blue-Green deploy to production
         env:
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           NAMESPACE: scas-prod
         run: |
