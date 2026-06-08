@@ -87,6 +87,11 @@ jobs:
             frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
             -n ${NAMESPACE}
 
+      - name: Scale staging deployments to 1
+        run: |
+          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=1 -n scas-staging
+          kubectl get deploy scas-backend scas-frontend -n scas-staging
+
       - name: Wait for rollout to complete
         run: |
           kubectl rollout status deployment/scas-backend \
@@ -171,6 +176,12 @@ jobs:
             exit 1
           fi
 
+      - name: Scale staging deployments back to 0
+        if: success()
+        run: |
+          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=0 -n scas-staging
+          kubectl get deploy scas-backend scas-frontend -n scas-staging
+
       - name: Notify on success
         if: success()
         run: |
@@ -220,6 +231,11 @@ jobs:
           kubectl set image deployment/scas-frontend \
             frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
             -n ${NAMESPACE}
+
+      - name: Scale production deployments to 1
+        run: |
+          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=1 -n scas-prod
+          kubectl get deploy scas-backend scas-frontend -n scas-prod
 
       - name: Wait for production rollout
         run: |
@@ -302,6 +318,12 @@ jobs:
             echo "Smoke test FAILED: health check returned ${HTTP_STATUS}"
             exit 1
           fi
+
+      - name: Scale production deployments back to 0
+        if: success()
+        run: |
+          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=0 -n scas-prod
+          kubectl get deploy scas-backend scas-frontend -n scas-prod
 
       - name: Rollback production on failure
         if: failure()
