@@ -33,14 +33,27 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           INPUT_TAG: ${{ github.event.inputs.image_tag || '' }}
           WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha || '' }}
+          WORKFLOW_RUN_PR_SHA: ${{ github.event.workflow_run.pull_requests[0].head.sha || '' }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
+          echo "EVENT_NAME=$EVENT_NAME"
+          echo "INPUT_TAG=$INPUT_TAG"
+          echo "WORKFLOW_RUN_SHA=$WORKFLOW_RUN_SHA"
+          echo "WORKFLOW_RUN_PR_SHA=$WORKFLOW_RUN_PR_SHA"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+
           if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_SHA" ]; then
             TAG="$WORKFLOW_RUN_SHA"
+            SOURCE="workflow_run.head_sha"
+          elif [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_PR_SHA" ]; then
+            TAG="$WORKFLOW_RUN_PR_SHA"
+            SOURCE="workflow_run.pull_requests[0].head.sha"
           elif [ -n "$INPUT_TAG" ]; then
             TAG="$(printf '%s' "$INPUT_TAG" | xargs)"
+            SOURCE="workflow_dispatch.image_tag"
           elif [ -n "$GITHUB_SHA" ]; then
             TAG="$GITHUB_SHA"
+            SOURCE="github.sha"
             echo "WARNING: image_tag was not provided; falling back to github.sha: $TAG"
           else
             echo "ERROR: image_tag cannot be resolved."
@@ -48,7 +61,7 @@ jobs:
           fi
 
           echo "value=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Resolved image tag: '$TAG'"
+          echo "Resolved image tag: '$TAG' from $SOURCE"
 
       - name: Check all workflows passed
         id: check
