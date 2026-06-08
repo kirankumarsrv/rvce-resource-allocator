@@ -173,6 +173,7 @@ jobs:
 
       - name: Validate staging image tag
         run: |
+          echo "DEBUG: staging IMAGE_TAG=${IMAGE_TAG}"
           if [ -z "${IMAGE_TAG}" ]; then
             echo "ERROR: IMAGE_TAG is empty. Deployment cannot continue."
             exit 1
@@ -195,7 +196,7 @@ jobs:
   deploy-production:
     name: Deploy to Production (Manual Approval)
     runs-on: ubuntu-22.04
-    needs: deploy-staging
+    needs: [deploy-staging, check-all-passed]
     env:
       SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
       IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
@@ -224,6 +225,7 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           NAMESPACE: scas-prod
         run: |
+          echo "DEBUG: production IMAGE_TAG=${IMAGE_TAG}"
           if [ -z "${IMAGE_TAG}" ]; then
             echo "ERROR: IMAGE_TAG is empty. Production deployment cannot continue."
             exit 1
