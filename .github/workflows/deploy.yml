@@ -43,10 +43,10 @@ jobs:
           audience: sts.amazonaws.com
 
       - name: Update kubeconfig for EKS
+        env:
+          AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          aws eks update-kubeconfig \
-            --region ${{ secrets.AWS_REGION }} \
-            --name scas-cluster
+          aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
 
       - name: Deploy to staging namespace
         env:
@@ -116,7 +116,9 @@ jobs:
           audience: sts.amazonaws.com
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name scas-cluster
+        env:
+          AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
+        run: aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
 
       - name: Blue-Green deploy to production
         env:
