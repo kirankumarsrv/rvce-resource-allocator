@@ -1,4 +1,24 @@
 name: Deploy to Kubernetes
+# Pre-deployment checklist:
+# 1. cd rvce-resource-allocator
+# 2. Optional: create a branch for your fixes
+#    git checkout -b fix/k8s-deploy
+# 3. Inspect workflow and manifests
+#    ls .github/workflows
+#    ls infra/k8s
+# 4. Apply staging manifests
+#    kubectl apply -f infra/k8s/staging-backend-deployment.yaml -n scas-staging
+#    kubectl apply -f infra/k8s/staging-frontend-deployment.yaml -n scas-staging
+#    kubectl apply -f infra/k8s/staging-ingress.yaml -n scas-staging
+# 5. Wait for rollout
+#    kubectl rollout status deployment/scas-backend -n scas-staging --timeout=5m
+#    kubectl rollout status deployment/scas-frontend -n scas-staging --timeout=5m
+# 6. Verify staging resources
+#    kubectl get deployment scas-backend scas-frontend -n scas-staging -o yaml
+#    kubectl get pods -n scas-staging
+# 7. Restart if needed
+#    kubectl rollout restart deployment/scas-backend -n scas-staging
+#    kubectl rollout restart deployment/scas-frontend -n scas-staging
 permissions:
   id-token: write
   contents: read
@@ -69,46 +89,10 @@ jobs:
           echo "Deploying commit: ${{ github.sha }}"
           echo "result=true" >> $GITHUB_OUTPUT
 
-  prepare-deploy:
-    name: Prepare Staging Deployment
-    runs-on: ubuntu-22.04
-    needs: check-all-passed
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (Assume role via OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          audience: sts.amazonaws.com
-
-      - name: Update kubeconfig for EKS
-        env:
-          AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
-
-      - name: Apply staging manifests
-        run: |
-          kubectl apply -f infra/k8s/staging-backend-deployment.yaml -n scas-staging
-          kubectl apply -f infra/k8s/staging-frontend-deployment.yaml -n scas-staging
-          kubectl apply -f infra/k8s/staging-ingress.yaml -n scas-staging
-
-      - name: Wait for staging rollout
-        run: |
-          kubectl rollout status deployment/scas-backend -n scas-staging --timeout=5m
-          kubectl rollout status deployment/scas-frontend -n scas-staging --timeout=5m
-
-      - name: Verify staging resources
-        run: |
-          kubectl get deployment scas-backend scas-frontend -n scas-staging -o yaml
-          kubectl get pods -n scas-staging
-
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-22.04
-    needs: [check-all-passed, prepare-deploy]
+    needs: check-all-passed
     env:
       SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
       IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
@@ -208,8 +192,6 @@ jobs:
         run: echo "Skipping staging smoke test because skip_smoke_test=true"
 
       - name: Validate staging image tag
-        env:
-          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
         run: |
           echo "DEBUG: staging IMAGE_TAG=${IMAGE_TAG}"
           if [ -z "${IMAGE_TAG}" ]; then
