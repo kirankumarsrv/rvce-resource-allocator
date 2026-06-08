@@ -35,9 +35,11 @@ jobs:
             TAG="$WORKFLOW_RUN_SHA"
           elif [ -n "$INPUT_TAG" ]; then
             TAG="$INPUT_TAG"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="latest"
+            echo "No image_tag provided for manual dispatch; using 'latest' and validating it exists."
           else
-            echo "ERROR: image_tag input is required for manual workflow_dispatch."
-            echo "Provide a concrete ECR image tag, such as a commit SHA or latest if it exists."
+            echo "ERROR: image_tag input is required."
             exit 1
           fi
 
