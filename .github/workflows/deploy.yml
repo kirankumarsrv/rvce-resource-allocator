@@ -104,8 +104,22 @@ jobs:
 
           if [ "$SERVICE_TYPE" != "LoadBalancer" ]; then
             echo "Service is not LoadBalancer; using port-forward instead..."
-            kubectl port-forward svc/scas-backend 8080:80 -n scas-staging &
-            sleep 3
+            kubectl port-forward svc/scas-backend 8080:80 -n scas-staging > /tmp/portforward.log 2>&1 &
+            PORT_FORWARD_PID=$!
+            for i in {1..15}; do
+              if bash -c '</dev/tcp/127.0.0.1/8080' >/dev/null 2>&1; then
+                echo "Port-forward is ready"
+                break
+              fi
+              echo "Waiting for local port-forward to become available..."
+              sleep 1
+            done
+            if ! bash -c '</dev/tcp/127.0.0.1/8080' >/dev/null 2>&1; then
+              echo "Port-forward did not become ready. Last port-forward log:"
+              tail -n 20 /tmp/portforward.log || true
+              kill "$PORT_FORWARD_PID" || true
+              exit 1
+            fi
             LB_IP="127.0.0.1:8080"
           else
             echo "Waiting for LoadBalancer endpoint..."
@@ -122,8 +136,22 @@ jobs:
 
             if [ -z "$LB_IP" ]; then
               echo "LoadBalancer IP not available, using port-forward instead..."
-              kubectl port-forward svc/scas-backend 8080:80 -n scas-staging &
-              sleep 3
+              kubectl port-forward svc/scas-backend 8080:80 -n scas-staging > /tmp/portforward.log 2>&1 &
+              PORT_FORWARD_PID=$!
+              for i in {1..15}; do
+                if bash -c '</dev/tcp/127.0.0.1/8080' >/dev/null 2>&1; then
+                  echo "Port-forward is ready"
+                  break
+                fi
+                echo "Waiting for local port-forward to become available..."
+                sleep 1
+              done
+              if ! bash -c '</dev/tcp/127.0.0.1/8080' >/dev/null 2>&1; then
+                echo "Port-forward did not become ready. Last port-forward log:"
+                tail -n 20 /tmp/portforward.log || true
+                kill "$PORT_FORWARD_PID" || true
+                exit 1
+              fi
               LB_IP="127.0.0.1:8080"
             fi
           fi
@@ -208,8 +236,22 @@ jobs:
 
           if [ "$SERVICE_TYPE" != "LoadBalancer" ]; then
             echo "Service is not LoadBalancer; using port-forward instead..."
-            kubectl port-forward svc/scas-backend 8080:80 -n scas-prod &
-            sleep 3
+            kubectl port-forward svc/scas-backend 8080:80 -n scas-prod > /tmp/portforward.log 2>&1 &
+            PORT_FORWARD_PID=$!
+            for i in {1..15}; do
+              if bash -c '</dev/tcp/127.0.0.1/8080' >/dev/null 2>&1; then
+                echo "Port-forward is ready"
+                break
+              fi
+              echo "Waiting for local port-forward to become available..."
+              sleep 1
+            done
+            if ! bash -c '</dev/tcp/127.0.0.1/8080' >/dev/null 2>&1; then
+              echo "Port-forward did not become ready. Last port-forward log:"
+              tail -n 20 /tmp/portforward.log || true
+              kill "$PORT_FORWARD_PID" || true
+              exit 1
+            fi
             LB_IP="127.0.0.1:8080"
           else
             echo "Waiting for LoadBalancer endpoint..."
@@ -226,8 +268,22 @@ jobs:
 
             if [ -z "$LB_IP" ]; then
               echo "LoadBalancer IP not available, using port-forward instead..."
-              kubectl port-forward svc/scas-backend 8080:80 -n scas-prod &
-              sleep 3
+              kubectl port-forward svc/scas-backend 8080:80 -n scas-prod > /tmp/portforward.log 2>&1 &
+              PORT_FORWARD_PID=$!
+              for i in {1..15}; do
+                if bash -c '</dev/tcp/127.0.0.1/8080' >/dev/null 2>&1; then
+                  echo "Port-forward is ready"
+                  break
+                fi
+                echo "Waiting for local port-forward to become available..."
+                sleep 1
+              done
+              if ! bash -c '</dev/tcp/127.0.0.1/8080' >/dev/null 2>&1; then
+                echo "Port-forward did not become ready. Last port-forward log:"
+                tail -n 20 /tmp/portforward.log || true
+                kill "$PORT_FORWARD_PID" || true
+                exit 1
+              fi
               LB_IP="127.0.0.1:8080"
             fi
           fi
