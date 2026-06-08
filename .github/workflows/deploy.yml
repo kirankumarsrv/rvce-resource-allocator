@@ -94,6 +94,12 @@ jobs:
           kubectl rollout status deployment/scas-frontend \
             -n scas-staging --timeout=5m
 
+      - name: Ensure staging ingress exists
+        run: |
+          kubectl apply -f infra/k8s/staging-ingress.yaml
+          kubectl get ingress -n scas-staging
+          kubectl describe ingress scas-staging-ingress -n scas-staging || true
+
       - name: Run smoke tests against staging
         run: |
           STAGING_URL="https://staging.scas.rvce.edu.in"
@@ -175,6 +181,12 @@ jobs:
         run: |
           kubectl rollout status deployment/scas-backend -n scas-prod --timeout=5m
           kubectl rollout status deployment/scas-frontend -n scas-prod --timeout=5m
+
+      - name: Ensure production ingress exists
+        run: |
+          kubectl apply -f infra/k8s/production-ingress.yaml
+          kubectl get ingress -n scas-prod
+          kubectl describe ingress scas-prod-ingress -n scas-prod || true
 
       - name: Production smoke test
         run: |
