@@ -31,15 +31,19 @@ jobs:
         id: resolve-tag
         env:
           EVENT_NAME: ${{ github.event_name }}
-          INPUT_TAG: ${{ github.event.inputs.image_tag }}
-          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          INPUT_TAG: ${{ github.event.inputs.image_tag || '' }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha || '' }}
+          GITHUB_SHA: ${{ github.sha }}
         run: |
           if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_SHA" ]; then
             TAG="$WORKFLOW_RUN_SHA"
           elif [ -n "$INPUT_TAG" ]; then
             TAG="$(printf '%s' "$INPUT_TAG" | xargs)"
+          elif [ -n "$GITHUB_SHA" ]; then
+            TAG="$GITHUB_SHA"
+            echo "WARNING: image_tag was not provided; falling back to github.sha: $TAG"
           else
-            echo "ERROR: image_tag input is required for manual workflow_dispatch."
+            echo "ERROR: image_tag cannot be resolved."
             exit 1
           fi
 
