@@ -10,6 +10,10 @@ on:
         description: 'ECR image tag to deploy (for example full commit SHA or latest)'
         required: false
         default: 'latest'
+      skip_smoke_test:
+        description: 'Skip smoke tests during deployment'
+        required: false
+        default: 'false'
   workflow_run:
     workflows: ["Backend CI", "Frontend CI"]
     types: [completed]
@@ -53,6 +57,8 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-22.04
     needs: check-all-passed
+    env:
+      SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
     environment:
       name: staging
       url: https://staging.scas.rvce.edu.in
@@ -87,6 +93,11 @@ jobs:
             frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
             -n ${NAMESPACE}
 
+      - name: Scale staging deployments to 1 for rollout
+        run: |
+          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=1 -n scas-staging
+          kubectl get deploy scas-backend scas-frontend -n scas-staging
+
       - name: Wait for rollout to complete
         run: |
           kubectl rollout status deployment/scas-backend \
@@ -101,6 +112,7 @@ jobs:
           kubectl describe ingress scas-staging-ingress -n scas-staging || true
 
       - name: Run smoke tests against staging
+        if: ${{ env.SKIP_SMOKE_TEST != 'true' }}
         run: |
           STAGING_URL="https://staging.scas.rvce.edu.in"
           sleep 30
@@ -127,6 +139,16 @@ jobs:
 
           echo "Smoke test PASSED: health check returned 200"
 
+      - name: Skip staging smoke test
+        if: ${{ env.SKIP_SMOKE_TEST == 'true' }}
+        run: echo "Skipping staging smoke test because skip_smoke_test=true"
+
+      - name: Scale staging deployments back to 0 on success
+        if: success()
+        run: |
+          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=0 -n scas-staging
+          kubectl get deploy scas-backend scas-frontend -n scas-staging
+
       - name: Notify on success
         if: success()
         run: |
@@ -144,6 +166,8 @@ jobs:
     name: Deploy to Production (Manual Approval)
     runs-on: ubuntu-22.04
     needs: deploy-staging
+    env:
+      SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
     environment:
       name: production
       url: https://scas.rvce.edu.in
@@ -189,6 +213,7 @@ jobs:
           kubectl describe ingress scas-production-ingress -n scas-prod || true
 
       - name: Production smoke test
+        if: ${{ env.SKIP_SMOKE_TEST != 'true' }}
         run: |
           PRODUCTION_URL="https://scas.rvce.edu.in"
 
@@ -201,6 +226,10 @@ jobs:
           echo "HTTP_STATUS=${HTTP_STATUS}"
           cat /tmp/production-health.txt || true
           [ "$HTTP_STATUS" = "200" ] || exit 1
+
+      - name: Skip production smoke test
+        if: ${{ env.SKIP_SMOKE_TEST == 'true' }}
+        run: echo "Skipping production smoke test because skip_smoke_test=true"
 
       - name: Rollback production on failure
         if: failure()
