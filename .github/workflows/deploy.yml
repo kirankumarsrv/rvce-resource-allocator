@@ -45,7 +45,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     outputs:
       should-deploy: ${{ steps.check.outputs.result }}
-      image_tag: ${{ steps.resolve-tag.outputs.value }}
+      image_tag: ${{ steps.resolve-tag.outputs.image_tag }}
     steps:
       - name: Resolve image tag
         id: resolve-tag
@@ -80,7 +80,7 @@ jobs:
             exit 1
           fi
 
-          echo "value=$TAG" >> "$GITHUB_OUTPUT"
+          echo "image_tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "Resolved image tag: '$TAG' from $SOURCE"
 
       - name: Check all workflows passed
@@ -95,7 +95,7 @@ jobs:
     needs: check-all-passed
     env:
       SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
-      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
+      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag || github.event.inputs.image_tag || github.sha }}
     environment:
       name: staging
       url: https://staging.scas.rvce.edu.in
@@ -116,9 +116,18 @@ jobs:
         run: |
           aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
 
+      - name: Validate staging image tag
+        run: |
+          echo "DEBUG: staging IMAGE_TAG=${IMAGE_TAG}"
+          if [ -z "${IMAGE_TAG}" ]; then
+            echo "ERROR: IMAGE_TAG is empty. Deployment cannot continue."
+            exit 1
+          fi
+          echo "Deploying staging images with tag: '${IMAGE_TAG}'"
+
       - name: Deploy to staging namespace
         env:
-          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
+          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag || github.event.inputs.image_tag || github.sha }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           NAMESPACE: scas-staging
         run: |
@@ -191,15 +200,6 @@ jobs:
         if: ${{ env.SKIP_SMOKE_TEST == 'true' }}
         run: echo "Skipping staging smoke test because skip_smoke_test=true"
 
-      - name: Validate staging image tag
-        run: |
-          echo "DEBUG: staging IMAGE_TAG=${IMAGE_TAG}"
-          if [ -z "${IMAGE_TAG}" ]; then
-            echo "ERROR: IMAGE_TAG is empty. Deployment cannot continue."
-            exit 1
-          fi
-          echo "Deploying staging images with tag: '${IMAGE_TAG}'"
-
       - name: Notify on success
         if: success()
         run: |
@@ -219,7 +219,7 @@ jobs:
     needs: [deploy-staging, check-all-passed]
     env:
       SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
-      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
+      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag || github.event.inputs.image_tag || github.sha }}
     environment:
       name: production
       url: https://scas.rvce.edu.in
@@ -241,7 +241,7 @@ jobs:
 
       - name: Deploy to production namespace
         env:
-          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
+          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag || github.event.inputs.image_tag || github.sha }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           NAMESPACE: scas-prod
         run: |
