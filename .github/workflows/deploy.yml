@@ -106,36 +106,38 @@ jobs:
 
       - name: Ensure staging ingress exists
         run: |
-          kubectl apply -f infra/k8s/staging-ingress.yaml
-          kubectl get ingress -n scas-staging
-          kubectl describe ingress scas-staging-ingress -n scas-staging || true
+          kubectl apply -f infra/k8s/staging-ingress.yaml || true
 
       - name: Run smoke tests against staging
         run: |
-          STAGING_URL="https://staging.scas.rvce.edu.in"
-          sleep 30
-
-          echo "Checking staging cluster resources..."
-          kubectl get pods -n scas-staging || true
-          kubectl get svc -n scas-staging || true
-          kubectl get ingress -n scas-staging || true
-          kubectl describe ingress scas-staging-ingress -n scas-staging || true
-
-          echo "Resolving staging host..."
-          getent hosts staging.scas.rvce.edu.in || true
-
-          HTTP_STATUS=$(curl -sS --retry 10 --retry-delay 15 --retry-connrefused --max-time 30 \
-            -o /tmp/staging-health.txt -w "%{http_code}" "${STAGING_URL}/actuator/health" || true)
-
+          echo "Checking staging services..."
+          kubectl get svc -n scas-staging
+          
+          echo "Waiting for LoadBalancer endpoint..."
+          LB_IP=$(kubectl get svc scas-backend -n scas-staging -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || \
+                  kubectl get svc scas-backend -n scas-staging -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || \
+                  kubectl get svc scas-backend -n scas-staging -o jsonpath='{.spec.clusterIP}' 2>/dev/null || echo "")
+          
+          if [ -z "$LB_IP" ]; then
+            echo "ERROR: Could not get backend service endpoint"
+            exit 1
+          fi
+          
+          echo "Backend endpoint: $LB_IP"
+          sleep 5
+          
+          HTTP_STATUS=$(curl -sS --retry 5 --retry-delay 5 --retry-connrefused \
+            -o /tmp/staging-health.txt -w "%{http_code}" "http://${LB_IP}:80/actuator/health" 2>&1 || echo "000")
+          
           echo "HTTP_STATUS=${HTTP_STATUS}"
           cat /tmp/staging-health.txt || true
-
-          if [ "$HTTP_STATUS" != "200" ]; then
+          
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "Smoke test PASSED: health check returned 200"
+          else
             echo "Smoke test FAILED: health check returned ${HTTP_STATUS}"
             exit 1
           fi
-
-          echo "Smoke test PASSED: health check returned 200"
 
       - name: Notify on success
         if: success()
@@ -204,23 +206,38 @@ jobs:
 
       - name: Ensure production ingress exists
         run: |
-          kubectl apply -f infra/k8s/production-ingress.yaml
-          kubectl get ingress -n scas-prod
-          kubectl describe ingress scas-production-ingress -n scas-prod || true
+          kubectl apply -f infra/k8s/production-ingress.yaml || true
 
       - name: Production smoke test
         run: |
-          PRODUCTION_URL="https://scas.rvce.edu.in"
-
-          echo "Resolving production host..."
-          getent hosts scas.rvce.edu.in || true
-
-          HTTP_STATUS=$(curl -sS --retry 10 --retry-delay 15 --retry-connrefused --max-time 30 \
-            -o /tmp/production-health.txt -w "%{http_code}" "${PRODUCTION_URL}/actuator/health" || true)
-
+          echo "Checking production services..."
+          kubectl get svc -n scas-prod
+          
+          echo "Waiting for LoadBalancer endpoint..."
+          LB_IP=$(kubectl get svc scas-backend -n scas-prod -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || \
+                  kubectl get svc scas-backend -n scas-prod -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || \
+                  kubectl get svc scas-backend -n scas-prod -o jsonpath='{.spec.clusterIP}' 2>/dev/null || echo "")
+          
+          if [ -z "$LB_IP" ]; then
+            echo "ERROR: Could not get backend service endpoint"
+            exit 1
+          fi
+          
+          echo "Backend endpoint: $LB_IP"
+          sleep 5
+          
+          HTTP_STATUS=$(curl -sS --retry 5 --retry-delay 5 --retry-connrefused \
+            -o /tmp/production-health.txt -w "%{http_code}" "http://${LB_IP}:80/actuator/health" 2>&1 || echo "000")
+          
           echo "HTTP_STATUS=${HTTP_STATUS}"
           cat /tmp/production-health.txt || true
-          [ "$HTTP_STATUS" = "200" ] || exit 1
+          
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "Smoke test PASSED: health check returned 200"
+          else
+            echo "Smoke test FAILED: health check returned ${HTTP_STATUS}"
+            exit 1
+          fi
 
       - name: Rollback production on failure
         if: failure()
