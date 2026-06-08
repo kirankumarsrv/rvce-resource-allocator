@@ -69,10 +69,46 @@ jobs:
           echo "Deploying commit: ${{ github.sha }}"
           echo "result=true" >> $GITHUB_OUTPUT
 
+  prepare-deploy:
+    name: Prepare Staging Deployment
+    runs-on: ubuntu-22.04
+    needs: check-all-passed
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (Assume role via OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Update kubeconfig for EKS
+        env:
+          AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
+
+      - name: Apply staging manifests
+        run: |
+          kubectl apply -f infra/k8s/staging-backend-deployment.yaml -n scas-staging
+          kubectl apply -f infra/k8s/staging-frontend-deployment.yaml -n scas-staging
+          kubectl apply -f infra/k8s/staging-ingress.yaml -n scas-staging
+
+      - name: Wait for staging rollout
+        run: |
+          kubectl rollout status deployment/scas-backend -n scas-staging --timeout=5m
+          kubectl rollout status deployment/scas-frontend -n scas-staging --timeout=5m
+
+      - name: Verify staging resources
+        run: |
+          kubectl get deployment scas-backend scas-frontend -n scas-staging -o yaml
+          kubectl get pods -n scas-staging
+
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-22.04
-    needs: check-all-passed
+    needs: [check-all-passed, prepare-deploy]
     env:
       SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
       IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
@@ -245,7 +281,7 @@ jobs:
 
       - name: Ensure production deployments are scaled up
         run: |
-          kubectl scale deployment/scas-backend scas-frontend --replicas=1 -n scas-prod
+          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=1 -n scas-prod
           kubectl get deploy scas-backend scas-frontend -n scas-prod
 
       - name: Wait for production rollout
