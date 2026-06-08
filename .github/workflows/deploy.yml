@@ -98,9 +98,21 @@ jobs:
         run: |
           STAGING_URL="https://staging.scas.rvce.edu.in"
           sleep 30
-          
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${STAGING_URL}/actuator/health")
+
+          echo "Checking staging cluster resources..."
+          kubectl get pods -n scas-staging || true
+          kubectl get svc -n scas-staging || true
+          kubectl get ingress -n scas-staging || true
+          kubectl describe ingress scas-staging-ingress -n scas-staging || true
+
+          echo "Resolving staging host..."
+          getent hosts staging.scas.rvce.edu.in || true
+
+          HTTP_STATUS=$(curl -sS --retry 10 --retry-delay 15 --retry-connrefused --max-time 30 \
+            -o /tmp/staging-health.txt -w "%{http_code}" "${STAGING_URL}/actuator/health" || true)
+
+          echo "HTTP_STATUS=${HTTP_STATUS}"
+          cat /tmp/staging-health.txt || true
 
           if [ "$HTTP_STATUS" != "200" ]; then
             echo "Smoke test FAILED: health check returned ${HTTP_STATUS}"
@@ -166,8 +178,16 @@ jobs:
 
       - name: Production smoke test
         run: |
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "https://scas.rvce.edu.in/actuator/health")
+          PRODUCTION_URL="https://scas.rvce.edu.in"
+
+          echo "Resolving production host..."
+          getent hosts scas.rvce.edu.in || true
+
+          HTTP_STATUS=$(curl -sS --retry 10 --retry-delay 15 --retry-connrefused --max-time 30 \
+            -o /tmp/production-health.txt -w "%{http_code}" "${PRODUCTION_URL}/actuator/health" || true)
+
+          echo "HTTP_STATUS=${HTTP_STATUS}"
+          cat /tmp/production-health.txt || true
           [ "$HTTP_STATUS" = "200" ] || exit 1
 
       - name: Rollback production on failure
