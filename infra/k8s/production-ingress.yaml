@@ -3,7 +3,10 @@ kind: Ingress
 metadata:
   name: scas-production-ingress
   namespace: scas-prod
+  annotations:
+    kubernetes.io/ingress.class: nginx
 spec:
+  ingressClassName: nginx
   rules:
     - host: scas.rvce.edu.in
       http:

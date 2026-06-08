@@ -94,6 +94,14 @@ jobs:
           kubectl rollout status deployment/scas-frontend \
             -n scas-staging --timeout=5m
 
+      - name: Ensure nginx ingress controller is installed
+        run: |
+          if ! kubectl get namespace ingress-nginx >/dev/null 2>&1; then
+            kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.6/deploy/static/provider/cloud/deploy.yaml
+          fi
+          kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=5m
+          kubectl get svc ingress-nginx-controller -n ingress-nginx
+
       - name: Ensure staging ingress exists
         run: |
           kubectl apply -f infra/k8s/staging-ingress.yaml
@@ -181,6 +189,14 @@ jobs:
         run: |
           kubectl rollout status deployment/scas-backend -n scas-prod --timeout=5m
           kubectl rollout status deployment/scas-frontend -n scas-prod --timeout=5m
+
+      - name: Ensure nginx ingress controller is installed
+        run: |
+          if ! kubectl get namespace ingress-nginx >/dev/null 2>&1; then
+            kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.6/deploy/static/provider/cloud/deploy.yaml
+          fi
+          kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=5m
+          kubectl get svc ingress-nginx-controller -n ingress-nginx
 
       - name: Ensure production ingress exists
         run: |
