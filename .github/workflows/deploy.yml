@@ -80,14 +80,17 @@ jobs:
         run: |
           aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
 
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Verify ECR image tags exist for staging
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
         run: |
           echo "Verifying ECR images for tag: ${IMAGE_TAG}"
-          aws ecr describe-images --repository-name scas-backend --image-ids imageTag=${IMAGE_TAG} --region "$AWS_REGION"
-          aws ecr describe-images --repository-name scas-frontend --image-ids imageTag=${IMAGE_TAG} --region "$AWS_REGION"
+          docker manifest inspect "${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}"
+          docker manifest inspect "${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}"
 
       - name: Deploy to staging namespace
         env:
@@ -244,14 +247,17 @@ jobs:
           AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
         run: aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
 
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Verify ECR image tags exist for production
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
         run: |
           echo "Verifying ECR images for tag: ${IMAGE_TAG}"
-          aws ecr describe-images --repository-name scas-backend --image-ids imageTag=${IMAGE_TAG} --region "$AWS_REGION"
-          aws ecr describe-images --repository-name scas-frontend --image-ids imageTag=${IMAGE_TAG} --region "$AWS_REGION"
+          docker manifest inspect "${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}"
+          docker manifest inspect "${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}"
 
       - name: Blue-Green deploy to production
         env:
