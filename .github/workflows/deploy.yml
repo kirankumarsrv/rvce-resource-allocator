@@ -10,6 +10,10 @@ on:
         description: 'ECR image tag to deploy (for example full commit SHA or latest)'
         required: false
         default: ''
+      skip_smoke_test:
+        description: 'Set to true to skip smoke tests during manual deploy.'
+        required: false
+        default: 'false'
   workflow_run:
     workflows: ["Backend CI", "Frontend CI"]
     types: [completed]
@@ -82,8 +86,8 @@ jobs:
           IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
         run: |
           echo "Verifying ECR images for tag: ${IMAGE_TAG}"
-          aws ecr describe-images --repository-name scas-backend --image-ids imageTag=${IMAGE_TAG}
-          aws ecr describe-images --repository-name scas-frontend --image-ids imageTag=${IMAGE_TAG}
+          aws ecr describe-images --repository-name scas-backend --image-ids imageTag=${IMAGE_TAG} --region "$AWS_REGION"
+          aws ecr describe-images --repository-name scas-frontend --image-ids imageTag=${IMAGE_TAG} --region "$AWS_REGION"
 
       - name: Deploy to staging namespace
         env:
@@ -112,6 +116,7 @@ jobs:
             -n scas-staging --timeout=5m
 
       - name: Run smoke tests against staging
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.skip_smoke_test != 'true' }}
         run: |
           echo "Checking staging services..."
           kubectl get svc -n scas-staging
@@ -245,8 +250,8 @@ jobs:
           IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
         run: |
           echo "Verifying ECR images for tag: ${IMAGE_TAG}"
-          aws ecr describe-images --repository-name scas-backend --image-ids imageTag=${IMAGE_TAG}
-          aws ecr describe-images --repository-name scas-frontend --image-ids imageTag=${IMAGE_TAG}
+          aws ecr describe-images --repository-name scas-backend --image-ids imageTag=${IMAGE_TAG} --region "$AWS_REGION"
+          aws ecr describe-images --repository-name scas-frontend --image-ids imageTag=${IMAGE_TAG} --region "$AWS_REGION"
 
       - name: Blue-Green deploy to production
         env:
@@ -273,6 +278,7 @@ jobs:
           kubectl rollout status deployment/scas-frontend -n scas-prod --timeout=5m
 
       - name: Production smoke test
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.skip_smoke_test != 'true' }}
         run: |
           echo "Checking production services..."
           kubectl get svc -n scas-prod
