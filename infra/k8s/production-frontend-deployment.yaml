@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scas-frontend
+  namespace: scas-prod
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: scas-frontend
+  template:
+    metadata:
+      labels:
+        app: scas-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: hashicorp/http-echo:0.2.3
+          args:
+            - "-text=production frontend"
+            - "-listen=:80"
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scas-frontend
+  namespace: scas-prod
+spec:
+  selector:
+    app: scas-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
