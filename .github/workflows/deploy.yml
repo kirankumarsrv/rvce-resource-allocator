@@ -208,6 +208,8 @@ jobs:
         run: echo "Skipping staging smoke test because skip_smoke_test=true"
 
       - name: Validate staging image tag
+        env:
+          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
         run: |
           echo "DEBUG: staging IMAGE_TAG=${IMAGE_TAG}"
           if [ -z "${IMAGE_TAG}" ]; then
