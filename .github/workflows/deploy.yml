@@ -75,6 +75,7 @@ jobs:
     needs: check-all-passed
     env:
       SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
+      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
     environment:
       name: staging
       url: https://staging.scas.rvce.edu.in
@@ -197,6 +198,7 @@ jobs:
     needs: deploy-staging
     env:
       SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
+      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
     environment:
       name: production
       url: https://scas.rvce.edu.in
