@@ -1,5 +1,9 @@
 # Kubernetes Bootstrap for rvce-resource-allocator
 
+> Note: These Kubernetes manifests live in the `deployment` branch. They are not present on `main` until this branch is merged.
+>
+> If you checkout `main`, the path `infra/k8s/production-frontend-deployment.yaml` will not exist.
+
 This folder contains a minimal Kubernetes bootstrap pack for your EKS cluster. It creates the basic staging and production deployments, services, and ingress rules required for your GitHub Actions deployment workflow.
 
 ## What is included
