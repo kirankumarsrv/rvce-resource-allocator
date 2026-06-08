@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: hashicorp/http-echo:0.2.3
+          image: 869657602774.dkr.ecr.ap-south-1.amazonaws.com/scas-frontend:latest
           ports:
             - containerPort: 80
 ---
