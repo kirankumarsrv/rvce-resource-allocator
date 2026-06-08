@@ -18,9 +18,6 @@ spec:
       containers:
         - name: frontend
           image: hashicorp/http-echo:0.2.3
-          args:
-            - "-text=staging frontend"
-            - "-listen=:80"
           ports:
             - containerPort: 80
 ---

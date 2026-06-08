@@ -18,9 +18,6 @@ spec:
       containers:
         - name: backend
           image: hashicorp/http-echo:0.2.3
-          args:
-            - "-text=production backend"
-            - "-listen=:8080"
           ports:
             - containerPort: 8080
 ---
