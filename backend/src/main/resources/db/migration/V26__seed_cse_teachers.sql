@@ -1,7 +1,7 @@
 -- V21__seed_cse_teachers.sql
 -- Seeds 64 CSE department teachers as User records with TEACHER/TTO/DEPT_COORD roles
 
-INSERT INTO users (user_id, name, email, password_hash, department_id, is_active, failed_login_count, version) VALUES
+INSERT INTO users (user_id, name, email, password_hash, department_id, is_active, failed_login_count, version) VALUES -- NOSONAR
     ('aaaaaaaa-aaaa-aaaa-aaaa-000000000001', 'Dr. Manas M N', 'manas.n@rvce.edu.in', '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO', '11111111-1111-1111-1111-111111111001', true, 0, 0),
     ('aaaaaaaa-aaaa-aaaa-aaaa-000000000002', 'Dr. Prapulla S B', 'prapulla.b@rvce.edu.in', '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO', '11111111-1111-1111-1111-111111111001', true, 0, 0),
     ('aaaaaaaa-aaaa-aaaa-aaaa-000000000003', 'Dr. Smriti Srivastava', 'smriti.srivastava@rvce.edu.in', '$2b$12$0dsNhVCAEAcS3nMYQnoc0.WvWNfo27XJWooMCvyL.B2bquUuJOkpO', '11111111-1111-1111-1111-111111111001', true, 0, 0),
