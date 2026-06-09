@@ -1,7 +1,13 @@
 package com.rvce.scas.repository;
 
 import com.rvce.scas.entity.User;
+<<<<<<< HEAD
 import com.rvce.scas.security.EmailHashUtil;
+=======
+import com.rvce.scas.entity.UserRole;
+import com.rvce.scas.security.UserDetailsServiceImpl;
+
+>>>>>>> 77e966c (feat: Layer 3 complete — real teacher UUIDs, 64 CSE teachers seeded)
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -68,6 +74,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @param email the user's email address (any case variation accepted)
      * @return Optional containing the User if found, empty Optional otherwise
      */
+<<<<<<< HEAD
     Optional<User> findByEmailHash(String emailHash);
 
     @Query(value = "SELECT * FROM users WHERE lower(email) = lower(:email)", nativeQuery = true)
@@ -82,6 +89,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
         return user.isPresent() ? user : findByPlainEmailIgnoreCase(email);
     }
 
+=======
+    Optional<User> findByEmailIgnoreCase(String email);
+>>>>>>> 77e966c (feat: Layer 3 complete — real teacher UUIDs, 64 CSE teachers seeded)
     /**
      * Finds users by a set of USN values.
      *
@@ -92,6 +102,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @return List of User entities matching the provided USNs
      */
     List<User> findByUsnIn(Set<String> usns);
+
+    Optional<User> findByName(String name);
 
     @Query("""
         SELECT DISTINCT u FROM User u

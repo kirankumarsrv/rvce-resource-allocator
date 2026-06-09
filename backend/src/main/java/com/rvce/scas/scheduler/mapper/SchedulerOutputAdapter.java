@@ -21,26 +21,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 @Component
 public class SchedulerOutputAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulerOutputAdapter.class);
-
-    // Layer 2 placeholder — real teacher lookup comes in Layer 3
-    private static final UUID PLACEHOLDER_TEACHER_ID =
-            UUID.fromString("44444444-4444-4444-4444-444444444004");
-
+    private static final UUID TIMETABLE_VERSION_ID =
+        UUID.fromString("66666666-6666-6666-6666-666666666001");
 
     @PersistenceContext
     private EntityManager entityManager;
 
 
-    // Existing timetable version from seed data
-    private static final UUID TIMETABLE_VERSION_ID =
-            UUID.fromString("66666666-6666-6666-6666-666666666001");
 
     private final RoomRepository roomRepository;
 
@@ -52,8 +44,7 @@ public class SchedulerOutputAdapter {
     public List<TimetableSlot> convert(List<ScheduledSlot> scheduledSlots) {
         List<TimetableSlot> result = new ArrayList<>();
 
-        // Load placeholder teacher once — same for all slots in Layer 2
-        User teacher = entityManager.getReference(User.class, PLACEHOLDER_TEACHER_ID);
+        
 
         for (ScheduledSlot slot : scheduledSlots) {
 
@@ -63,6 +54,11 @@ public class SchedulerOutputAdapter {
                 log.warn("Room '{}' not found in DB, skipping slot: {}",
                         slot.getRoom().getId(), slot);
                 continue;
+            }
+                    User teacher = resolveTeacher(slot.getSubject().getTeacherId());
+            if (teacher == null) {
+                log.warn("Could not resolve teacher for slot: {}, skipping", slot);
+                continue;   
             }
 
             TimetableSlot entity = new TimetableSlot();
@@ -127,4 +123,23 @@ public class SchedulerOutputAdapter {
         try { return Integer.parseInt(semester.trim()); }
         catch (NumberFormatException e) { return 0; }
     }
+
+private User resolveTeacher(String teacherId) {
+    // During scheduler input, teacherId is the T-code like "T1"
+    // Map to UUID for seeded teachers, fall back to name lookup for others
+    if (teacherId != null && teacherId.matches("T\\d+")) {
+        int num = Integer.parseInt(teacherId.substring(1));
+        UUID uuid = UUID.fromString(String.format("aaaaaaaa-aaaa-aaaa-aaaa-%012d", num));
+        return entityManager.getReference(User.class, uuid);
+    }
+    // If teacherId is already a UUID string (from UI in Layer 3 real flow)
+    try {
+        UUID uuid = UUID.fromString(teacherId);
+        return entityManager.getReference(User.class, uuid);
+    } catch (IllegalArgumentException e) {
+        log.warn("Cannot resolve teacher ID: '{}'", teacherId);
+        return null;
+    }
+}
+
 }
