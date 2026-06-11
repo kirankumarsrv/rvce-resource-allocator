@@ -1,105 +1,65 @@
-services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      DB_URL: jdbc:postgresql://postgres:5432/scas_db?stringtype=unspecified
-      DB_USER: scas
-      DB_PASSWORD: Kiran@13579
-      SCAS_ENCRYPTION_KEY: 2bvQHPjzfSPE5f5IfMdlG8Y8QTBb+qfGAC8k4BRzo6k=
-      JWT_PRIVATE_KEY: |-
-        -----BEGIN PRIVATE KEY-----
-        MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDg4opwi2D66SSL
-        l1uRpR3IQPAsagJ3pUNtpkUVPQb2zi7eOzCw4OXLPDjo+K77Mg088UEbnvdSf9zR
-        Nj5Psxm7whe8T9acOaBir8Jd9uVhpTCW2a/Vi+5fYqKzQTvEJxCmvJLIXqu7x2lK
-        KaA4dvXtRlWymCt9R2wLyloE8W9LkkY3e05djl8fHOM9Sm9K6T9u5ASNBOApVyEt
-        GMJUXJp1JknKXoq/0qfQekMy4wMX+JBiNkfqzqLNRoQzYCiO8+W0aRS6q/BGFivN
-        IUeqihqoZQrx0sEdDX+TC7rom7c7HjDmDU4p47kOzE3Hi9xNiGI5sFf3sSm8+c9+
-        qMhzp+OPAgMBAAECggEADmgk81HSjDB8cV7odFuuHUKfwFCoSM7zE2a3/UTUGeKa
-        mQ0UsPgvcIYypSYtW5VYyMMx5xmXgZcEZ/jAJC32o5MrHxrERmzgrAHTg16KUmeZ
-        Rci7XYRh6IVyo+Y1dHsGM5BYHPMHsHd1dNVW2NcyKRm86ryZ6KQ3NUgo3TE0bpRZ
-        H6ytkI04yCdxsd9g8c5deLXfVQD+fpqvjGjr78oChNR3ySOCtgt1FlhEb/XWBHV3
-        MvMOrKZEKIOZ8ftmJTZU/8b9PtBgBzxUwWYQ+BKZaXr+HojHyJRlG+IXfof7nmQh
-        KzUzKsWr9s66uQIhn7FtOFadEF4Q0bJSrGlxeUTZDQKBgQD16y3eiPDkZKeSxxDq
-        Z4epvKbpdWbSCJlopJInbYZRyrumcgmfzyW29rL0zRZW304kmwGs8xZEDWtVI46r
-        1qClHhZvyOAGYWPyzBEl6l4EOEeG2XodLIc8GK+AmfvbP2mFoMEhiYH3Stv7MaWw
-        21mDQga54sJuJw85lvy0adtgCwKBgQDqGp7iPApUFAvG+eykTyJWblKwJrBJW7j8
-        bBVLQbEZ8FMA50R+jiGLvLPmNZz+B9tfpkOJVWFPjL53rUsnQglmUtM8yDw814jK
-        kOGlqOgKmqaMoT1GK3nAnEe3qZlq2nWt124dM6TvnoTx/OyAwnPWiW5ysycPvpPT
-        x4gcSY7pDQKBgQCfkrG6+yVFLsNGDQI++Fshmxa72sCTfZz+N/vWtc04+dJ2GP2B
-        w4r3hHFvRD1AtbohKqwVq89A7Ww+XMpRWv325uUsOC6WNVAD1sMx1TiYiGRxbmE8
-        2Q4Pwvzu9/xjsmwol716o52/98Vy5C5d6pfVAl0W9buweov4lK756s69LQKBgH2r
-        brFJw82guTXGQkduB6PYM2FGU4n9yA8RQlkU2apv/U7V10oMqGtoEDa7fxxLQXNW
-        QJj/kW5vwmtiRp67b2pTefv+DYAnv9Hl9ovEYVQX8uI5SDhb7E7+Ve19CNN4lIWO
-        yRi5+Yd8VCfHO3pfaGm5euXt0EE+cALW8PUmc6YdAoGBAIouNtjI8JMFdBX/YfIX
-        oZS7JZ81FQIq92uKFFmeHajJII387jJdQS40vBnFTwWZfRSTtXYECKHLM3s0CjIM
-        a/WRYoCqRKvwyN30UcR0oicNYC5g6GFG+nt9J1vzgSWn6ozAWAtFgRmOyWUFBtbd
-        jS9gYm4xaLpQaJ/BqJewKc39
-        -----END PRIVATE KEY-----
-      JWT_PUBLIC_KEY: |-
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4OKKcItg+ukki5dbkaUd
-        yEDwLGoCd6VDbaZFFT0G9s4u3jswsODlyzw46Piu+zINPPFBG573Un/c0TY+T7MZ
-        u8IXvE/WnDmgYq/CXfblYaUwltmv1YvuX2Kis0E7xCcQprySyF6ru8dpSimgOHb1
-        7UZVspgrfUdsC8paBPFvS5JGN3tOXY5fHxzjPUpvSuk/buQEjQTgKVchLRjCVFya
-        dSZJyl6Kv9Kn0HpDMuMDF/iQYjZH6s6izUaEM2AojvPltGkUuqvwRhYrzSFHqooa
-        qGUK8dLBHQ1/kwu66Ju3Ox4w5g1OKeO5DsxNx4vcTYhiObBX97EpvPnPfqjIc6fj
-        jwIDAQAB
-        -----END PUBLIC KEY-----
-      REDIS_HOST: redis
-      REDIS_PORT: "6379"
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: "6379"
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: "6379"
-      SPRING_MAIL_HOST: smtp.gmail.com
-      SPRING_MAIL_PORT: "587"
-      SPRING_MAIL_USERNAME: kirankumars13579@gmail.com
-      SPRING_MAIL_PASSWORD: xnyc sovn uour rnnm
-      SPRING_MAIL_PROTOCOL: smtp
-      SPRING_MAIL_FROM: kirankumars13579@gmail.com
-      SPRING_MAIL_AUTH: "true"
-      SPRING_MAIL_STARTTLS_ENABLE: "true"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
+  services:
+    backend:
+      build:
+        context: ./backend
+        dockerfile: Dockerfile
+      ports:
+        - "8080:8080"
+      environment:
+        SPRING_PROFILES_ACTIVE: dev
+        DB_URL: jdbc:postgresql://postgres:5432/scas_db?stringtype=unspecified
+        DB_USER: scas
+        DB_PASSWORD: scas_dev_password
+        REDIS_HOST: redis
+        REDIS_PORT: "6379"
+        SPRING_REDIS_HOST: redis
+        SPRING_REDIS_PORT: "6379"
+        SPRING_DATA_REDIS_HOST: redis
+        SPRING_DATA_REDIS_PORT: "6379"
+        SPRING_MAIL_HOST: smtp.gmail.com
+        SPRING_MAIL_PORT: "587"
+        SPRING_MAIL_USERNAME: kirankumars13579@gmail.com
+        SPRING_MAIL_PASSWORD: xnyc sovn uour rnnm
+        SPRING_MAIL_PROTOCOL: smtp
+        SPRING_MAIL_FROM: kirankumars13579@gmail.com
+        SPRING_MAIL_AUTH: "true"
+        SPRING_MAIL_STARTTLS_ENABLE: "true"
+      depends_on:
+        postgres:
+          condition: service_healthy
+        redis:
+          condition: service_started
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "5173:80"
-    depends_on:
-      - backend
+    frontend:
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile
+      ports:
+        - "5173:80"
+      depends_on:
+        - backend
 
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: scas
-      POSTGRES_PASSWORD: Kiran@13579
-      POSTGRES_DB: scas_db
-      TZ: UTC
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U scas -d scas_db"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
+    postgres:
+      image: postgres:15
+      environment:
+        POSTGRES_USER: scas
+        POSTGRES_PASSWORD: scas_dev_password
+        POSTGRES_DB: scas_db
+        TZ: UTC
+      ports:
+        - "5432:5432"
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U scas -d scas_db"]
+        interval: 5s
+        timeout: 3s
+        retries: 20
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    redis:
+      image: redis:7-alpine
+      ports:
+        - "6379:6379"
 
-volumes:
-  postgres_data:
+  volumes:
+    postgres_data:

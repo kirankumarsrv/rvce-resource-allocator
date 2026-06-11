@@ -86,7 +86,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/api/exam/*/rooms/available"
+                                "/api/exam/*/rooms/available",
+                                "/api/scheduler/**"
                         ).permitAll()
                         .requestMatchers("/api/auth/logout", "/api/auth/logout-all").authenticated()
                         .requestMatchers("/api/exam/*/seating/my-seat", "/api/exam/student/seating", "/api/exam/student/**").hasRole("STUDENT")

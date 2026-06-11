@@ -163,13 +163,13 @@ public class ExamHallService {
         User invigilator = userRepository.findById(invigilatorUUID)
                 .orElseThrow(() -> new IllegalArgumentException("Invigilator not found: " + invigilatorId));
 
-        // Verify invigilator has TEACHER role (matches seed data role name)
-        Role teacherRole = roleRepository.findByName("TEACHER")
-                .orElseThrow(() -> new IllegalArgumentException("TEACHER role not found in system"));
+        // Verify invigilator has ROLE_TEACHER
+        Role teacherRole = roleRepository.findByName("ROLE_TEACHER")
+                .orElseThrow(() -> new IllegalArgumentException("ROLE_TEACHER role not found in system"));
 
         boolean isTeacher = userRoleRepository.existsByUser_UserIdAndRole_RoleId(invigilatorUUID, teacherRole.getRoleId());
         if (!isTeacher) {
-            throw new IllegalArgumentException("User " + invigilatorId + " is not assigned the TEACHER role");
+            throw new IllegalArgumentException("User " + invigilatorId + " is not assigned the ROLE_TEACHER role");
         }
 
         return invigilator;

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <h3>Purpose</h3>
@@ -85,5 +86,7 @@ public interface RoomRepository extends JpaRepository<Room, java.util.UUID> {
         @Param("minCapacity") Integer minCapacity,
         @Param("building") String building
     );
+
+    Optional<Room> findByName(String name);
 
 }
