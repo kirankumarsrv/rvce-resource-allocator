@@ -99,6 +99,13 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
           <path d="M12 2L4 5l8 3 8-3-8-3z" />
         </svg>
       ),
+       scheduler: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <path d="M16 2v4M8 2v4M3 10h18" />
+          <path d="M8 14h.01M12 14h.01M16 14h.01" />
+        </svg>
+      ),
     }
 
     if (hasRole('ROLE_TTO')) {
@@ -106,6 +113,7 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
       addLink({ label: 'Upload Timetable', path: '/tto/upload', icon: icons.upload })
       addLink({ label: 'Substitute Teacher', path: '/tto/substitute', icon: icons.substitute })
       addLink({ label: 'Room Availability', path: '/tto/rooms', icon: icons.room })
+      addLink({ label: 'Timetable Scheduler', path: '/admin/scheduler', icon: icons.scheduler })
     }
 
     if (hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPER_ADMIN')) {
@@ -113,6 +121,7 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
       addLink({ label: 'User Management', path: '/admin/users', icon: icons.users })
       addLink({ label: 'Substitute Teacher', path: '/admin/substitute', icon: icons.substitute })
       addLink({ label: 'Room Availability', path: '/tto/rooms', icon: icons.room })
+      addLink({ label: 'Timetable Scheduler', path: '/admin/scheduler', icon: icons.scheduler })
     }
 
     if (hasRole('ROLE_TEACHER')) {

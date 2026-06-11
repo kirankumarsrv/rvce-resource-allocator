@@ -14,6 +14,7 @@ import UploadTimetablePage from '@/pages/UploadTimetablePage'
 import SubstitutePage from '@/pages/SubstitutePage'
 import RoomAvailabilityPage from '@/pages/RoomAvailabilityPage'
 import AdminUsersPage from '@/pages/AdminUsersPage'
+import AdminSchedulerPage from '@/pages/AdminSchedulerPage'
 import UnauthorizedPage from '@/pages/UnauthorizedPage'
 import SeatingViewPage from '@/pages/SeatingViewPage'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
@@ -194,7 +195,16 @@ function App() {
             </RequireRole>
           }
         />
+        <Route
+    path="/admin/scheduler"
+    element={
+      <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
+        {withLayout(<AdminSchedulerPage />)}
+      </RequireRole>
+    }
+  />
       </Routes>
+      
     </BrowserRouter>
   )
 }
