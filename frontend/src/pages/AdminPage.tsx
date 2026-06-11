@@ -18,7 +18,7 @@ const AdminPage = () => {
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Admin Portal</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Link
           to="/admin/substitute"
           className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
@@ -65,6 +65,23 @@ const AdminPage = () => {
             </div>
           </div>
         </Link>
+         <Link
+    to="/admin/scheduler"
+    className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-lg shadow-md transition-colors duration-200"
+  >
+    <div className="flex items-center">
+      <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2" strokeWidth={2} />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 2v4M8 2v4M3 10h18" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14h.01M12 14h.01M16 14h.01" />
+      </svg>
+      <div>
+        <h3 className="font-semibold">Timetable Scheduler</h3>
+        <p className="text-sm opacity-90">Generate department timetables</p>
+      </div>
+    </div>
+  </Link>
+
       </div>
 
       {/* Tab Navigation */}
