@@ -49,66 +49,75 @@ const TimetableGrid = ({
   const activeDays = ALL_DAYS.slice(0, daysInWeek)
 
   const slotMap = new Map<string, ScheduledSlot[]>()
-  for (const s of slots) {
-    if (s.isLabSecondHour) continue // only render first hour of labs
-    const key = `${s.day}__${s.timeSlot}`
+
+  for (const slot of slots) {
+    if (slot.isLabSecondHour) continue
+
+    const key = `${slot.day}__${slot.timeSlot}`
     const existing = slotMap.get(key) ?? []
-    slotMap.set(key, [...existing, s])
+    slotMap.set(key, [...existing, slot])
   }
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full border-collapse text-xs">
+      <table className="w-full min-w-[900px] border-collapse">
         <thead>
           <tr>
-            <th className="border border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold text-slate-500 w-24">
+            <th className="w-28 border border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold text-slate-600">
               Time
             </th>
+
             {activeDays.map((day) => (
               <th
                 key={day}
-                className="border border-slate-200 bg-slate-50 px-3 py-2 text-center font-semibold text-slate-700"
+                className="border border-slate-200 bg-slate-50 px-3 py-2 text-center text-xs font-semibold text-slate-700"
               >
-                {DAY_LABELS[day]}
+                {DAY_LABELS[day].toUpperCase()}
               </th>
             ))}
           </tr>
         </thead>
+
         <tbody>
-          {ALL_TIME_SLOTS.map((ts) => (
-            <tr key={ts} className="group">
-              <td className="border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-500 whitespace-nowrap">
-                {TIME_SLOT_LABELS[ts]}
+          {ALL_TIME_SLOTS.map((timeSlot) => (
+            <tr key={timeSlot}>
+              <td className="border border-slate-200 bg-slate-50 px-3 py-2 font-semibold text-slate-700 whitespace-nowrap">
+                {TIME_SLOT_LABELS[timeSlot]}
               </td>
+
               {activeDays.map((day) => {
-                const cellSlots = slotMap.get(`${day}__${ts}`) ?? []
+                const cellSlots =
+                  slotMap.get(`${day}__${timeSlot}`) ?? []
+
                 return (
                   <td
-                    key={day}
-                    className="border border-slate-100 px-2 py-1.5 align-top min-w-[120px]"
+                    key={`${day}-${timeSlot}`}
+                    className="border border-slate-200 p-2 align-top min-h-[80px]"
                   >
-                    {cellSlots.length === 0 ? (
-                      <span className="text-slate-200">—</span>
-                    ) : (
-                      <div className="space-y-1">
-                        {cellSlots.map((slot, idx) => (
-                          <div
-                            key={idx}
-                            className={`rounded-lg px-2 py-1.5 text-xs leading-tight ${
-                              slot.subject.type === 'LAB'
-                                ? 'bg-violet-50 border border-violet-200 text-violet-800'
-                                : 'bg-blue-50 border border-blue-200 text-blue-800'
-                            }`}
-                          >
-                            <p className="font-semibold truncate">{slot.subject.name}</p>
-                            <p className="opacity-70 truncate">
-                              {slot.subject.section} · {slot.room.name}
-                            </p>
-                            <p className="opacity-60 truncate">{slot.subject.teacherId}</p>
-                          </div>
-                        ))}
+                    {cellSlots.map((slot, index) => (
+                      <div
+                        key={index}
+                        className={`mb-1 rounded-lg border p-2 text-xs ${
+                          slot.subject.type === 'LAB'
+                            ? 'bg-amber-50 border-amber-300'
+                            : 'bg-blue-50 border-blue-300'
+                        }`}
+                      >
+                        <div className="font-bold text-slate-900">
+                          {slot.subject.name}
+                        </div>
+
+                        <div className="mt-1 text-[11px] text-slate-600">
+                          {slot.subject.id}
+                          {' | '}
+                          {slot.room.name}
+                          {' | '}
+                          {slot.subject.teacherId}
+                          {' | '}
+                          {slot.subject.section}
+                        </div>
                       </div>
-                    )}
+                    ))}
                   </td>
                 )
               })}
@@ -116,6 +125,53 @@ const TimetableGrid = ({
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+
+//section wise timetable
+
+const SectionTimetables = ({
+  slots,
+  daysInWeek,
+}: {
+  slots: ScheduledSlot[]
+  daysInWeek: number
+}) => {
+  const sectionMap = new Map<string, ScheduledSlot[]>()
+
+  slots.forEach((slot) => {
+    const section = slot.subject.section
+
+    if (!sectionMap.has(section)) {
+      sectionMap.set(section, [])
+    }
+
+    sectionMap.get(section)!.push(slot)
+  })
+
+  const sections = [...sectionMap.entries()].sort((a, b) =>
+    a[0].localeCompare(b[0])
+  )
+
+  return (
+    <div className="space-y-6">
+      {sections.map(([section, sectionSlots]) => (
+        <section
+          key={section}
+          className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm"
+        >
+          <div className="border-b bg-slate-50 px-4 py-3 font-bold text-slate-800">
+            Section: {section}
+          </div>
+
+          <TimetableGrid
+            slots={sectionSlots}
+            daysInWeek={daysInWeek}
+          />
+        </section>
+      ))}
     </div>
   )
 }
@@ -303,21 +359,27 @@ export const SchedulerResultPanel = ({ result, daysInWeek }: Props) => {
         </section>
       )}
 
-      {/* Timetable grid view */}
-      {result.scheduledSlots.length > 0 && (
-        <section>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">
-            Weekly Timetable Grid
-          </h3>
-          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-            <TimetableGrid slots={result.scheduledSlots} daysInWeek={daysInWeek} />
-          </div>
-          <p className="mt-2 text-xs text-slate-400">
-            <span className="inline-block w-3 h-3 rounded bg-blue-100 border border-blue-200 mr-1 align-middle" />Theory
-            <span className="inline-block w-3 h-3 rounded bg-violet-100 border border-violet-200 ml-3 mr-1 align-middle" />Lab
-          </p>
-        </section>
-      )}
+     {/* Section-wise timetables */}
+    {result.scheduledSlots.length > 0 && (
+  <section>
+    <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">
+      Section Timetables
+    </h3>
+
+    <SectionTimetables
+      slots={result.scheduledSlots}
+      daysInWeek={daysInWeek}
+    />
+
+    <p className="mt-3 text-xs text-slate-400">
+      <span className="inline-block w-3 h-3 rounded bg-blue-100 border border-blue-300 mr-1 align-middle" />
+      Theory
+
+      <span className="inline-block w-3 h-3 rounded bg-amber-100 border border-amber-300 ml-4 mr-1 align-middle" />
+      Lab
+    </p>
+  </section>
+    )}
 
       {/* Flat slot table */}
       {result.scheduledSlots.length > 0 && (
