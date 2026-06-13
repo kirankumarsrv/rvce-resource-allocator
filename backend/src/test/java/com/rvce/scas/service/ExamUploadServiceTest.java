@@ -138,7 +138,7 @@ class ExamUploadServiceTest {
         User user = new User();
         user.setUserId(studentId);
         user.setUsn("1RV22CS050");
-        when(userRepository.findByUsnIn(anySet())).thenReturn(List.of(user));
+        when(userRepository.findAllByRoleName("STUDENT")).thenReturn(List.of(user));
         when(examStudentRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
         String csv = "usn,name,branch_code,needs_front_row\n"

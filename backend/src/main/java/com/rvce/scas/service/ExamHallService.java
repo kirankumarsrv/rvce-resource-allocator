@@ -146,7 +146,7 @@ public class ExamHallService {
 
     /**
      * Validates and resolves an invigilator by ID.
-     * Ensures the invigilator exists and has ROLE_TEACHER.
+     * Ensures the invigilator exists and has the teacher role used by the schema.
      *
      * @param invigilatorId the invigilator ID (must be a valid UUID string)
      * @return the resolved User with teacher role
@@ -163,9 +163,10 @@ public class ExamHallService {
         User invigilator = userRepository.findById(invigilatorUUID)
                 .orElseThrow(() -> new IllegalArgumentException("Invigilator not found: " + invigilatorId));
 
-        // Verify invigilator has ROLE_TEACHER
-        Role teacherRole = roleRepository.findByName("ROLE_TEACHER")
-                .orElseThrow(() -> new IllegalArgumentException("ROLE_TEACHER role not found in system"));
+        // The database seeds teacher roles as TEACHER, while older data may still use ROLE_TEACHER.
+        Role teacherRole = roleRepository.findByName("TEACHER")
+            .or(() -> roleRepository.findByName("ROLE_TEACHER"))
+            .orElseThrow(() -> new IllegalArgumentException("Teacher role not found in system"));
 
         boolean isTeacher = userRoleRepository.existsByUser_UserIdAndRole_RoleId(invigilatorUUID, teacherRole.getRoleId());
         if (!isTeacher) {

@@ -113,7 +113,7 @@ class ExamHallServiceTest {
         Role teacherRole = new Role();
         teacherRole.setRoleId(UUID.randomUUID());
         teacherRole.setName("ROLE_TEACHER");
-        when(roleRepository.findByName("ROLE_TEACHER")).thenReturn(Optional.of(teacherRole));
+        when(roleRepository.findByName("TEACHER")).thenReturn(Optional.of(teacherRole));
         when(userRoleRepository.existsByUser_UserIdAndRole_RoleId(invigilatorId, teacherRole.getRoleId())).thenReturn(true);
 
         when(examHallRepository.existsByExamSession_ExamIdAndRoom_Id(examId, roomId)).thenReturn(false);
@@ -283,7 +283,7 @@ class ExamHallServiceTest {
         Role teacherRole = new Role();
         teacherRole.setRoleId(UUID.randomUUID());
         teacherRole.setName("ROLE_TEACHER");
-        when(roleRepository.findByName("ROLE_TEACHER")).thenReturn(Optional.of(teacherRole));
+        when(roleRepository.findByName("TEACHER")).thenReturn(Optional.of(teacherRole));
         when(userRoleRepository.existsByUser_UserIdAndRole_RoleId(invigilatorId, teacherRole.getRoleId())).thenReturn(false);
 
         when(examHallRepository.existsByExamSession_ExamIdAndRoom_Id(examId, roomId)).thenReturn(false);

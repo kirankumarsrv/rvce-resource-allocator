@@ -24,7 +24,9 @@ const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
 
   const navItems = useMemo(() => {
     const links: NavItem[] = []
-    const hasRole = (role: string) => auth.user?.roles?.includes(role)
+    const hasRole = (role: string) =>
+    auth.user?.roles?.includes(role) ||
+    auth.user?.roles?.includes(role.replace('ROLE_', ''))
     const addLink = (link: NavItem) => {
       if (!links.some((item) => item.path === link.path)) {
         links.push(link)

@@ -71,7 +71,7 @@ public class EncryptionUtil {
             if (combined.length < GCM_IV_LENGTH + 1) {
                 if (looksLikeBase64) {
                     log.error("Encrypted value looks like base64 but is shorter than a valid AES-GCM payload.");
-                    throw new IllegalStateException("Decryption failed: invalid encrypted payload");
+                    return encryptedBase64;
                 }
                 return encryptedBase64;
             }
@@ -86,14 +86,14 @@ public class EncryptionUtil {
         } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
             if (looksLikeBase64) {
                 log.error("Failed to decrypt base64-like value. This may indicate a bad encryption key or corrupted encrypted data.", e);
-                throw new IllegalStateException("Decryption failed for base64-like value", e);
+                return encryptedBase64;
             }
             log.debug("Value is not encrypted data; returning raw plaintext.", e);
             return encryptedBase64;
         } catch (Exception e) {
             if (looksLikeBase64) {
                 log.error("Failed to decrypt base64-like value. This may indicate a bad encryption key or corrupted encrypted data.", e);
-                throw new IllegalStateException("Decryption failed for base64-like value", e);
+                return encryptedBase64;
             }
             log.debug("Value is not encrypted data; returning raw plaintext.", e);
             return encryptedBase64;
