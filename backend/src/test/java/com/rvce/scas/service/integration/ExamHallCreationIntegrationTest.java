@@ -87,7 +87,7 @@ class ExamHallCreationIntegrationTest {
     @DisplayName("Valid teacher invigilator accepted for exam hall creation -> 201")
     void validTeacherInvigilatorCreatesExamHall() throws Exception {
         UUID actorId = UUID.randomUUID();
-        Role teacherRole = createRole("ROLE_TEACHER");
+        Role teacherRole = createRole("TEACHER");
         User teacher = createUser("teacher@rvce.edu.in");
         assignRole(teacher, teacherRole);
 
@@ -122,7 +122,7 @@ class ExamHallCreationIntegrationTest {
     @DisplayName("Missing invigilatorId triggers request validation -> 400")
     void missingInvigilatorIdReturnsBadRequest() throws Exception {
         UUID actorId = UUID.randomUUID();
-        createRole("ROLE_TEACHER");
+        createRole("TEACHER");
         ExamSession examSession = createExamSession(actorId);
         Room examHallRoom = createExamHallRoom();
 
@@ -149,9 +149,9 @@ class ExamHallCreationIntegrationTest {
     @DisplayName("Non-teacher invigilator is rejected by business validation -> 400")
     void nonTeacherInvigilatorRejected() throws Exception {
         UUID actorId = UUID.randomUUID();
-        Role teacherRole = createRole("ROLE_TEACHER");
+        Role teacherRole = createRole("TEACHER");
         User staff = createUser("staff@rvce.edu.in");
-        // Do not assign ROLE_TEACHER to this user.
+        // Do not assign TEACHER to this user.
         assignRole(staff, createRole("ROLE_STAFF"));
 
         ExamSession examSession = createExamSession(actorId);
@@ -176,7 +176,7 @@ class ExamHallCreationIntegrationTest {
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("ROLE_TEACHER")));
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("TEACHER")));
     }
 
     private ExamSession createExamSession(UUID creatorId) {
