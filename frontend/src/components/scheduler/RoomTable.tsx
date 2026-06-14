@@ -1,140 +1,182 @@
-import type { SchedulerRoom, RoomType } from '@/types/scheduler'
+import { useEffect, useRef, useState } from 'react'
+import type { SchedulerRoom } from '@/types/scheduler'
+import { authenticatedFetch } from '@/services/authService'
+
+interface RoomOption {
+  id: string
+  name: string
+  type: 'CLASSROOM' | 'LAB'
+  capacity: number
+  labType?: string
+}
+
+let _roomCache: RoomOption[] | null = null
+
+const useRooms = () => {
+  const [rooms, setRooms] = useState<RoomOption[]>(_roomCache ?? [])
+  const [loading, setLoading] = useState(!_roomCache)
+  useEffect(() => {
+    if (_roomCache) return
+    authenticatedFetch('/api/rooms')
+      .then((r) => r.json())
+      .then((data: RoomOption[]) => { _roomCache = data; setRooms(data) })
+      .finally(() => setLoading(false))
+  }, [])
+  return { rooms, loading }
+}
+
+const RoomSelect = ({
+  onAdd,
+}: {
+  onAdd: (room: SchedulerRoom) => void
+}) => {
+  const { rooms, loading } = useRooms()
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const filtered = query
+    ? rooms.filter((r) =>
+        r.name.toLowerCase().includes(query.toLowerCase()) ||
+        r.id.toLowerCase().includes(query.toLowerCase()) ||
+        (r.labType ?? '').toLowerCase().includes(query.toLowerCase())
+      )
+    : rooms
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        {loading ? 'Loading rooms…' : 'Add Room'}
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 left-0 w-80 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+          <div className="p-2 border-b border-slate-100">
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search room name or lab type…"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm outline-none focus:border-slate-400"
+            />
+          </div>
+          <div className="max-h-64 overflow-y-auto divide-y divide-slate-50">
+            {filtered.length === 0 ? (
+              <p className="px-3 py-4 text-sm text-slate-400 text-center">No rooms match</p>
+            ) : (
+              filtered.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => {
+                    onAdd({
+                      id: r.id,
+                      name: r.name,
+                      type: r.type,
+                      capacity: r.capacity,
+                      labType: r.labType,
+                    })
+                    setOpen(false)
+                    setQuery('')
+                  }}
+                  className="w-full text-left px-3 py-2.5 text-sm hover:bg-slate-50 transition flex items-center justify-between gap-2"
+                >
+                  <div>
+                    <span className="font-medium text-slate-800">{r.id}</span>
+                    <span className="ml-2 text-slate-500 text-xs">{r.name}</span>
+                    {r.labType && (
+                      <span className="ml-2 rounded-full bg-violet-100 text-violet-700 px-1.5 py-0.5 text-xs font-semibold">
+                        {r.labType}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-slate-400 shrink-0">{r.capacity} seats</span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface Props {
   rooms: SchedulerRoom[]
   onChange: (rooms: SchedulerRoom[]) => void
 }
 
-const ROOM_TYPE_OPTIONS: RoomType[] = ['CLASSROOM', 'LAB']
-
-const inputCls =
-  'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100'
-
-const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="flex flex-col gap-1">
-    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</span>
-    {children}
-  </div>
-)
-
 export const RoomTable = ({ rooms, onChange }: Props) => {
-  const update = (index: number, patch: Partial<SchedulerRoom>) => {
-    onChange(rooms.map((r, i) => (i === index ? { ...r, ...patch } : r)))
+  const remove = (id: string) => onChange(rooms.filter((r) => r.id !== id))
+  const add = (room: SchedulerRoom) => {
+    if (rooms.find((r) => r.id === room.id)) return  // no duplicates
+    onChange([...rooms, room])
   }
 
-  const remove = (index: number) => onChange(rooms.filter((_, i) => i !== index))
-
-  const add = () =>
-    onChange([
-      ...rooms,
-      { id: '', name: '', type: 'CLASSROOM' as RoomType, capacity: 60 },
-    ])
-
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          Rooms{' '}
-          <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-normal text-slate-500">
-            {rooms.length}
-          </span>
-        </h3>
-        <button
-          type="button"
-          onClick={add}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700"
-        >
-          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Add Room
-        </button>
-      </div>
-
-      {rooms.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 py-8 text-center text-sm text-slate-400">
-          No rooms yet — click Add Room to begin.
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {rooms.map((r, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
-                  Room {i + 1}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => remove(i)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
-                  aria-label="Remove room"
-                >
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <Field label="Room ID *">
-                  <input
-                    value={r.id}
-                    onChange={(e) => update(i, { id: e.target.value })}
-                    placeholder="e.g. CS-101"
-                    className={inputCls}
-                    required
-                  />
-                </Field>
-                <Field label="Room Name *">
-                  <input
-                    value={r.name}
-                    onChange={(e) => update(i, { name: e.target.value })}
-                    placeholder="e.g. CS-101"
-                    className={inputCls}
-                    required
-                  />
-                </Field>
-                <Field label="Type *">
-                  <select
-                    value={r.type}
-                    onChange={(e) => update(i, { type: e.target.value as RoomType })}
-                    className={inputCls}
-                  >
-                    {ROOM_TYPE_OPTIONS.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="Capacity *">
-                  <input
-                    type="number"
-                    min={1}
-                    value={r.capacity}
-                    onChange={(e) => update(i, { capacity: Number(e.target.value) })}
-                    className={inputCls}
-                    required
-                  />
-                </Field>
-                {r.type === 'LAB' && (
-                  <Field label="Lab Type">
-                    <input
-                      value={r.labType ?? ''}
-                      onChange={(e) => update(i, { labType: e.target.value })}
-                      placeholder="e.g. NETWORKING"
-                      className={inputCls}
-                    />
-                  </Field>
-                )}
-              </div>
-            </div>
-          ))}
+    <div className="space-y-3">
+      {rooms.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 py-6 text-center text-sm text-slate-400">
+          No rooms added — click Add Room to select from database.
         </div>
       )}
+
+      {rooms.length > 0 && (
+        <div className="rounded-2xl border border-slate-200 overflow-hidden">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-4 py-2.5 text-left">Room ID</th>
+                <th className="px-4 py-2.5 text-left">Name</th>
+                <th className="px-4 py-2.5 text-left">Type</th>
+                <th className="px-4 py-2.5 text-left">Lab Type</th>
+                <th className="px-4 py-2.5 text-right">Capacity</th>
+                <th className="px-4 py-2.5" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {rooms.map((r) => (
+                <tr key={r.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-2.5 font-mono font-semibold text-slate-800">{r.id}</td>
+                  <td className="px-4 py-2.5 text-slate-600">{r.name}</td>
+                  <td className="px-4 py-2.5">
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      r.type === 'LAB' ? 'bg-violet-100 text-violet-700' : 'bg-blue-100 text-blue-700'
+                    }`}>{r.type}</span>
+                  </td>
+                  <td className="px-4 py-2.5 text-xs text-slate-500">{r.labType ?? '—'}</td>
+                  <td className="px-4 py-2.5 text-right text-slate-600">{r.capacity}</td>
+                  <td className="px-4 py-2.5 text-right">
+                    <button type="button" onClick={() => remove(r.id)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6 6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <RoomSelect onAdd={add} />
     </div>
   )
 }

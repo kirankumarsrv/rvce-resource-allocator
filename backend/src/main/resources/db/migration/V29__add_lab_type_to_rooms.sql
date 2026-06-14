@@ -1,0 +1,7 @@
+ALTER TABLE rooms
+ADD COLUMN IF NOT EXISTS lab_type VARCHAR(50);
+
+UPDATE rooms
+SET lab_type = 'GENERAL'
+WHERE lab_type IS NULL;
+

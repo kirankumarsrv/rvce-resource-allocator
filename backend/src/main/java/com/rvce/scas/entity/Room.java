@@ -49,6 +49,9 @@ public class Room {
     private Integer capacity;
 
     @Column(nullable = true)
+    private String labType; //may be this is error -> i added this
+
+    @Column(nullable = true)
     private Integer benchRows; // For exam halls only
 
     @Column(nullable = true)
