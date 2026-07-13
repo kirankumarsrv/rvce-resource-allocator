@@ -190,7 +190,9 @@ public class ExamUploadService {
 
         Map<String, UUID> studentIdsByUsn = new HashMap<>();
         if (!usnsToLink.isEmpty()) {
-            for (User user : userRepository.findByUsnIn(usnsToLink)) {
+            // USN is encrypted at rest with a random IV, so equality lookups on the column are not reliable.
+            // Resolve active students in memory using the decrypted entity value instead.
+            for (User user : userRepository.findAllByRoleName("STUDENT")) {
                 if (user.getUsn() != null) {
                     studentIdsByUsn.put(usnValidator.normalize(user.getUsn()), user.getUserId());
                 }
