@@ -16,3 +16,13 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+
+app.jar
+backend/app.jarapp.jar
+backend/app.jar
+backend/build/
+frontend/dist/
+frontend/node_modules/
+node_modules/
+generate_result.json
+confirm_payload.json
