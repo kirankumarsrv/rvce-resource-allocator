@@ -34,6 +34,18 @@ const AdminPage = () => {
           </div>
         </Link>
 
+      <Link
+  to="/admin/teacher-schedules"
+  className="rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+>
+  <h3 className="text-lg font-semibold">
+    Teacher Schedules
+  </h3>
+
+  <p className="text-sm text-slate-600 mt-2">
+    View timetable of any faculty member
+  </p>
+</Link>
         <Link
           to="/admin/users"
           className="bg-slate-800 hover:bg-slate-900 text-white p-4 rounded-lg shadow-md transition-colors duration-200"

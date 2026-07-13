@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { SchedulerSubject, SubjectType } from '@/types/scheduler'
 import { authenticatedFetch } from '@/services/authService'
 
@@ -32,24 +33,60 @@ const TeacherSelect = ({
   const { teachers, loading } = useTeachers()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   const selected = teachers.find((t) => t.id === value)
   const filtered = query
     ? teachers.filter((t) => t.text.toLowerCase().includes(query.toLowerCase()))
     : teachers
 
+  // Position the menu using the button's real screen position, then render it
+  // through a portal to document.body. This is the fix for the dropdown only
+  // showing ~1 row: a parent card further up uses overflow-hidden (for its
+  // rounded corners), which was clipping the absolutely-positioned menu even
+  // though the menu itself allows scrolling. A portal escapes that entirely.
+  useEffect(() => {
+    if (!open || !buttonRef.current) return
+    const updatePosition = () => {
+      const rect = buttonRef.current!.getBoundingClientRect()
+      const spaceBelow = window.innerHeight - rect.bottom
+      const openUpward = spaceBelow < 260 && rect.top > 260
+      setMenuStyle({
+        position: 'fixed',
+        left: rect.left,
+        width: rect.width,
+        ...(openUpward
+          ? { bottom: window.innerHeight - rect.top + 4 }
+          : { top: rect.bottom + 4 }),
+        zIndex: 9999,
+      })
+    }
+    updatePosition()
+    window.addEventListener('scroll', updatePosition, true)
+    window.addEventListener('resize', updatePosition)
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [open])
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      const target = e.target as Node
+      if (buttonRef.current?.contains(target)) return
+      if (menuRef.current?.contains(target)) return
+      setOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-left outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100 flex items-center justify-between gap-2"
@@ -62,8 +99,12 @@ const TeacherSelect = ({
         </svg>
       </button>
 
-      {open && (
-        <div className="absolute z-50 mt-1 w-full min-w-[240px] rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+      {open && createPortal(
+        <div
+          ref={menuRef}
+          style={menuStyle}
+          className="min-w-[240px] rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden"
+        >
           <div className="p-2 border-b border-slate-100">
             <input
               autoFocus
@@ -98,7 +139,8 @@ const TeacherSelect = ({
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
@@ -550,10 +592,8 @@ export const SubjectTable = ({ subjects, department, onChange }: Props) => {
       )}
 
       {subjects.length > 0 && (
-        <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700 flex items-center justify-between">
-          <span><span className="font-semibold">{subjects.length} subject slots</span> ready — scroll down to add rooms and generate.</span>
-          <button type="button" onClick={() => setStep(3)}
-            className="text-xs underline text-emerald-600 hover:text-emerald-800">Edit assignments</button>
+        <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
+          <span className="font-semibold">{subjects.length} subject slots</span> ready — scroll down to add rooms and generate.
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   type SchedulerResult,
   type ScheduledSlot,
@@ -6,10 +7,32 @@ import {
   DAY_LABELS,
   TIME_SLOT_LABELS,
 } from '@/types/scheduler'
+import { confirmTimetable } from '@/services/schedulerService'
+import { authenticatedFetch } from '@/services/authService'
+
+interface TeacherOption { id: string; text: string }
+let _teacherCache: TeacherOption[] | null = null
+const useTeacherNames = () => {
+  const [map, setMap] = useState<Record<string, string>>({})
+  useEffect(() => {
+    const apply = (list: TeacherOption[]) => {
+      const m: Record<string, string> = {}
+      list.forEach((t) => { m[t.id] = t.text.replace(/\s*\([^)]*\)\s*$/, '') })
+      setMap(m)
+    }
+    if (_teacherCache) { apply(_teacherCache); return }
+    authenticatedFetch('/api/timetable/teachers')
+      .then((r) => r.json())
+      .then((data: TeacherOption[]) => { _teacherCache = data; apply(data) })
+      .catch(() => {})
+  }, [])
+  return map
+}
 
 interface Props {
   result: SchedulerResult
   daysInWeek: number
+  department: string
 }
 
 // ─── Summary cards ────────────────────────────────────────────────────────────
@@ -42,9 +65,11 @@ const SummaryCard = ({
 const TimetableGrid = ({
   slots,
   daysInWeek,
+  teacherNames,
 }: {
   slots: ScheduledSlot[]
   daysInWeek: number
+  teacherNames: Record<string, string>
 }) => {
   const activeDays = ALL_DAYS.slice(0, daysInWeek)
 
@@ -112,7 +137,7 @@ const TimetableGrid = ({
                           {' | '}
                           {slot.room.name}
                           {' | '}
-                          {slot.subject.teacherId}
+                          {teacherNames[slot.subject.teacherId] ?? slot.subject.teacherId}
                           {' | '}
                           {slot.subject.section}
                         </div>
@@ -135,9 +160,11 @@ const TimetableGrid = ({
 const SectionTimetables = ({
   slots,
   daysInWeek,
+  teacherNames,
 }: {
   slots: ScheduledSlot[]
   daysInWeek: number
+  teacherNames: Record<string, string>
 }) => {
   const sectionMap = new Map<string, ScheduledSlot[]>()
 
@@ -169,6 +196,7 @@ const SectionTimetables = ({
           <TimetableGrid
             slots={sectionSlots}
             daysInWeek={daysInWeek}
+            teacherNames={teacherNames}
           />
         </section>
       ))}
@@ -178,7 +206,7 @@ const SectionTimetables = ({
 
 // ─── Flat slot table ─────────────────────────────────────────────────────────
 
-const SlotTable = ({ slots }: { slots: ScheduledSlot[] }) => {
+const SlotTable = ({ slots, teacherNames }: { slots: ScheduledSlot[]; teacherNames: Record<string, string> }) => {
   const visible = slots.filter((s) => !s.isLabSecondHour)
   return (
     <div className="overflow-x-auto">
@@ -213,7 +241,7 @@ const SlotTable = ({ slots }: { slots: ScheduledSlot[] }) => {
                 </span>
               </td>
               <td className="px-4 py-2.5 font-mono text-xs text-slate-600">{s.room.name}</td>
-              <td className="px-4 py-2.5 font-mono text-xs text-slate-600">{s.subject.teacherId}</td>
+              <td className="px-4 py-2.5 text-slate-700">{teacherNames[s.subject.teacherId] ?? s.subject.teacherId}</td>
             </tr>
           ))}
         </tbody>
@@ -224,12 +252,30 @@ const SlotTable = ({ slots }: { slots: ScheduledSlot[] }) => {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export const SchedulerResultPanel = ({ result, daysInWeek }: Props) => {
+export const SchedulerResultPanel = ({ result, daysInWeek, department }: Props) => {
+  const teacherNames = useTeacherNames()
+  const [isConfirming, setIsConfirming] = useState(false)
+  const [confirmError, setConfirmError] = useState<string | null>(null)
+  const [confirmed, setConfirmed] = useState<{ versionId: string; savedSlots: number } | null>(null)
+
   const unscheduledEntries = Object.entries(result.unscheduledHours ?? {}).filter(
     ([, hours]) => hours > 0
   )
   const teacherEntries = Object.entries(result.teacherLoadSummary ?? {})
   const totalSlots = result.scheduledSlots.filter((s) => !s.isLabSecondHour).length
+
+  const handleConfirm = async () => {
+    setIsConfirming(true)
+    setConfirmError(null)
+    try {
+      const response = await confirmTimetable(department, result.scheduledSlots)
+      setConfirmed(response)
+    } catch (err) {
+      setConfirmError(err instanceof Error ? err.message : 'Failed to save timetable')
+    } finally {
+      setIsConfirming(false)
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -252,16 +298,32 @@ export const SchedulerResultPanel = ({ result, daysInWeek }: Props) => {
             <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
           </svg>
         )}
-        <div>
+        <div className="flex-1">
           <p className="font-semibold">
             {result.isFullyScheduled
               ? 'Timetable fully scheduled'
               : 'Timetable partially scheduled — some hours could not be placed'}
           </p>
           <p className="text-sm opacity-80 mt-0.5">
-            Results have been saved to the database.
+            {confirmed
+              ? `Saved to the database (version ${confirmed.versionId}, ${confirmed.savedSlots} slots).`
+              : 'This is a preview — nothing is saved yet. Review it, then confirm to write it to the database.'}
           </p>
+          {confirmError && (
+            <p className="text-sm mt-1 font-medium text-rose-700">{confirmError}</p>
+          )}
         </div>
+
+        {!confirmed && (
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={isConfirming || result.scheduledSlots.length === 0}
+            className="flex-shrink-0 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isConfirming ? 'Saving…' : 'Confirm & Save'}
+          </button>
+        )}
       </div>
 
       {/* Summary cards */}
@@ -325,7 +387,7 @@ export const SchedulerResultPanel = ({ result, daysInWeek }: Props) => {
             <table className="min-w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  <th className="px-4 py-3 text-left">Teacher ID</th>
+                  <th className="px-4 py-3 text-left">Teacher</th>
                   <th className="px-4 py-3 text-right">Total Hours</th>
                   <th className="px-4 py-3 text-right">Load bar</th>
                 </tr>
@@ -338,7 +400,7 @@ export const SchedulerResultPanel = ({ result, daysInWeek }: Props) => {
                     const pct = max > 0 ? Math.round((hours / max) * 100) : 0
                     return (
                       <tr key={teacherId} className="hover:bg-slate-50">
-                        <td className="px-4 py-2.5 font-mono text-slate-700">{teacherId}</td>
+                        <td className="px-4 py-2.5 text-slate-700">{teacherNames[teacherId] ?? teacherId}</td>
                         <td className="px-4 py-2.5 text-right font-semibold text-slate-700">{hours}</td>
                         <td className="px-4 py-2.5">
                           <div className="flex items-center justify-end gap-2">
@@ -369,6 +431,7 @@ export const SchedulerResultPanel = ({ result, daysInWeek }: Props) => {
     <SectionTimetables
       slots={result.scheduledSlots}
       daysInWeek={daysInWeek}
+      teacherNames={teacherNames}
     />
 
     <p className="mt-3 text-xs text-slate-400">
@@ -388,7 +451,7 @@ export const SchedulerResultPanel = ({ result, daysInWeek }: Props) => {
             All Scheduled Slots
           </h3>
           <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-            <SlotTable slots={result.scheduledSlots} />
+            <SlotTable slots={result.scheduledSlots} teacherNames={teacherNames} />
           </div>
         </section>
       )}

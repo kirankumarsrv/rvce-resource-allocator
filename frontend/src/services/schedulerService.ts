@@ -1,13 +1,13 @@
 import { authenticatedFetch } from '@/services/authService'
-import type { DepartmentInput, SchedulerResult } from '@/types/scheduler'
+import type { DepartmentInput, SchedulerResult, ScheduledSlot } from '@/types/scheduler'
 
 const API_BASE = '/api/scheduler'
 
 /**
  * POST /api/scheduler/generate
- * Generates a timetable for the given department input and persists it to the DB.
- * Returns the full SchedulerResult including scheduled slots, teacher load, and
- * any unscheduled hours.
+ * Generates a PREVIEW timetable for the given department input. This does
+ * NOT persist anything to the database — call confirmTimetable() once the
+ * TTO has reviewed the result and wants to save it.
  */
 export const generateTimetable = async (
   input: DepartmentInput
@@ -37,19 +37,50 @@ export const generateTimetable = async (
   return response.json()
 }
 
+export interface ConfirmResponse {
+  versionId: string
+  savedSlots: number
+}
+
+/**
+ * POST /api/scheduler/confirm
+ * Persists a previously generated result to the database. This is the only
+ * scheduler call that actually writes to timetable_slots.
+ */
+export const confirmTimetable = async (
+  department: string,
+  scheduledSlots: ScheduledSlot[]
+): Promise<ConfirmResponse> => {
+  const response = await authenticatedFetch(`${API_BASE}/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ department, scheduledSlots }),
+  })
+
+  if (!response.ok) {
+    let message = 'Failed to confirm timetable'
+    try {
+      const payload = await response.json()
+      if (typeof payload?.message === 'string' && payload.message.trim()) {
+        message = payload.message.trim()
+      } else if (typeof payload?.error === 'string' && payload.error.trim()) {
+        message = payload.error.trim()
+      }
+    } catch {
+      const text = await response.text()
+      if (text) message = text
+    }
+    throw new Error(message)
+  }
+
+  return response.json()
+}
+
 /*
  * NOTE — Missing read endpoint:
- * The backend SchedulerController currently only exposes POST /api/scheduler/generate.
- * There is no GET endpoint to retrieve previously generated timetables by department.
- * The generated result is persisted to the timetable_slots table, so the data exists,
- * but there is no scheduler-specific read API for the frontend to query.
- *
- * Recommended next addition:
+ * The backend still only exposes POST /generate (preview) and POST /confirm (save).
+ * There is no GET endpoint to retrieve a previously confirmed timetable by department
+ * without re-generating. Recommended next addition:
  *   GET /api/scheduler/results?department={dept}
- * or reuse the existing timetable query endpoints
- *   GET /api/timetable/... filtered by department
- * to surface persisted scheduler output without re-generating.
- *
- * Until that endpoint exists this service only calls /generate and the frontend
- * keeps the result in local state for the current session.
+ * or reuse existing timetable query endpoints filtered by department.
  */

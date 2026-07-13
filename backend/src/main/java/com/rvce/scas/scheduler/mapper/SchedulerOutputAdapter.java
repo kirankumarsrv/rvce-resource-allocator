@@ -26,8 +26,8 @@ import java.util.UUID;
 public class SchedulerOutputAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulerOutputAdapter.class);
-    private static final UUID TIMETABLE_VERSION_ID =
-        UUID.fromString("66666666-6666-6666-6666-666666666001");
+
+    
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -41,7 +41,7 @@ public class SchedulerOutputAdapter {
         this.roomRepository = roomRepository;
     }
 
-    public List<TimetableSlot> convert(List<ScheduledSlot> scheduledSlots) {
+    public List<TimetableSlot> convert(List<ScheduledSlot> scheduledSlots, UUID versionId) {
         List<TimetableSlot> result = new ArrayList<>();
 
         
@@ -84,7 +84,7 @@ public class SchedulerOutputAdapter {
             entity.setSemester(parseSemester(slot.getSubject().getSemester()));
 
             // Metadata
-            entity.setVersionId(TIMETABLE_VERSION_ID);
+            entity.setVersionId(versionId);
             entity.setCreatedAt(LocalDateTime.now());
             entity.setIsActive(true);
 

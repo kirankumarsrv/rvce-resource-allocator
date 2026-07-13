@@ -19,6 +19,8 @@ import UnauthorizedPage from '@/pages/UnauthorizedPage'
 import SeatingViewPage from '@/pages/SeatingViewPage'
 import AuthenticatedLayout from '@/components/AuthenticatedLayout'
 import { useAuth } from '@/context/AuthContext'
+import AdminTeacherScheduleViewer from './pages/AdminTeacherScheduleViewer'
+
 
 const getDefaultRedirect = (roles: string[] | undefined): string => {
   if (roles?.includes('ROLE_ADMIN') || roles?.includes('ROLE_SUPER_ADMIN')) return '/admin'
@@ -122,6 +124,14 @@ function App() {
             </RequireRole>
           }
         />
+        <Route
+            path="/admin/teacher-schedules"
+            element={
+              <RequireRole allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']}>
+                {withLayout(<AdminTeacherScheduleViewer />)}
+              </RequireRole>
+            }
+          />
         <Route
           path="/tto/substitute"
           element={

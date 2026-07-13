@@ -256,7 +256,7 @@ const AdminSchedulerPage = () => {
       {activeTab === 'results' && (
         <div>
           {result ? (
-            <SchedulerResultPanel result={result} daysInWeek={daysInWeek} />
+              <SchedulerResultPanel result={result} daysInWeek={daysInWeek} department={department} />
           ) : (
             <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 py-16 text-center">
               <svg className="mx-auto mb-4 h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

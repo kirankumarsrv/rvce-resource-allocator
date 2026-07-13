@@ -3,6 +3,7 @@ package com.rvce.scas.repository;
 import com.rvce.scas.entity.TimetableSlot;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.Modifying;
 
 /**
  * <h3>Purpose</h3>
@@ -55,6 +57,11 @@ public interface TimetableSlotRepository extends JpaRepository<TimetableSlot, Lo
         @Param("endDayOfWeek") int endDayOfWeek
     );
 
+    @Modifying
+    @Query("UPDATE TimetableSlot ts SET ts.isActive = false " +
+        "WHERE ts.department = :department AND ts.isActive = true")
+    int deactivateActiveForDepartment(@Param("department") String department);
+    
     @Query("""
         SELECT ts FROM TimetableSlot ts
         WHERE ts.isActive = true
