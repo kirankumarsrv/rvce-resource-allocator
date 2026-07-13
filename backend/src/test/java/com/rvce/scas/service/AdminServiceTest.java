@@ -146,6 +146,24 @@ class AdminServiceTest {
     }
 
     @Test
+    void createUserRequiresUsnForStudentRole() {
+        CreateUserRequest request = new CreateUserRequest(
+                "Student User",
+                "student@rvce.edu.in",
+                null,
+                "STUDENT",
+                "CSE"
+        );
+
+        try {
+            adminService.createUser(request);
+            assertTrue(false, "Expected IllegalArgumentException for missing USN on student user");
+        } catch (IllegalArgumentException ex) {
+            assertEquals("USN is required for student users", ex.getMessage());
+        }
+    }
+
+    @Test
     void createUserRejectsInvalidEmailDomain() {
         CreateUserRequest request = new CreateUserRequest(
                 "Invalid Domain",

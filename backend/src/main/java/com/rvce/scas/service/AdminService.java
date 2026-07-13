@@ -137,6 +137,9 @@ public class AdminService {
         if (request.getDepartmentCode() == null || request.getDepartmentCode().isBlank()) {
             throw new IllegalArgumentException("Department code is required");
         }
+        if ("STUDENT".equalsIgnoreCase(request.getRole()) && (request.getUsn() == null || request.getUsn().isBlank())) {
+            throw new IllegalArgumentException("USN is required for student users");
+        }
     }
 
     /**
