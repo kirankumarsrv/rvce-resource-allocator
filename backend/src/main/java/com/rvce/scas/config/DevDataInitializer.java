@@ -25,8 +25,8 @@ import java.util.UUID;
  * This replaces the hardcoded password hash migration (V10) with
  * a runtime initialization that doesn't expose secrets in git.
  */
-// @Configuration
-@Profile("!dev")
+@Configuration
+@Profile("dev")
 public class DevDataInitializer {
 
     @Bean
@@ -86,6 +86,13 @@ public class DevDataInitializer {
                     "22222222-2222-2222-2222-222222222001",
                     "44444444-4444-4444-4444-444444444001");
             upsertTeacher(userRepository, departmentRepository, jdbcTemplate, encodedPassword,
+                    "44444444-4444-4444-4444-444444444021",
+                    "Dr. Meera Rao",
+                    "meera.rao@rvce.edu.in",
+                    cse.getDepartmentId(),
+                    "22222222-2222-2222-2222-222222222001",
+                    "44444444-4444-4444-4444-444444444001");
+            upsertTeacher(userRepository, departmentRepository, jdbcTemplate, encodedPassword,
                     "44444444-4444-4444-4444-444444444019",
                     "Dr. Lakshmi Narayana",
                     "lakshmi.narayana@rvce.edu.in",
@@ -100,8 +107,46 @@ public class DevDataInitializer {
                     "22222222-2222-2222-2222-222222222001",
                     "44444444-4444-4444-4444-444444444001");
 
+            seedTimetableSlots(jdbcTemplate);
+
             System.out.println("✓ Dev data initialization complete. Test password: Test@1234");
         };
+    }
+
+    private void seedTimetableSlots(JdbcTemplate jdbcTemplate) {
+        String versionId = "66666666-6666-6666-6666-666666666001";
+        String roomA201 = "55555555-5555-5555-5555-555500000003";
+        String roomA202 = "55555555-5555-5555-5555-555500000004";
+        String roomB101 = "55555555-5555-5555-5555-555500000007";
+        String teacherPriya = "44444444-4444-4444-4444-444444444003";
+        String teacherRamesh = "44444444-4444-4444-4444-444444444004";
+        String teacherAnil = "44444444-4444-4444-4444-444444444018";
+        String teacherMeera = "44444444-4444-4444-4444-444444444021";
+
+        String[] statements = new String[]{
+                "INSERT INTO timetable_versions (version_id, academic_year, semester, label, status, created_by) VALUES (?, '2025-26', 5, 'Odd Semester 2025-26 - Dev Seed', 'ACTIVE', '44444444-4444-4444-4444-444444444002') ON CONFLICT (version_id) DO NOTHING",
+                "INSERT INTO timetable_slots (version_id, room_id, teacher_id, department, subject_code, subject_name, section, semester, day_of_week, period_number, start_time, end_time, is_active) VALUES (?, ?, ?, 'Computer Science & Engineering', '21CS51', 'Design & Analysis of Algorithms', 'A', 5, 1, 1, '08:00', '09:00', true) ON CONFLICT DO NOTHING",
+                "INSERT INTO timetable_slots (version_id, room_id, teacher_id, department, subject_code, subject_name, section, semester, day_of_week, period_number, start_time, end_time, is_active) VALUES (?, ?, ?, 'Computer Science & Engineering', '21CS52', 'Operating Systems', 'B', 5, 1, 2, '09:00', '10:00', true) ON CONFLICT DO NOTHING",
+                "INSERT INTO timetable_slots (version_id, room_id, teacher_id, department, subject_code, subject_name, section, semester, day_of_week, period_number, start_time, end_time, is_active) VALUES (?, ?, ?, 'Computer Science & Engineering', '21CSL57', 'CN & OS Lab', 'A', 5, 3, 3, '10:15', '12:15', true) ON CONFLICT DO NOTHING",
+                "INSERT INTO timetable_slots (version_id, room_id, teacher_id, department, subject_code, subject_name, section, semester, day_of_week, period_number, start_time, end_time, is_active) VALUES (?, ?, ?, 'Computer Science & Engineering', '21CS53', 'Database Management Systems', 'C', 5, 2, 4, '11:00', '12:00', true) ON CONFLICT DO NOTHING",
+                "INSERT INTO timetable_slots (version_id, room_id, teacher_id, department, subject_code, subject_name, section, semester, day_of_week, period_number, start_time, end_time, is_active) VALUES (?, ?, ?, 'Computer Science & Engineering', '21CS54', 'Machine Learning', 'A', 5, 4, 5, '13:00', '14:00', true) ON CONFLICT DO NOTHING"
+        };
+
+        Object[][] params = new Object[][]{
+                {versionId},
+                {versionId, roomA201, teacherRamesh},
+                {versionId, roomA202, teacherRamesh},
+                {versionId, roomB101, teacherPriya},
+                {versionId, roomA201, teacherAnil},
+                {versionId, roomA202, teacherMeera}
+        };
+
+        for (int i = 0; i < statements.length; i++) {
+            jdbcTemplate.update(statements[i], params[i]);
+        }
+
+        jdbcTemplate.execute("SELECT setval(pg_get_serial_sequence('timetable_slots', 'slot_id'), COALESCE((SELECT MAX(slot_id) FROM timetable_slots), 1), true)");
+        System.out.println("✓ Dev seed: timetable slots inserted for teacher schedule visibility");
     }
 
     private void upsertTeacher(

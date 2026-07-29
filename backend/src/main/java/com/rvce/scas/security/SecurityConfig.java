@@ -6,6 +6,7 @@ import com.rvce.scas.rbac.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -76,6 +77,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/refresh",
@@ -179,15 +181,18 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:5174",
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "https://localhost:*",
+                "http://127.0.0.1:*",
+                "https://127.0.0.1:*",
+                "https://*.app.github.dev",
+                "https://*.github.dev",
                 "https://scas.rvce.edu.in"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of(
-                "Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Auth-Error"
+                "Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Auth-Error", "Origin"
         ));
         config.setExposedHeaders(List.of("X-Auth-Error"));
         config.setAllowCredentials(true);

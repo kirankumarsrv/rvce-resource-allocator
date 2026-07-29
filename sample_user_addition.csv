@@ -1,0 +1,3 @@
+name,email,usn,role,departmentCode
+Demo Student,demo.student@rvce.edu.in,1RV22CS099,STUDENT,CSE
+Demo Teacher,demo.teacher@rvce.edu.in,,TEACHER,CSE

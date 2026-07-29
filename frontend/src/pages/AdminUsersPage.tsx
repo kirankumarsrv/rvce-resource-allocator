@@ -9,6 +9,7 @@ const isValidRvceEmail = (value: string) => RVCE_EMAIL_REGEX.test(value.trim())
 const AdminUsersPage = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [usn, setUsn] = useState('')
   const [role, setRole] = useState('TEACHER')
   const [department, setDepartment] = useState('CSE')
   const [bulkUsers, setBulkUsers] = useState<CreateUserRequest[]>([])
@@ -22,9 +23,15 @@ const AdminUsersPage = () => {
       return
     }
 
+    if (role === 'STUDENT' && !usn.trim()) {
+      setMessage('USN is required for student users')
+      return
+    }
+
     const req: CreateUserRequest = {
       name,
       email,
+      usn: role === 'STUDENT' ? usn.trim() : undefined,
       role,
       departmentCode: department,
     }
@@ -36,6 +43,7 @@ const AdminUsersPage = () => {
       // Clear form
       setName('')
       setEmail('')
+      setUsn('')
       setRole('TEACHER')
       setDepartment('CSE')
     } catch (e) {
@@ -44,7 +52,7 @@ const AdminUsersPage = () => {
   }
 
   const addBulkUser = () => {
-    setBulkUsers([...bulkUsers, { name: '', email: '', role: 'TEACHER', departmentCode: 'CSE' }])
+    setBulkUsers([...bulkUsers, { name: '', email: '', usn: '', role: 'TEACHER', departmentCode: 'CSE' }])
   }
 
   const updateBulkUser = (index: number, field: keyof CreateUserRequest, value: string) => {
@@ -78,6 +86,10 @@ const AdminUsersPage = () => {
         setMessage(`User ${index + 1}: department code is required`)
         return
       }
+      if (user.role === 'STUDENT' && !user.usn?.trim()) {
+        setMessage(`User ${index + 1}: USN is required for student users`)
+        return
+      }
     }
 
     try {
@@ -96,9 +108,16 @@ const AdminUsersPage = () => {
 
       <section className="mb-8">
         <h2 className="font-semibold mb-2">Create single user</h2>
-        <div className="grid gap-2 sm:grid-cols-4 mb-2">
+        <div className="grid gap-2 sm:grid-cols-5 mb-2">
           <input data-test-id="create-name" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="border p-2 rounded" />
           <input data-test-id="create-email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="border p-2 rounded" />
+          <input
+            data-test-id="create-usn"
+            placeholder={role === 'STUDENT' ? 'USN (required for students)' : 'USN (optional)'}
+            value={usn}
+            onChange={(e) => setUsn(e.target.value)}
+            className="border p-2 rounded"
+          />
           <select data-test-id="create-role" value={role} onChange={(e) => setRole(e.target.value)} className="border p-2 rounded">
             <option value="TEACHER">TEACHER</option>
             <option value="STUDENT">STUDENT</option>
@@ -145,6 +164,15 @@ const AdminUsersPage = () => {
                         onChange={(e) => updateBulkUser(index, 'email', e.target.value)}
                         className="w-full p-1 border rounded"
                         placeholder="Email"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      <input
+                        type="text"
+                        value={user.usn || ''}
+                        onChange={(e) => updateBulkUser(index, 'usn', e.target.value)}
+                        className="w-full p-1 border rounded"
+                        placeholder={user.role === 'STUDENT' ? 'USN' : 'Optional'}
                       />
                     </td>
                     <td className="border border-gray-300 p-2">
