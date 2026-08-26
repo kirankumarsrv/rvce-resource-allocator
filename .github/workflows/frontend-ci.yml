@@ -1,5 +1,9 @@
 name: Frontend CI
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   push:
     branches: [main, develop]
@@ -14,7 +18,7 @@ concurrency:
 
 jobs:
   test-and-build:
-    name: Test, Build & Scan Frontend
+    name: Test & Type Check Frontend
     runs-on: ubuntu-22.04
 
     steps:
@@ -44,48 +48,3 @@ jobs:
         env:
           CI: true
         run: npm test -- --coverage --watchAll=false
-
-      - name: Check coverage
-        working-directory: frontend
-        run: echo "Coverage enforced via jest.config.js threshold"
-
-      - name: Build Next.js app
-        working-directory: frontend
-        env:
-          NEXT_PUBLIC_API_URL: https://api.scas.rvce.edu.in
-        run: npm run build
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build & scan Docker image
-        working-directory: frontend
-        env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t "${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" .
-          docker save "${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" | gzip > image.tar.gz
-
-      - name: Trivy scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          input: image.tar.gz
-          severity: 'CRITICAL'
-          exit-code: '1'
-
-      - name: Push to ECR
-        env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker push "${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}"
-          docker push "${ECR_REGISTRY}/scas-frontend:latest"

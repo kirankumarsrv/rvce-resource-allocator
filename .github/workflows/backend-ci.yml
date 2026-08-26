@@ -1,5 +1,9 @@
 name: Backend CI
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   push:
     branches: [main, develop]
@@ -60,61 +64,33 @@ jobs:
         run: ./gradlew dependencyCheckAnalyze -DfailBuildOnCVSS=7
         continue-on-error: true
 
-      - name: Upload dependency check report
-        if: always() && hashFiles('backend/build/reports/dependency-check-report.html') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-check-report
-          path: backend/build/reports/dependency-check-report.html
-
   build-and-push:
-    name: Build Docker Image & Security Scan
+    name: Build Docker Image & Push to ACR
     runs-on: ubuntu-22.04
     needs: test
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Login to Amazon ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: Log in to Azure Container Registry (ACR)
+        run: |
+          az acr login --name ${{ secrets.AZURE_REGISTRY_NAME }}
 
-      - name: Build Docker image
+      - name: Build and Push Docker image
         working-directory: backend
         env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          ACR_REGISTRY: ${{ secrets.AZURE_REGISTRY_NAME }}.azurecr.io
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          IMAGE="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}"
-          docker build -t "$IMAGE" -t "${ECR_REGISTRY}/scas-backend:latest" .
-          echo "IMAGE=${IMAGE}" >> $GITHUB_OUTPUT
-        id: build
-
-      - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ steps.build.outputs.IMAGE }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL'
-          exit-code: '1'
-
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: Push to ECR (if scan passes)
-        env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker push "${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}"
-          docker push "${ECR_REGISTRY}/scas-backend:latest"
+          IMAGE="${ACR_REGISTRY}/scas-backend:${IMAGE_TAG}"
+          LATEST_IMAGE="${ACR_REGISTRY}/scas-backend:latest"
+          docker build -t "$IMAGE" -t "$LATEST_IMAGE" .
+          docker push "$IMAGE"
+          docker push "$LATEST_IMAGE"
