@@ -4,7 +4,10 @@
 
 import type { LoginRequest, LoginResponse } from '@/types/auth'
 
-const API_BASE = '/api/auth'
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+export const apiUrl = (path: string): string =>
+  /^https?:\/\//.test(path) ? path : `${API_BASE_URL}${path}`
+const API_BASE = apiUrl('/api/auth')
 const ACCESS_TOKEN_KEY = 'accessToken'
 const REFRESH_TOKEN_KEY = 'refreshToken'
 
@@ -81,7 +84,7 @@ export const authenticatedFetch = async (
       Object.assign(headers, authHeaders)
     }
 
-    return fetch(url, {
+    return fetch(apiUrl(url), {
       ...options,
       headers,
     })

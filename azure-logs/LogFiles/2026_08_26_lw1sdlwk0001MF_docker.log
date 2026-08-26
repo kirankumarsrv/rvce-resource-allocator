@@ -1,0 +1,601 @@
+2026-08-26T11:39:05.5432411Z State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-08-26T11:39:09.4919578Z State: Starting, Action: StartingMsiContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-08-26T11:39:32.5742407Z State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-08-26T11:39:32.5814235Z Container start method called.
+2026-08-26T11:39:32.5825984Z State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T11:39:32.5833959Z Establishing network.
+2026-08-26T11:39:32.5839090Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de.
+2026-08-26T11:39:51.2564759Z Image scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de is pulled from registry scasacr2026rvce.azurecr.io
+2026-08-26T11:39:51.2569099Z Container is starting.
+2026-08-26T11:39:51.2668475Z State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T11:39:51.2680266Z Establishing user namespace if not established already.
+2026-08-26T11:39:51.2681901Z Establishing network if not established already.
+2026-08-26T11:39:51.2683087Z Mounting volumes.
+2026-08-26T11:39:51.2687642Z Nested mountpoint volatile/logs
+2026-08-26T11:39:51.2978241Z Nested mountpoint 
+2026-08-26T11:39:51.3077275Z Nested mountpoint 
+2026-08-26T11:39:51.4600675Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T11:39:51.4609416Z Creating container.
+2026-08-26T11:39:51.5255089Z Creating pipes for streaming container io.
+2026-08-26T11:39:51.5258595Z Creating stdout named pipe at /podr/container/pipe/738454137397_scas-backend-2026-rvce/stdout_c4f3c516952646d7aab4e3c49dd9bb29.
+2026-08-26T11:39:51.5261184Z Successfully created stdout named pipe at: /podr/container/pipe/738454137397_scas-backend-2026-rvce/stdout_c4f3c516952646d7aab4e3c49dd9bb29.
+2026-08-26T11:39:51.5267690Z Opening named pipe /podr/container/pipe/738454137397_scas-backend-2026-rvce/stdout_c4f3c516952646d7aab4e3c49dd9bb29 for reading in non-blocking mode.
+2026-08-26T11:39:51.5268823Z Successfully opened named pipe: /podr/container/pipe/738454137397_scas-backend-2026-rvce/stdout_c4f3c516952646d7aab4e3c49dd9bb29.
+2026-08-26T11:39:51.5271003Z Successfully removed non-blocking flag from /podr/container/pipe/738454137397_scas-backend-2026-rvce/stdout_c4f3c516952646d7aab4e3c49dd9bb29.
+2026-08-26T11:39:51.5436239Z Creating stderr named pipe at /podr/container/pipe/738454137397_scas-backend-2026-rvce/stderr_5e523dfd7d3f4395b02d0daec42d9bd2.
+2026-08-26T11:39:51.5438156Z Successfully created stderr named pipe at: /podr/container/pipe/738454137397_scas-backend-2026-rvce/stderr_5e523dfd7d3f4395b02d0daec42d9bd2.
+2026-08-26T11:39:51.5439049Z Opening named pipe /podr/container/pipe/738454137397_scas-backend-2026-rvce/stderr_5e523dfd7d3f4395b02d0daec42d9bd2 for reading in non-blocking mode.
+2026-08-26T11:39:51.5444636Z Successfully opened named pipe: /podr/container/pipe/738454137397_scas-backend-2026-rvce/stderr_5e523dfd7d3f4395b02d0daec42d9bd2.
+2026-08-26T11:39:51.5445575Z Successfully removed non-blocking flag from /podr/container/pipe/738454137397_scas-backend-2026-rvce/stderr_5e523dfd7d3f4395b02d0daec42d9bd2.
+2026-08-26T11:39:51.5447564Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de
+2026-08-26T11:39:52.3719606Z Starting container: 738454137397_scas-backend-2026-rvce.
+2026-08-26T11:39:52.4731160Z Starting watchers and probes.
+2026-08-26T11:39:52.5382709Z Starting metrics collection.
+2026-08-26T11:39:52.5385598Z Container is running.
+2026-08-26T11:39:52.5410298Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T11:39:52.6868619Z Container start method finished after 20104 ms.
+2026-08-26T11:39:52.7516374Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T11:39:52.7910241Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T11:41:20.3557636Z Container has finished running with exit code: 1.
+2026-08-26T11:41:20.3711433Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T11:41:20.4076967Z Stop and delete container. Retry count = 0
+2026-08-26T11:41:20.4178383Z Stopping container: 738454137397_scas-backend-2026-rvce.
+2026-08-26T11:41:20.5325360Z Deleting container: 738454137397_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T11:41:20.7934446Z Container spec TerminationMessagePolicy  path 
+2026-08-26T11:41:20.8052686Z Container is terminated. Total time elapsed: 424 ms.
+2026-08-26T11:41:20.8055228Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T11:41:20.8138078Z State: Stopping, Action: CancellingStartup, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:41:21.0144224Z Site startup probe failed after 88.1312603 seconds.
+2026-08-26T11:41:21.4953263Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:41:21.5644784Z Failed to start site. Revert by stopping site.
+2026-08-26T11:41:21.6133956Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:41:21.6302524Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:41:22.4143879Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T11:41:22.4160264Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:41:22.4173433Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T11:41:22.4947234Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:41:23.3610915Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:41:23.9323786Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:41:23 (UTC), DetailsLevel: ERR
+2026-08-26T11:41:25.0508444Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:41:23 (UTC), DetailsLevel: ERR
+2026-08-26T11:42:01.6545008Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:41:23 (UTC), DetailsLevel: ERR
+2026-08-26T11:42:07.0359719Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:41:23 (UTC), DetailsLevel: ERR
+2026-08-26T11:42:33.7698572Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:41:23 (UTC), DetailsLevel: ERR
+2026-08-26T11:42:33.7704176Z Container start method called.
+2026-08-26T11:42:33.7705420Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T11:42:33.7706465Z Establishing network.
+2026-08-26T11:42:33.7760925Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de.
+2026-08-26T11:42:37.7632292Z Container is starting.
+2026-08-26T11:42:37.7634305Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T11:42:37.7635800Z Establishing user namespace if not established already.
+2026-08-26T11:42:37.7707430Z Establishing network if not established already.
+2026-08-26T11:42:37.7714523Z Mounting volumes.
+2026-08-26T11:42:37.7734610Z Nested mountpoint volatile/logs
+2026-08-26T11:42:37.8312688Z Nested mountpoint 
+2026-08-26T11:42:38.0122515Z Nested mountpoint 
+2026-08-26T11:42:38.0879281Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T11:42:38.0881972Z Creating container.
+2026-08-26T11:42:38.0882628Z Creating pipes for streaming container io.
+2026-08-26T11:42:38.0883643Z Creating stdout named pipe at /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stdout_a92075ba0cc643fe99423e7f6bc09584.
+2026-08-26T11:42:38.1403312Z Successfully created stdout named pipe at: /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stdout_a92075ba0cc643fe99423e7f6bc09584.
+2026-08-26T11:42:38.1404710Z Opening named pipe /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stdout_a92075ba0cc643fe99423e7f6bc09584 for reading in non-blocking mode.
+2026-08-26T11:42:38.1405729Z Successfully opened named pipe: /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stdout_a92075ba0cc643fe99423e7f6bc09584.
+2026-08-26T11:42:38.1406275Z Successfully removed non-blocking flag from /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stdout_a92075ba0cc643fe99423e7f6bc09584.
+2026-08-26T11:42:38.1407512Z Creating stderr named pipe at /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stderr_9bbb63fb10a84a4f9ecd72ea0933435c.
+2026-08-26T11:42:38.1579433Z Successfully created stderr named pipe at: /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stderr_9bbb63fb10a84a4f9ecd72ea0933435c.
+2026-08-26T11:42:38.1581158Z Opening named pipe /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stderr_9bbb63fb10a84a4f9ecd72ea0933435c for reading in non-blocking mode.
+2026-08-26T11:42:38.1582131Z Successfully opened named pipe: /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stderr_9bbb63fb10a84a4f9ecd72ea0933435c.
+2026-08-26T11:42:38.1583039Z Successfully removed non-blocking flag from /podr/container/pipe/a788b6a82b30_scas-backend-2026-rvce/stderr_9bbb63fb10a84a4f9ecd72ea0933435c.
+2026-08-26T11:42:38.1600570Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de
+2026-08-26T11:42:40.1310267Z Starting container: a788b6a82b30_scas-backend-2026-rvce.
+2026-08-26T11:42:40.6386593Z Starting watchers and probes.
+2026-08-26T11:42:40.6555357Z Starting metrics collection.
+2026-08-26T11:42:40.6561578Z Container is running.
+2026-08-26T11:42:40.6583685Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T11:42:41.1073414Z Container start method finished after 7336 ms.
+2026-08-26T11:42:41.1082987Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T11:42:41.1083395Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T11:44:27.6900069Z Container has finished running with exit code: 1.
+2026-08-26T11:44:27.6968909Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T11:44:27.7000217Z Stop and delete container. Retry count = 0
+2026-08-26T11:44:27.7067254Z Stopping container: a788b6a82b30_scas-backend-2026-rvce.
+2026-08-26T11:44:27.8200462Z Deleting container: a788b6a82b30_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T11:44:28.1912635Z Container spec TerminationMessagePolicy  path 
+2026-08-26T11:44:28.1918345Z Container is terminated. Total time elapsed: 494 ms.
+2026-08-26T11:44:28.1928984Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T11:44:28.2003814Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:41:21, LastErrorDetails: Container exited with exit code 1 during startup after 88.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:44:28.2801060Z Site startup probe failed after 107.1711292 seconds.
+2026-08-26T11:44:28.5095671Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:44:28.5117113Z Failed to start site. Revert by stopping site.
+2026-08-26T11:44:28.5131640Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:44:28.5400777Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:44:29.1117489Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T11:44:29.1127920Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:44:29.1130218Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T11:44:29.1315801Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:44:29.7015655Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:44:30.1802893Z Site: scas-backend-2026-rvce will be blocked for 1 minutes till 08/26/2026 11:45:30
+2026-08-26T11:44:30.1804193Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site: scas-backend-2026-rvce will be blocked for 1 minutes till 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:44:30.3378487Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:44:30 (UTC), DetailsLevel: WARN
+2026-08-26T11:44:32.1273297Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:44:30 (UTC), DetailsLevel: WARN
+2026-08-26T11:44:37.4140988Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:44:37.4141430Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:44:42.6063111Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:44:42.6063435Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:44:47.8251415Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:44:47.8252202Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:44:52.9849194Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:44:52.9849499Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:44:58.3651686Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:44:58.3654663Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:45:03.5643679Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:03.5645077Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:45:08.8279629Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:08.8281229Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:45:14.0430658Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:14.0430999Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:45:19.4500048Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:19.4500822Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:45:24.5744586Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:24.5744924Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:45:29.6977373Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:29.6977679Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:45:30.1863905Z Site: scas-backend-2026-rvce is unblocked.
+2026-08-26T11:45:34.8413528Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:38.1428092Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:52.6779447Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:45:30, DetailsLevel: WARN
+2026-08-26T11:45:52.6781018Z Container start method called.
+2026-08-26T11:45:52.6782047Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T11:45:52.6783076Z Establishing network.
+2026-08-26T11:45:52.6784483Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de.
+2026-08-26T11:45:58.5371169Z Container is starting.
+2026-08-26T11:45:58.5375433Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T11:45:58.5376344Z Establishing user namespace if not established already.
+2026-08-26T11:45:58.5377041Z Establishing network if not established already.
+2026-08-26T11:45:58.5384582Z Mounting volumes.
+2026-08-26T11:45:58.5386226Z Nested mountpoint volatile/logs
+2026-08-26T11:45:58.5687104Z Nested mountpoint 
+2026-08-26T11:45:58.6249282Z Nested mountpoint 
+2026-08-26T11:45:58.7500449Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T11:45:58.7503329Z Creating container.
+2026-08-26T11:45:58.7504031Z Creating pipes for streaming container io.
+2026-08-26T11:45:58.7504745Z Creating stdout named pipe at /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stdout_de573dfeff7f4862aa57c29d65b95975.
+2026-08-26T11:45:58.7506287Z Successfully created stdout named pipe at: /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stdout_de573dfeff7f4862aa57c29d65b95975.
+2026-08-26T11:45:58.7507855Z Opening named pipe /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stdout_de573dfeff7f4862aa57c29d65b95975 for reading in non-blocking mode.
+2026-08-26T11:45:58.7591065Z Successfully opened named pipe: /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stdout_de573dfeff7f4862aa57c29d65b95975.
+2026-08-26T11:45:58.7592434Z Successfully removed non-blocking flag from /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stdout_de573dfeff7f4862aa57c29d65b95975.
+2026-08-26T11:45:58.7593785Z Creating stderr named pipe at /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stderr_5ae6ce8cd37e4eddadfd0d949baa0b65.
+2026-08-26T11:45:58.7595048Z Successfully created stderr named pipe at: /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stderr_5ae6ce8cd37e4eddadfd0d949baa0b65.
+2026-08-26T11:45:58.7595688Z Opening named pipe /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stderr_5ae6ce8cd37e4eddadfd0d949baa0b65 for reading in non-blocking mode.
+2026-08-26T11:45:58.7596441Z Successfully opened named pipe: /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stderr_5ae6ce8cd37e4eddadfd0d949baa0b65.
+2026-08-26T11:45:58.7596960Z Successfully removed non-blocking flag from /podr/container/pipe/12e0d51101d2_scas-backend-2026-rvce/stderr_5ae6ce8cd37e4eddadfd0d949baa0b65.
+2026-08-26T11:45:58.7597918Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de
+2026-08-26T11:45:59.4931695Z Starting container: 12e0d51101d2_scas-backend-2026-rvce.
+2026-08-26T11:45:59.5738574Z Starting watchers and probes.
+2026-08-26T11:45:59.5748328Z Starting metrics collection.
+2026-08-26T11:45:59.5837659Z Container is running.
+2026-08-26T11:45:59.5839144Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T11:45:59.7855176Z Container start method finished after 7107 ms.
+2026-08-26T11:45:59.8523400Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T11:45:59.8533460Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T11:48:23.2064625Z Container has finished running with exit code: 1.
+2026-08-26T11:48:23.2067284Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T11:48:23.2426468Z Stop and delete container. Retry count = 0
+2026-08-26T11:48:23.2434909Z Stopping container: 12e0d51101d2_scas-backend-2026-rvce.
+2026-08-26T11:48:23.5697318Z Deleting container: 12e0d51101d2_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T11:48:24.0849656Z Container spec TerminationMessagePolicy  path 
+2026-08-26T11:48:24.0950859Z Container is terminated. Total time elapsed: 886 ms.
+2026-08-26T11:48:24.0967010Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T11:48:24.1040527Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:44:28, LastErrorDetails: Container exited with exit code 1 during startup after 107.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:48:24.3134844Z Site startup probe failed after 144.433723 seconds.
+2026-08-26T11:48:24.7605024Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:48:24.8196992Z Failed to start site. Revert by stopping site.
+2026-08-26T11:48:24.8962617Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:48:24.9272819Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:48:25.8462382Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T11:48:25.8553977Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:48:25.8643438Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T11:48:25.8852177Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:48:26.4249450Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T11:48:27.2356338Z Site: scas-backend-2026-rvce will be blocked for 1 minutes till 08/26/2026 11:49:27
+2026-08-26T11:48:27.2369910Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site: scas-backend-2026-rvce will be blocked for 1 minutes till 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T11:48:27.2373609Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:48:27 (UTC), DetailsLevel: WARN
+2026-08-26T11:48:28.2151997Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 11:48:27 (UTC), DetailsLevel: WARN
+2026-08-26T11:48:33.8172758Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T11:48:33.8173374Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:48:39.2262740Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T11:48:39.2263857Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:48:44.6904038Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T11:48:44.6904992Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:48:49.9948791Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T11:48:49.9950059Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:48:55.2512979Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T11:48:55.2513819Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:49:00.5524001Z State: Blocked, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T11:49:00.5525169Z Start site prohibitted because the site is being blocked.
+2026-08-26T11:49:27.2438476Z Site: scas-backend-2026-rvce is unblocked.
+2026-08-26T12:24:28.3024104Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T12:24:31.0319337Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T12:24:45.8794483Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 08/26/2026 11:49:27, DetailsLevel: WARN
+2026-08-26T12:24:45.8882736Z Container start method called.
+2026-08-26T12:24:45.8893017Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T12:24:45.8899507Z Establishing network.
+2026-08-26T12:24:45.8981162Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de.
+2026-08-26T12:24:49.8204115Z Container is starting.
+2026-08-26T12:24:49.8208665Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T12:24:49.8209445Z Establishing user namespace if not established already.
+2026-08-26T12:24:49.8210132Z Establishing network if not established already.
+2026-08-26T12:24:49.8210852Z Mounting volumes.
+2026-08-26T12:24:49.8211972Z Nested mountpoint volatile/logs
+2026-08-26T12:24:49.8867191Z Nested mountpoint 
+2026-08-26T12:24:49.9115746Z Nested mountpoint 
+2026-08-26T12:24:50.1034501Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T12:24:50.1289548Z Creating container.
+2026-08-26T12:24:50.1290984Z Creating pipes for streaming container io.
+2026-08-26T12:24:50.1293000Z Creating stdout named pipe at /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stdout_edd5f276a85f495c918c7f029cc5b0b0.
+2026-08-26T12:24:50.1299224Z Successfully created stdout named pipe at: /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stdout_edd5f276a85f495c918c7f029cc5b0b0.
+2026-08-26T12:24:50.1301857Z Opening named pipe /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stdout_edd5f276a85f495c918c7f029cc5b0b0 for reading in non-blocking mode.
+2026-08-26T12:24:50.1490965Z Successfully opened named pipe: /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stdout_edd5f276a85f495c918c7f029cc5b0b0.
+2026-08-26T12:24:50.1492913Z Successfully removed non-blocking flag from /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stdout_edd5f276a85f495c918c7f029cc5b0b0.
+2026-08-26T12:24:50.1494211Z Creating stderr named pipe at /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stderr_4897ae2e6ccd4f5697f18a7cf44ddb6a.
+2026-08-26T12:24:50.1495715Z Successfully created stderr named pipe at: /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stderr_4897ae2e6ccd4f5697f18a7cf44ddb6a.
+2026-08-26T12:24:50.1496429Z Opening named pipe /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stderr_4897ae2e6ccd4f5697f18a7cf44ddb6a for reading in non-blocking mode.
+2026-08-26T12:24:50.1497565Z Successfully opened named pipe: /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stderr_4897ae2e6ccd4f5697f18a7cf44ddb6a.
+2026-08-26T12:24:50.1498060Z Successfully removed non-blocking flag from /podr/container/pipe/d4d4512e06b9_scas-backend-2026-rvce/stderr_4897ae2e6ccd4f5697f18a7cf44ddb6a.
+2026-08-26T12:24:50.1498985Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-544b4de
+2026-08-26T12:24:51.2476616Z Starting container: d4d4512e06b9_scas-backend-2026-rvce.
+2026-08-26T12:24:51.3769130Z Starting watchers and probes.
+2026-08-26T12:24:51.3776457Z Starting metrics collection.
+2026-08-26T12:24:51.3781903Z Container is running.
+2026-08-26T12:24:51.3788839Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T12:24:51.4937041Z Container start method finished after 5605 ms.
+2026-08-26T12:24:51.4942689Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T12:24:51.4943775Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T12:26:17.8068211Z Container has finished running with exit code: 1.
+2026-08-26T12:26:17.8123488Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T12:26:17.8254475Z Stop and delete container. Retry count = 0
+2026-08-26T12:26:17.8260370Z Stopping container: d4d4512e06b9_scas-backend-2026-rvce.
+2026-08-26T12:26:17.9208124Z Deleting container: d4d4512e06b9_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T12:26:18.2786536Z Container spec TerminationMessagePolicy  path 
+2026-08-26T12:26:18.2902906Z Container is terminated. Total time elapsed: 467 ms.
+2026-08-26T12:26:18.3058311Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T12:26:18.3153614Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 11:48:24, LastErrorDetails: Container exited with exit code 1 during startup after 144.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:26:18.5111559Z Site startup probe failed after 86.870371 seconds.
+2026-08-26T12:26:18.8129906Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:26:18.8483430Z Failed to start site. Revert by stopping site.
+2026-08-26T12:26:18.8642360Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:26:18.8653358Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:26:19.6618379Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T12:26:19.6678012Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:26:19.6679785Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T12:52:23.8892097Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 12:26:21 (UTC), DetailsLevel: WARN
+2026-08-26T12:52:29.3754791Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 12:26:21 (UTC), DetailsLevel: WARN
+2026-08-26T12:52:45.8074035Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 12:26:21 (UTC), DetailsLevel: WARN
+2026-08-26T12:52:45.8084350Z Container start method called.
+2026-08-26T12:52:45.8275918Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T12:52:45.8277955Z Establishing network.
+2026-08-26T12:52:45.8279000Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de.
+2026-08-26T12:52:54.4416982Z Image scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de is pulled from registry scasacr2026rvce.azurecr.io
+2026-08-26T12:52:54.4439141Z Container is starting.
+2026-08-26T12:52:54.4535871Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T12:52:54.4538108Z Establishing user namespace if not established already.
+2026-08-26T12:52:54.4539331Z Establishing network if not established already.
+2026-08-26T12:52:54.4540592Z Mounting volumes.
+2026-08-26T12:52:54.4542383Z Nested mountpoint volatile/logs
+2026-08-26T12:52:54.4910191Z Nested mountpoint 
+2026-08-26T12:52:54.5004601Z Nested mountpoint 
+2026-08-26T12:52:54.6542789Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T12:52:54.6549580Z Creating container.
+2026-08-26T12:52:54.6552079Z Creating pipes for streaming container io.
+2026-08-26T12:52:54.6563370Z Creating stdout named pipe at /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stdout_b50a64c1e8e14743ba8fc50eb4511aeb.
+2026-08-26T12:52:54.6758728Z Successfully created stdout named pipe at: /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stdout_b50a64c1e8e14743ba8fc50eb4511aeb.
+2026-08-26T12:52:54.6760469Z Opening named pipe /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stdout_b50a64c1e8e14743ba8fc50eb4511aeb for reading in non-blocking mode.
+2026-08-26T12:52:54.7124009Z Successfully opened named pipe: /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stdout_b50a64c1e8e14743ba8fc50eb4511aeb.
+2026-08-26T12:52:54.7125862Z Successfully removed non-blocking flag from /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stdout_b50a64c1e8e14743ba8fc50eb4511aeb.
+2026-08-26T12:52:54.7148732Z Creating stderr named pipe at /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stderr_09f65f6c97bc4b5dbacefd6f7832de0f.
+2026-08-26T12:52:54.7151368Z Successfully created stderr named pipe at: /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stderr_09f65f6c97bc4b5dbacefd6f7832de0f.
+2026-08-26T12:52:54.7152465Z Opening named pipe /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stderr_09f65f6c97bc4b5dbacefd6f7832de0f for reading in non-blocking mode.
+2026-08-26T12:52:54.7217535Z Successfully opened named pipe: /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stderr_09f65f6c97bc4b5dbacefd6f7832de0f.
+2026-08-26T12:52:54.7218743Z Successfully removed non-blocking flag from /podr/container/pipe/d77fad98c807_scas-backend-2026-rvce/stderr_09f65f6c97bc4b5dbacefd6f7832de0f.
+2026-08-26T12:52:54.7237068Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de
+2026-08-26T12:52:55.3539925Z Starting container: d77fad98c807_scas-backend-2026-rvce.
+2026-08-26T12:52:55.8173121Z Starting watchers and probes.
+2026-08-26T12:52:55.8198691Z Starting metrics collection.
+2026-08-26T12:52:55.8199836Z Container is running.
+2026-08-26T12:52:55.8299477Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T12:52:55.9156260Z Container start method finished after 10106 ms.
+2026-08-26T12:52:55.9186504Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T12:52:55.9442198Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T12:54:15.8481489Z Container has finished running with exit code: 1.
+2026-08-26T12:54:15.8491912Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T12:54:15.8592727Z Stop and delete container. Retry count = 0
+2026-08-26T12:54:15.8595865Z Stopping container: d77fad98c807_scas-backend-2026-rvce.
+2026-08-26T12:54:15.9936212Z Deleting container: d77fad98c807_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T12:54:16.2465812Z Container spec TerminationMessagePolicy  path 
+2026-08-26T12:54:16.2467282Z Container is terminated. Total time elapsed: 396 ms.
+2026-08-26T12:54:16.2467940Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T12:54:16.2565204Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:26:18, LastErrorDetails: Container exited with exit code 1 during startup after 86.9s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:54:16.5069635Z Site startup probe failed after 80.4317337 seconds.
+2026-08-26T12:54:16.7190622Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:54:16.8176116Z Failed to start site. Revert by stopping site.
+2026-08-26T12:54:16.8324722Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:54:16.8334362Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:54:18.0416278Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T12:54:18.0423802Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:54:18.0430769Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T12:54:18.0699836Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:54:18.7240247Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T12:54:19.3821800Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 12:54:19 (UTC), DetailsLevel: ERR
+2026-08-26T12:54:20.1733030Z State: Stopped, Action: None, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 12:54:19 (UTC), DetailsLevel: ERR
+2026-08-26T13:00:32.1724112Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 12:54:19 (UTC), DetailsLevel: ERR
+2026-08-26T13:00:35.1780972Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 12:54:19 (UTC), DetailsLevel: ERR
+2026-08-26T13:00:50.9346182Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 12:54:19 (UTC), DetailsLevel: ERR
+2026-08-26T13:00:50.9517064Z Container start method called.
+2026-08-26T13:00:50.9518352Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:00:50.9519608Z Establishing network.
+2026-08-26T13:00:50.9520883Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de.
+2026-08-26T13:00:51.9045413Z Container is starting.
+2026-08-26T13:00:51.9046828Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:00:51.9048031Z Establishing user namespace if not established already.
+2026-08-26T13:00:51.9049104Z Establishing network if not established already.
+2026-08-26T13:00:51.9058653Z Mounting volumes.
+2026-08-26T13:00:51.9060281Z Nested mountpoint volatile/logs
+2026-08-26T13:00:51.9088230Z Nested mountpoint 
+2026-08-26T13:00:51.9193650Z Nested mountpoint 
+2026-08-26T13:00:52.0705301Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T13:00:52.0706662Z Creating container.
+2026-08-26T13:00:52.0974994Z Creating pipes for streaming container io.
+2026-08-26T13:00:52.0976392Z Creating stdout named pipe at /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stdout_78989a5419bf40afb007cf59533f15ee.
+2026-08-26T13:00:52.0992817Z Successfully created stdout named pipe at: /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stdout_78989a5419bf40afb007cf59533f15ee.
+2026-08-26T13:00:52.0993998Z Opening named pipe /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stdout_78989a5419bf40afb007cf59533f15ee for reading in non-blocking mode.
+2026-08-26T13:00:52.0995358Z Successfully opened named pipe: /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stdout_78989a5419bf40afb007cf59533f15ee.
+2026-08-26T13:00:52.0996623Z Successfully removed non-blocking flag from /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stdout_78989a5419bf40afb007cf59533f15ee.
+2026-08-26T13:00:52.1636636Z Creating stderr named pipe at /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stderr_fe91504ef33c47ccb67c761b57fb4eac.
+2026-08-26T13:00:52.1752073Z Successfully created stderr named pipe at: /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stderr_fe91504ef33c47ccb67c761b57fb4eac.
+2026-08-26T13:00:52.1753629Z Opening named pipe /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stderr_fe91504ef33c47ccb67c761b57fb4eac for reading in non-blocking mode.
+2026-08-26T13:00:52.1754737Z Successfully opened named pipe: /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stderr_fe91504ef33c47ccb67c761b57fb4eac.
+2026-08-26T13:00:52.1755414Z Successfully removed non-blocking flag from /podr/container/pipe/66c57b38db6a_scas-backend-2026-rvce/stderr_fe91504ef33c47ccb67c761b57fb4eac.
+2026-08-26T13:00:52.1821130Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de
+2026-08-26T13:00:52.9952372Z Starting container: 66c57b38db6a_scas-backend-2026-rvce.
+2026-08-26T13:00:53.0962450Z Starting watchers and probes.
+2026-08-26T13:00:53.0964400Z Starting metrics collection.
+2026-08-26T13:00:53.1068664Z Container is running.
+2026-08-26T13:00:53.1069973Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:00:53.2387747Z Container start method finished after 2286 ms.
+2026-08-26T13:00:53.2396104Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:00:53.2487546Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T13:02:46.8704712Z Container has finished running with exit code: 1.
+2026-08-26T13:02:46.8715228Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T13:02:46.8792053Z Stop and delete container. Retry count = 0
+2026-08-26T13:02:46.8793219Z Stopping container: 66c57b38db6a_scas-backend-2026-rvce.
+2026-08-26T13:02:46.9718570Z Deleting container: 66c57b38db6a_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T13:02:47.2277656Z Container spec TerminationMessagePolicy  path 
+2026-08-26T13:02:47.2289321Z Container is terminated. Total time elapsed: 350 ms.
+2026-08-26T13:02:47.2295420Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T13:02:47.2354580Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 12:54:16, LastErrorDetails: Container exited with exit code 1 during startup after 80.4s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:02:47.4288712Z Site startup probe failed after 114.1787557 seconds.
+2026-08-26T13:02:47.8593569Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:02:47.9137799Z Failed to start site. Revert by stopping site.
+2026-08-26T13:02:47.9276904Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:02:47.9287924Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:02:48.5222295Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T13:02:48.5227888Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:02:48.5230135Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T13:17:13.4252985Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:02:50 (UTC), DetailsLevel: WARN
+2026-08-26T13:17:19.8788324Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:02:50 (UTC), DetailsLevel: WARN
+2026-08-26T13:17:49.5254652Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:02:50 (UTC), DetailsLevel: WARN
+2026-08-26T13:17:49.5260127Z Container start method called.
+2026-08-26T13:17:49.5356084Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:17:49.5442040Z Establishing network.
+2026-08-26T13:17:49.5444209Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de.
+2026-08-26T13:17:52.1267652Z Container is starting.
+2026-08-26T13:17:52.1273068Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:17:52.1276475Z Establishing user namespace if not established already.
+2026-08-26T13:17:52.1277139Z Establishing network if not established already.
+2026-08-26T13:17:52.1277879Z Mounting volumes.
+2026-08-26T13:17:52.1285860Z Nested mountpoint volatile/logs
+2026-08-26T13:17:52.1752313Z Nested mountpoint 
+2026-08-26T13:17:52.3033134Z Nested mountpoint 
+2026-08-26T13:17:52.9836096Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T13:17:53.0374532Z Creating container.
+2026-08-26T13:17:53.0378958Z Creating pipes for streaming container io.
+2026-08-26T13:17:53.0380832Z Creating stdout named pipe at /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stdout_ff19aa76743e4d11b06795c8baac6011.
+2026-08-26T13:17:53.1118091Z Successfully created stdout named pipe at: /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stdout_ff19aa76743e4d11b06795c8baac6011.
+2026-08-26T13:17:53.1119269Z Opening named pipe /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stdout_ff19aa76743e4d11b06795c8baac6011 for reading in non-blocking mode.
+2026-08-26T13:17:53.1120042Z Successfully opened named pipe: /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stdout_ff19aa76743e4d11b06795c8baac6011.
+2026-08-26T13:17:53.1626745Z Successfully removed non-blocking flag from /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stdout_ff19aa76743e4d11b06795c8baac6011.
+2026-08-26T13:17:53.1634289Z Creating stderr named pipe at /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stderr_68f57ab012354e8098581c43370def0e.
+2026-08-26T13:17:53.1817011Z Successfully created stderr named pipe at: /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stderr_68f57ab012354e8098581c43370def0e.
+2026-08-26T13:17:53.1837000Z Opening named pipe /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stderr_68f57ab012354e8098581c43370def0e for reading in non-blocking mode.
+2026-08-26T13:17:53.1838642Z Successfully opened named pipe: /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stderr_68f57ab012354e8098581c43370def0e.
+2026-08-26T13:17:53.1839453Z Successfully removed non-blocking flag from /podr/container/pipe/7751cc8bff11_scas-backend-2026-rvce/stderr_68f57ab012354e8098581c43370def0e.
+2026-08-26T13:17:53.1840922Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-544b4de
+2026-08-26T13:17:54.6474818Z Container get mounts received unexpected exception.
+2026-08-26T13:17:54.8537195Z Container get processes received unexpected exception.
+2026-08-26T13:17:56.5621816Z Starting container: 7751cc8bff11_scas-backend-2026-rvce.
+2026-08-26T13:17:56.8203881Z Starting watchers and probes.
+2026-08-26T13:17:56.8411195Z Starting metrics collection.
+2026-08-26T13:17:56.8412779Z Container is running.
+2026-08-26T13:17:56.8413826Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:17:57.6982357Z Container start method finished after 8172 ms.
+2026-08-26T13:17:57.6983998Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:17:57.6984283Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T13:20:27.8150169Z Container has finished running with exit code: 1.
+2026-08-26T13:20:27.8151414Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T13:20:27.8225902Z Stop and delete container. Retry count = 0
+2026-08-26T13:20:27.8226620Z Stopping container: 7751cc8bff11_scas-backend-2026-rvce.
+2026-08-26T13:20:27.9642412Z Deleting container: 7751cc8bff11_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T13:20:28.3247568Z Container spec TerminationMessagePolicy  path 
+2026-08-26T13:20:28.3258334Z Container is terminated. Total time elapsed: 509 ms.
+2026-08-26T13:20:28.3265773Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T13:20:28.3437038Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:02:47, LastErrorDetails: Container exited with exit code 1 during startup after 114.1s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:20:28.7551663Z Site startup probe failed after 151.0439908 seconds.
+2026-08-26T13:20:29.1343643Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:20:29.1428207Z Failed to start site. Revert by stopping site.
+2026-08-26T13:20:29.1609079Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:20:29.1762807Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:20:29.9978648Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T13:20:30.0001236Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:20:30.0053004Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T13:23:49.7273985Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:20:31 (UTC), DetailsLevel: ERR
+2026-08-26T13:23:52.4579380Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:20:31 (UTC), DetailsLevel: ERR
+2026-08-26T13:24:11.0970438Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:20:31 (UTC), DetailsLevel: ERR
+2026-08-26T13:24:11.0972347Z Container start method called.
+2026-08-26T13:24:11.0973306Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221 for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:24:11.1150659Z Establishing network.
+2026-08-26T13:24:11.1156260Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221.
+2026-08-26T13:24:12.2724944Z Image scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221 is pulled from registry scasacr2026rvce.azurecr.io
+2026-08-26T13:24:12.2725733Z Container is starting.
+2026-08-26T13:24:12.2726763Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:24:12.2727583Z Establishing user namespace if not established already.
+2026-08-26T13:24:12.2728096Z Establishing network if not established already.
+2026-08-26T13:24:12.2728640Z Mounting volumes.
+2026-08-26T13:24:12.2729380Z Nested mountpoint volatile/logs
+2026-08-26T13:24:12.2844491Z Nested mountpoint 
+2026-08-26T13:24:12.2848899Z Nested mountpoint 
+2026-08-26T13:24:12.4878104Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T13:24:12.4879455Z Creating container.
+2026-08-26T13:24:12.4880012Z Creating pipes for streaming container io.
+2026-08-26T13:24:12.4880538Z Creating stdout named pipe at /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stdout_3d8c84b252ae45dda84725462b54a2b6.
+2026-08-26T13:24:12.4882202Z Successfully created stdout named pipe at: /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stdout_3d8c84b252ae45dda84725462b54a2b6.
+2026-08-26T13:24:12.4882704Z Opening named pipe /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stdout_3d8c84b252ae45dda84725462b54a2b6 for reading in non-blocking mode.
+2026-08-26T13:24:12.4883361Z Successfully opened named pipe: /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stdout_3d8c84b252ae45dda84725462b54a2b6.
+2026-08-26T13:24:12.4883931Z Successfully removed non-blocking flag from /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stdout_3d8c84b252ae45dda84725462b54a2b6.
+2026-08-26T13:24:12.5650259Z Creating stderr named pipe at /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stderr_1e5530f8bc9a4679a8c9e34ee76f558c.
+2026-08-26T13:24:12.5660788Z Successfully created stderr named pipe at: /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stderr_1e5530f8bc9a4679a8c9e34ee76f558c.
+2026-08-26T13:24:12.5666262Z Opening named pipe /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stderr_1e5530f8bc9a4679a8c9e34ee76f558c for reading in non-blocking mode.
+2026-08-26T13:24:12.5672696Z Successfully opened named pipe: /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stderr_1e5530f8bc9a4679a8c9e34ee76f558c.
+2026-08-26T13:24:12.5751002Z Successfully removed non-blocking flag from /podr/container/pipe/08b8e31ebf5a_scas-backend-2026-rvce/stderr_1e5530f8bc9a4679a8c9e34ee76f558c.
+2026-08-26T13:24:12.5922274Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221 from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221
+2026-08-26T13:24:13.2169921Z Starting container: 08b8e31ebf5a_scas-backend-2026-rvce.
+2026-08-26T13:24:13.3053244Z Starting watchers and probes.
+2026-08-26T13:24:13.3119080Z Starting metrics collection.
+2026-08-26T13:24:13.3120194Z Container is running.
+2026-08-26T13:24:13.3120894Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:24:13.4289474Z Container start method finished after 2331 ms.
+2026-08-26T13:24:13.4290812Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:24:13.4291047Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T13:25:31.4080658Z Container has finished running with exit code: 1.
+2026-08-26T13:25:31.4087777Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T13:25:31.4194645Z Stop and delete container. Retry count = 0
+2026-08-26T13:25:31.4195982Z Stopping container: 08b8e31ebf5a_scas-backend-2026-rvce.
+2026-08-26T13:25:31.5049522Z Deleting container: 08b8e31ebf5a_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T13:25:31.9535288Z Container spec TerminationMessagePolicy  path 
+2026-08-26T13:25:31.9600852Z Container is terminated. Total time elapsed: 543 ms.
+2026-08-26T13:25:31.9614725Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T13:25:31.9826278Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:20:29, LastErrorDetails: Container exited with exit code 1 during startup after 151.5s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:25:32.0084939Z Site startup probe failed after 78.4802644 seconds.
+2026-08-26T13:25:32.2470619Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:25:32.2660079Z Failed to start site. Revert by stopping site.
+2026-08-26T13:25:32.2661390Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:25:32.2663103Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:25:32.8704941Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T13:25:32.8711351Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:25:32.8713703Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T13:26:53.3351939Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:25:34 (UTC), DetailsLevel: ERR
+2026-08-26T13:26:56.7637874Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:25:34 (UTC), DetailsLevel: ERR
+2026-08-26T13:27:16.9087017Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:25:34 (UTC), DetailsLevel: ERR
+2026-08-26T13:27:16.9087823Z Container start method called.
+2026-08-26T13:27:16.9088171Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221 for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:27:16.9088676Z Establishing network.
+2026-08-26T13:27:16.9089435Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221.
+2026-08-26T13:27:21.3698960Z Container is starting.
+2026-08-26T13:27:21.3722611Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:27:21.3724003Z Establishing user namespace if not established already.
+2026-08-26T13:27:21.3725291Z Establishing network if not established already.
+2026-08-26T13:27:21.3726432Z Mounting volumes.
+2026-08-26T13:27:21.3978649Z Nested mountpoint volatile/logs
+2026-08-26T13:27:21.4294374Z Nested mountpoint 
+2026-08-26T13:27:21.4300553Z Nested mountpoint 
+2026-08-26T13:27:21.6175936Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T13:27:21.6195682Z Creating container.
+2026-08-26T13:27:21.6196833Z Creating pipes for streaming container io.
+2026-08-26T13:27:21.6198611Z Creating stdout named pipe at /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stdout_1dae2cbe12d744caa3bc1eb144d65044.
+2026-08-26T13:27:21.6201867Z Successfully created stdout named pipe at: /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stdout_1dae2cbe12d744caa3bc1eb144d65044.
+2026-08-26T13:27:21.6202886Z Opening named pipe /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stdout_1dae2cbe12d744caa3bc1eb144d65044 for reading in non-blocking mode.
+2026-08-26T13:27:21.6204158Z Successfully opened named pipe: /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stdout_1dae2cbe12d744caa3bc1eb144d65044.
+2026-08-26T13:27:21.6758642Z Successfully removed non-blocking flag from /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stdout_1dae2cbe12d744caa3bc1eb144d65044.
+2026-08-26T13:27:21.6762552Z Creating stderr named pipe at /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stderr_f454116c47424061ac317adf84ce9ad1.
+2026-08-26T13:27:21.6765301Z Successfully created stderr named pipe at: /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stderr_f454116c47424061ac317adf84ce9ad1.
+2026-08-26T13:27:21.6958879Z Opening named pipe /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stderr_f454116c47424061ac317adf84ce9ad1 for reading in non-blocking mode.
+2026-08-26T13:27:21.6961730Z Successfully opened named pipe: /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stderr_f454116c47424061ac317adf84ce9ad1.
+2026-08-26T13:27:21.6980110Z Successfully removed non-blocking flag from /podr/container/pipe/d1886b866542_scas-backend-2026-rvce/stderr_f454116c47424061ac317adf84ce9ad1.
+2026-08-26T13:27:21.7319091Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221 from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221
+2026-08-26T13:27:23.7503021Z Starting container: d1886b866542_scas-backend-2026-rvce.
+2026-08-26T13:27:23.8944736Z Starting watchers and probes.
+2026-08-26T13:27:23.8947212Z Starting metrics collection.
+2026-08-26T13:27:23.8966880Z Container is running.
+2026-08-26T13:27:23.8967624Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:27:24.0434480Z Container start method finished after 7134 ms.
+2026-08-26T13:27:24.0638280Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:27:24.0638888Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T13:29:09.5186061Z Container has finished running with exit code: 1.
+2026-08-26T13:29:09.5187274Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T13:29:09.5377125Z Stop and delete container. Retry count = 0
+2026-08-26T13:29:09.5379121Z Stopping container: d1886b866542_scas-backend-2026-rvce.
+2026-08-26T13:29:09.7033322Z Deleting container: d1886b866542_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T13:29:10.1653537Z Container spec TerminationMessagePolicy  path 
+2026-08-26T13:29:10.1824537Z Container is terminated. Total time elapsed: 646 ms.
+2026-08-26T13:29:10.1825663Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T13:29:10.1938202Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:25:32, LastErrorDetails: Container exited with exit code 1 during startup after 78.6s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:29:10.2685901Z Site startup probe failed after 106.0815171 seconds.
+2026-08-26T13:29:10.6352082Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:29:10.7204288Z Failed to start site. Revert by stopping site.
+2026-08-26T13:29:10.7211607Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:29:10.7307685Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:29:11.5173006Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T13:29:11.5177072Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:29:11.5178562Z Site: scas-backend-2026-rvce stopped.
+2026-08-26T13:38:59.8224037Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:29:12 (UTC), DetailsLevel: ERR
+2026-08-26T13:39:03.2728169Z State: Starting, Action: StartingMsiContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:29:12 (UTC), DetailsLevel: ERR
+2026-08-26T13:39:21.6310037Z State: Starting, Action: StartingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Site stopped at 08/26/2026 13:29:12 (UTC), DetailsLevel: ERR
+2026-08-26T13:39:21.6387610Z Container start method called.
+2026-08-26T13:39:21.6388626Z State: Starting, Action: PullingImage, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Pulling image scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221 for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:39:21.6396583Z Establishing network.
+2026-08-26T13:39:21.6764186Z Pulling image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221.
+2026-08-26T13:39:27.5326736Z Container is starting.
+2026-08-26T13:39:27.5327667Z State: Starting, Action: MountingVolumes, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Mounting volumes for scas-backend-2026-rvce., DetailsLevel: INFO
+2026-08-26T13:39:27.5328250Z Establishing user namespace if not established already.
+2026-08-26T13:39:27.5328758Z Establishing network if not established already.
+2026-08-26T13:39:27.5329419Z Mounting volumes.
+2026-08-26T13:39:27.5330289Z Nested mountpoint volatile/logs
+2026-08-26T13:39:27.5698024Z Nested mountpoint 
+2026-08-26T13:39:27.5703894Z Nested mountpoint 
+2026-08-26T13:39:27.7227089Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for scas-backend-2026-rvce. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-08-26T13:39:27.7439555Z Creating container.
+2026-08-26T13:39:27.7902693Z Creating pipes for streaming container io.
+2026-08-26T13:39:27.7904804Z Creating stdout named pipe at /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stdout_a39d30b375ba469e917c90e392a95caa.
+2026-08-26T13:39:27.7922249Z Successfully created stdout named pipe at: /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stdout_a39d30b375ba469e917c90e392a95caa.
+2026-08-26T13:39:27.7923245Z Opening named pipe /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stdout_a39d30b375ba469e917c90e392a95caa for reading in non-blocking mode.
+2026-08-26T13:39:27.7924591Z Successfully opened named pipe: /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stdout_a39d30b375ba469e917c90e392a95caa.
+2026-08-26T13:39:27.7925181Z Successfully removed non-blocking flag from /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stdout_a39d30b375ba469e917c90e392a95caa.
+2026-08-26T13:39:27.8106674Z Creating stderr named pipe at /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stderr_ea4298cee53943b3b9812a541763473c.
+2026-08-26T13:39:27.8108379Z Successfully created stderr named pipe at: /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stderr_ea4298cee53943b3b9812a541763473c.
+2026-08-26T13:39:27.8255998Z Opening named pipe /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stderr_ea4298cee53943b3b9812a541763473c for reading in non-blocking mode.
+2026-08-26T13:39:27.8258055Z Successfully opened named pipe: /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stderr_ea4298cee53943b3b9812a541763473c.
+2026-08-26T13:39:27.8258826Z Successfully removed non-blocking flag from /podr/container/pipe/ccdc746759fd_scas-backend-2026-rvce/stderr_ea4298cee53943b3b9812a541763473c.
+2026-08-26T13:39:27.8345371Z Creating container with image: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221 from registry: scasacr2026rvce.azurecr.io and fully qualified image name: scasacr2026rvce.azurecr.io/scas-backend:demo-citext-fix-20260826132221
+2026-08-26T13:39:28.6947144Z Starting container: ccdc746759fd_scas-backend-2026-rvce.
+2026-08-26T13:39:28.8381725Z Starting watchers and probes.
+2026-08-26T13:39:28.8390279Z Starting metrics collection.
+2026-08-26T13:39:28.8391843Z Container is running.
+2026-08-26T13:39:28.8393416Z State: Starting, Action: CreatingContainer, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:39:28.9373857Z Container start method finished after 7298 ms.
+2026-08-26T13:39:28.9850502Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Container scas-backend-2026-rvce successfully created and is running., DetailsLevel: INFO
+2026-08-26T13:39:28.9851055Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-08-26T13:41:52.1747788Z Container has finished running with exit code: 1.
+2026-08-26T13:41:52.1760231Z Container is terminating. Grace period: 5 seconds.
+2026-08-26T13:41:52.1861200Z Stop and delete container. Retry count = 0
+2026-08-26T13:41:52.1862488Z Stopping container: ccdc746759fd_scas-backend-2026-rvce.
+2026-08-26T13:41:52.2638258Z Deleting container: ccdc746759fd_scas-backend-2026-rvce. Retry count = 0
+2026-08-26T13:41:52.5254300Z Container spec TerminationMessagePolicy  path 
+2026-08-26T13:41:52.5353103Z Container is terminated. Total time elapsed: 354 ms.
+2026-08-26T13:41:52.5359392Z Site container: scas-backend-2026-rvce terminated during site startup.
+2026-08-26T13:41:52.5375653Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:29:10, LastErrorDetails: Container exited with exit code 1 during startup after 106.3s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:41:52.6979309Z Site startup probe failed after 143.6774516 seconds.
+2026-08-26T13:41:53.2494273Z State: Stopping, Action: CancellingStartup, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:41:53, LastErrorDetails: Container exited with exit code 1 during startup after 143.7s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:41:53.3139081Z Failed to start site. Revert by stopping site.
+2026-08-26T13:41:53.3146423Z State: Stopping, Action: StoppingSite, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:41:53, LastErrorDetails: Container exited with exit code 1 during startup after 143.7s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:41:53.3151543Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:41:53, LastErrorDetails: Container exited with exit code 1 during startup after 143.7s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:41:53.9017613Z Site container: scas-backend-2026-rvce_managedIdentity terminated during site startup.
+2026-08-26T13:41:53.9018525Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerStartupFailure, LastErrorTimestamp: 08/26/2026 13:41:53, LastErrorDetails: Container exited with exit code 1 during startup after 143.7s. Please inspect your container logs for more details., Details: Site container: scas-backend-2026-rvce terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-08-26T13:41:53.9019433Z Site: scas-backend-2026-rvce stopped.

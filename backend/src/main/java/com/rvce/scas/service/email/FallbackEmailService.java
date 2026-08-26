@@ -1,7 +1,7 @@
 package com.rvce.scas.service.email;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@ConditionalOnMissingBean(EmailService.class)
+@Profile("prod")
 public class FallbackEmailService implements EmailService {
 
     @Override

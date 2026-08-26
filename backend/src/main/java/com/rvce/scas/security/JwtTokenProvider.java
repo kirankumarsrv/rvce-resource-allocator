@@ -127,6 +127,11 @@ public class JwtTokenProvider {
         }
 
         if (!hasPemValues && !hasPathValues) {
+            String activeProfile = System.getProperty("spring.profiles.active",
+                    System.getenv().getOrDefault("SPRING_PROFILES_ACTIVE", ""));
+            if (activeProfile.contains("prod")) {
+                throw new IllegalStateException("JWT keys are required when the prod profile is active.");
+            }
             log.warn("SECURITY WARNING: JWT private/public key configuration is missing. Generating ephemeral RSA keypair. " +
                     "This is insecure for production and will invalidate tokens on restart.");
         }

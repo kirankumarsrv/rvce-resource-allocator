@@ -4,8 +4,9 @@ import type {
   ResetPasswordWithTokenRequest,
   ResetPasswordResponse,
 } from '@/types/passwordReset'
+import { apiUrl } from '@/services/authService'
 
-const API_BASE = '/api/auth'
+const API_BASE = apiUrl('/api/auth')
 
 /**
  * Request a password reset (forgot password flow).

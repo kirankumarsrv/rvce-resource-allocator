@@ -24,10 +24,9 @@
 --        have no USN. Making it NOT NULL would force dummy
 --        values, polluting data integrity.
 --
---   [D5] email uses CITEXT extension (case-insensitive text)
---        so 'Kiran@RVCE.edu' and 'kiran@rvce.edu' are treated
---        as duplicates. Without this, case variations bypass
---        the UNIQUE constraint.
+--   [D5] email uniqueness is enforced on the normalized email value
+--        maintained by the application. The Azure-compatible schema
+--        uses standard VARCHAR and does not require the citext extension.
 --
 --   [D6] refresh_tokens stores token_hash (SHA-256 of the raw
 --        token), NEVER the raw token. If the DB is breached,
@@ -35,10 +34,7 @@
 --        Same principle as password hashing.
 -- ============================================================
 
--- Enable case-insensitive text support
-CREATE EXTENSION IF NOT EXISTS citext;
--- Enable UUID generation without external tools
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- PostgreSQL 13+ provides gen_random_uuid() as a built-in function.
 
 -- ─── DEPARTMENTS ─────────────────────────────────────────────
 -- Created first because users FK to departments.
@@ -60,7 +56,8 @@ COMMENT ON TABLE  departments       IS 'Academic departments at RVCE';
 COMMENT ON COLUMN departments.hod_user_id IS 'FK added as DEFERRABLE after users table exists';
 
 -- ─── USERS ───────────────────────────────────────────────────
--- DECISION: CITEXT on email for case-insensitive uniqueness.
+-- DECISION: email is stored as standard VARCHAR; application-level
+-- normalization and email_hash provide lookup and uniqueness support.
 -- DECISION: usn nullable - only students have USNs.
 -- DECISION: is_active soft-delete instead of hard delete because
 --   audit_logs reference actor by email string (denormalised),

@@ -1,24 +1,15 @@
-name: Deploy to Kubernetes
+name: Deploy to Azure
+
 # Pre-deployment checklist:
-# 1. cd rvce-resource-allocator
-# 2. Optional: create a branch for your fixes
-#    git checkout -b fix/k8s-deploy
-# 3. Inspect workflow and manifests
-#    ls .github/workflows
-#    ls infra/k8s
-# 4. Apply staging manifests
-#    kubectl apply -f infra/k8s/staging-backend-deployment.yaml -n scas-staging
-#    kubectl apply -f infra/k8s/staging-frontend-deployment.yaml -n scas-staging
-#    kubectl apply -f infra/k8s/staging-ingress.yaml -n scas-staging
-# 5. Wait for rollout
-#    kubectl rollout status deployment/scas-backend -n scas-staging --timeout=5m
-#    kubectl rollout status deployment/scas-frontend -n scas-staging --timeout=5m
-# 6. Verify staging resources
-#    kubectl get deployment scas-backend scas-frontend -n scas-staging -o yaml
-#    kubectl get pods -n scas-staging
-# 7. Restart if needed
-#    kubectl rollout restart deployment/scas-backend -n scas-staging
-#    kubectl rollout restart deployment/scas-frontend -n scas-staging
+# 1. Ensure secrets exist in GitHub Settings -> Secrets and variables -> Actions:
+#    - AZURE_CLIENT_ID
+#    - AZURE_TENANT_ID
+#    - AZURE_SUBSCRIPTION_ID
+#    - AZURE_REGISTRY_NAME (e.g., scasregistry)
+#    - AZURE_WEBAPP_NAME (e.g., scas-backend-app)
+#    - AZURE_STATIC_WEB_APPS_API_TOKEN
+# 2. Trigger manually via workflow_dispatch or automatically via completed CI runs.
+
 permissions:
   id-token: write
   contents: read
@@ -27,8 +18,9 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'ECR image tag to deploy (for example full commit SHA or latest). Required for manual deploys.'
+        description: 'Docker image tag to deploy (e.g. commit SHA or latest).'
         required: true
+        default: 'latest'
       skip_smoke_test:
         description: 'Skip smoke tests during deployment'
         required: false
@@ -40,7 +32,7 @@ on:
 
 jobs:
   check-all-passed:
-    name: Verify All CI Workflows Passed
+    name: Verify All CI Workflows Passed & Resolve Tag
     runs-on: ubuntu-22.04
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     outputs:
@@ -56,250 +48,93 @@ jobs:
           WORKFLOW_RUN_PR_SHA: ${{ github.event.workflow_run.pull_requests[0].head.sha || '' }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
-          echo "EVENT_NAME=$EVENT_NAME"
-          echo "INPUT_TAG=$INPUT_TAG"
-          echo "WORKFLOW_RUN_SHA=$WORKFLOW_RUN_SHA"
-          echo "WORKFLOW_RUN_PR_SHA=$WORKFLOW_RUN_PR_SHA"
-          echo "GITHUB_SHA=$GITHUB_SHA"
-
           if [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_SHA" ]; then
             TAG="$WORKFLOW_RUN_SHA"
-            SOURCE="workflow_run.head_sha"
           elif [ "$EVENT_NAME" = "workflow_run" ] && [ -n "$WORKFLOW_RUN_PR_SHA" ]; then
             TAG="$WORKFLOW_RUN_PR_SHA"
-            SOURCE="workflow_run.pull_requests[0].head.sha"
           elif [ -n "$INPUT_TAG" ]; then
             TAG="$(printf '%s' "$INPUT_TAG" | xargs)"
-            SOURCE="workflow_dispatch.image_tag"
           elif [ -n "$GITHUB_SHA" ]; then
             TAG="$GITHUB_SHA"
-            SOURCE="github.sha"
-            echo "WARNING: image_tag was not provided; falling back to github.sha: $TAG"
           else
             echo "ERROR: image_tag cannot be resolved."
             exit 1
           fi
 
           echo "image_tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Resolved image tag: '$TAG' from $SOURCE"
+          echo "Resolved image tag for Azure deployment: '$TAG'"
 
-      - name: Check all workflows passed
+      - name: Check status
         id: check
-        run: |
-          echo "Deploying commit: ${{ github.sha }}"
-          echo "result=true" >> $GITHUB_OUTPUT
+        run: echo "result=true" >> "$GITHUB_OUTPUT"
 
-  deploy-staging:
-    name: Deploy to Staging
+  deploy-azure:
+    name: Deploy to Azure (App Service & Static Web Apps)
     runs-on: ubuntu-22.04
     needs: check-all-passed
     env:
       SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
-      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag || github.event.inputs.image_tag || github.sha }}
-    environment:
-      name: staging
-      url: https://staging.scas.rvce.edu.in
+      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag }}
+      BACKEND_URL: "https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+      FRONTEND_URL: "https://thankful-field-093367500.7.azurestaticapps.net"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (Assume role via OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+      # 1. Secure Azure Login using OIDC Federated Credentials (Keyless Authentication)
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          audience: sts.amazonaws.com
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Update kubeconfig for EKS
-        env:
-          AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
+      # 2. Update Backend Azure App Service Container Image
+      - name: Deploy Backend Container to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          images: '${{ secrets.AZURE_REGISTRY_NAME }}.azurecr.io/scas-backend:${{ env.IMAGE_TAG }}'
 
-      - name: Validate staging image tag
-        run: |
-          echo "DEBUG: staging IMAGE_TAG=${IMAGE_TAG}"
-          if [ -z "${IMAGE_TAG}" ]; then
-            echo "ERROR: IMAGE_TAG is empty. Deployment cannot continue."
-            exit 1
-          fi
-          echo "Deploying staging images with tag: '${IMAGE_TAG}'"
+      # 3. Build & Deploy Frontend to Azure Static Web Apps
+      - name: Build and Deploy Frontend to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/" # Location of frontend application code
+          api_location: ""  # Optional API location
+          output_location: "dist" # Built output folder for React/Vite
 
-      - name: Deploy to staging namespace
-        env:
-          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag || github.event.inputs.image_tag || github.sha }}
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          NAMESPACE: scas-staging
-        run: |
-          kubectl apply -f infra/k8s/staging-backend-deployment.yaml -n ${NAMESPACE}
-          kubectl apply -f infra/k8s/staging-frontend-deployment.yaml -n ${NAMESPACE}
-
-          kubectl set image deployment/scas-backend \
-            backend="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}" \
-            -n ${NAMESPACE}
-
-          kubectl set image deployment/scas-frontend \
-            frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
-            -n ${NAMESPACE}
-
-      - name: Scale staging deployments to 1 for rollout
-        run: |
-          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=1 -n scas-staging
-          kubectl get deploy scas-backend scas-frontend -n scas-staging
-
-      - name: Wait for rollout to complete
-        run: |
-          set +e
-          kubectl rollout status deployment/scas-backend -n scas-staging --timeout=5m
-          BACKEND_STATUS=$?
-          kubectl rollout status deployment/scas-frontend -n scas-staging --timeout=5m
-          FRONTEND_STATUS=$?
-          if [ $BACKEND_STATUS -ne 0 ] || [ $FRONTEND_STATUS -ne 0 ]; then
-            echo "Rollout failed or timed out. Gathering diagnostics..."
-            kubectl get pods -n scas-staging -o wide
-            kubectl describe deployment scas-backend scas-frontend -n scas-staging
-            kubectl get events -n scas-staging --sort-by='.metadata.creationTimestamp' | tail -n 50
-            exit 1
-          fi
-
-      - name: Ensure staging ingress exists
-        run: |
-          kubectl apply -f infra/k8s/staging-ingress.yaml
-          kubectl get ingress -n scas-staging
-          kubectl describe ingress scas-staging-ingress -n scas-staging || true
-
-      - name: Run smoke tests against staging
+      # 4. Backend Health & CORS Verification (Smoke Test)
+      - name: Run Backend Smoke Test
         if: ${{ env.SKIP_SMOKE_TEST != 'true' }}
         run: |
-          STAGING_URL="https://staging.scas.rvce.edu.in"
-          sleep 30
-
-          echo "Checking staging cluster resources..."
-          kubectl get pods -n scas-staging || true
-          kubectl get svc -n scas-staging || true
-          kubectl get ingress -n scas-staging || true
-          kubectl describe ingress scas-staging-ingress -n scas-staging || true
-
-          echo "Resolving staging host..."
-          getent hosts staging.scas.rvce.edu.in || true
-
+          echo "Verifying backend health on Azure App Service..."
+          
           HTTP_STATUS=$(curl -sS --retry 10 --retry-delay 15 --retry-connrefused --max-time 30 \
-            -o /tmp/staging-health.txt -w "%{http_code}" "${STAGING_URL}/actuator/health" || true)
+            -o /tmp/azure-health.txt -w "%{http_code}" "${{ env.BACKEND_URL }}/actuator/health" || true)
 
           echo "HTTP_STATUS=${HTTP_STATUS}"
-          cat /tmp/staging-health.txt || true
+          cat /tmp/azure-health.txt || true
 
           if [ "$HTTP_STATUS" != "200" ]; then
-            echo "Smoke test FAILED: health check returned ${HTTP_STATUS}"
+            echo "Smoke test FAILED: Backend health returned HTTP ${HTTP_STATUS}"
             exit 1
           fi
 
-          echo "Smoke test PASSED: health check returned 200"
+          echo "Smoke test PASSED: Azure App Service backend is healthy."
 
-      - name: Skip staging smoke test
+      - name: Skip Smoke Test Log
         if: ${{ env.SKIP_SMOKE_TEST == 'true' }}
-        run: echo "Skipping staging smoke test because skip_smoke_test=true"
+        run: echo "Skipping smoke test based on execution parameter."
 
-      - name: Notify on success
+      - name: Notify on Deployment Success
         if: success()
-        run: |
-          echo "Deployment to staging succeeded: ${{ github.sha }}"
+        run: echo "Deployment to Azure succeeded for tag ${{ env.IMAGE_TAG }}"
 
-      - name: Rollback on failure
+      - name: Notify on Deployment Failure
         if: failure()
-        run: |
-          echo "Deployment FAILED. Rolling back..."
-          kubectl rollout undo deployment/scas-backend -n scas-staging
-          kubectl rollout undo deployment/scas-frontend -n scas-staging
-          echo "Rollback complete"
-
-  deploy-production:
-    name: Deploy to Production (Manual Approval)
-    runs-on: ubuntu-22.04
-    needs: [deploy-staging, check-all-passed]
-    env:
-      SKIP_SMOKE_TEST: ${{ github.event.inputs.skip_smoke_test || 'false' }}
-      IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag || github.event.inputs.image_tag || github.sha }}
-    environment:
-      name: production
-      url: https://scas.rvce.edu.in
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (Assume role via OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          audience: sts.amazonaws.com
-
-      - name: Update kubeconfig
-        env:
-          AWS_TARGET_REGION: ${{ secrets.AWS_REGION }}
-        run: aws eks update-kubeconfig --region $AWS_TARGET_REGION --name scas-cluster
-
-      - name: Deploy to production namespace
-        env:
-          IMAGE_TAG: ${{ needs.check-all-passed.outputs.image_tag || github.event.inputs.image_tag || github.sha }}
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          NAMESPACE: scas-prod
-        run: |
-          echo "DEBUG: production IMAGE_TAG=${IMAGE_TAG}"
-          if [ -z "${IMAGE_TAG}" ]; then
-            echo "ERROR: IMAGE_TAG is empty. Production deployment cannot continue."
-            exit 1
-          fi
-          echo "Deploying production images with tag: '${IMAGE_TAG}'"
-
-          kubectl apply -f infra/k8s/production-backend-deployment.yaml -n ${NAMESPACE}
-          kubectl apply -f infra/k8s/production-frontend-deployment.yaml -n ${NAMESPACE}
-
-          kubectl set image deployment/scas-backend \
-            backend="${ECR_REGISTRY}/scas-backend:${IMAGE_TAG}" \
-            -n ${NAMESPACE}
-
-          kubectl set image deployment/scas-frontend \
-            frontend="${ECR_REGISTRY}/scas-frontend:${IMAGE_TAG}" \
-            -n ${NAMESPACE}
-
-      - name: Ensure production deployments are scaled up
-        run: |
-          kubectl scale deployment/scas-backend deployment/scas-frontend --replicas=1 -n scas-prod
-          kubectl get deploy scas-backend scas-frontend -n scas-prod
-
-      - name: Wait for production rollout
-        run: |
-          kubectl rollout status deployment/scas-backend -n scas-prod --timeout=5m
-          kubectl rollout status deployment/scas-frontend -n scas-prod --timeout=5m
-
-      - name: Ensure production ingress exists
-        run: |
-          kubectl apply -f infra/k8s/production-ingress.yaml
-          kubectl get ingress -n scas-prod
-          kubectl describe ingress scas-production-ingress -n scas-prod || true
-
-      - name: Production smoke test
-        if: ${{ env.SKIP_SMOKE_TEST != 'true' }}
-        run: |
-          PRODUCTION_URL="https://scas.rvce.edu.in"
-
-          echo "Resolving production host..."
-          getent hosts scas.rvce.edu.in || true
-
-          HTTP_STATUS=$(curl -sS --retry 10 --retry-delay 15 --retry-connrefused --max-time 30 \
-            -o /tmp/production-health.txt -w "%{http_code}" "${PRODUCTION_URL}/actuator/health" || true)
-
-          echo "HTTP_STATUS=${HTTP_STATUS}"
-          cat /tmp/production-health.txt || true
-          [ "$HTTP_STATUS" = "200" ] || exit 1
-
-      - name: Skip production smoke test
-        if: ${{ env.SKIP_SMOKE_TEST == 'true' }}
-        run: echo "Skipping production smoke test because skip_smoke_test=true"
-
-      - name: Rollback production on failure
-        if: failure()
-        run: |
-          kubectl rollout undo deployment/scas-backend -n scas-prod
-          kubectl rollout undo deployment/scas-frontend -n scas-prod
+        run: echo "Deployment to Azure FAILED. Check App Service container logs and SWA build output."

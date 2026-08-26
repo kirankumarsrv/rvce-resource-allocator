@@ -33,8 +33,6 @@ dependencies {
 	runtimeOnly(libs.jjwt.impl)
 	runtimeOnly(libs.jjwt.jackson)
 	runtimeOnly(libs.postgresql)
-	implementation("software.amazon.awssdk:secretsmanager:2.34.0")
-	implementation("io.awspring.cloud:spring-cloud-aws-secrets-manager-config:2.4.4")
 	implementation("org.bouncycastle:bcprov-jdk15on:1.70")
 	testImplementation(libs.spring.boot.starter.test)
 	testImplementation(libs.spring.security.test)
